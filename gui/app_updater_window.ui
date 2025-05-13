@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AppUpdater</class>
+ <widget class="QDialog" name="AppUpdater">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Image Tea Mini Updater</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="lblTitle">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Image Tea Mini Updater</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>   </item>   <item>
+    <widget class="QLabel" name="label">     <property name="text">
+      <string>&lt;html&gt;&lt;body&gt;
+&lt;p align=&quot;center&quot;&gt;&lt;b&gt;Update Information&lt;/b&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;This update will download version &lt;b&gt;%version%&lt;/b&gt; (&lt;i&gt;%hash%&lt;/i&gt;) from the remote repository.&lt;/p&gt;
+&lt;p&gt;What will happen:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;All core application files will be replaced with the latest version&lt;/li&gt;
+  &lt;li&gt;Custom files you've added to the application folder will &lt;b&gt;not&lt;/b&gt; be affected&lt;/li&gt;
+  &lt;li&gt;Any modifications to core application files will be overwritten&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p style=&quot;color: #cc0000;&quot;&gt;&lt;b&gt;WARNING:&lt;/b&gt;&lt;/p&gt;
+&lt;ul style=&quot;color: #cc0000;&quot;&gt;
+  &lt;li&gt;By proceeding with this update, you acknowledge that you understand and accept all risks involved&lt;/li&gt;
+  &lt;li&gt;The developer is not responsible for any data loss, software malfunction, or other issues that may arise&lt;/li&gt;
+  &lt;li&gt;Please ensure you have backups of any customized files or configurations before proceeding&lt;/li&gt;
+  &lt;li&gt;Once updated, you cannot automatically revert to the previous version&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;b&gt;IMPORTANT:&lt;/b&gt; All consequences of updating the application are solely your responsibility as the user.&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>      <widget class="QCheckBox" name="checkBox">
+       <property name="text">
+        <string>I understand all risks and accept full responsibility for any consequences of this update.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Proceed</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>btnCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>AppUpdater</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>345</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
