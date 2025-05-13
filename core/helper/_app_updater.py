@@ -249,8 +249,7 @@ def perform_update(config, base_dir, signals):
         if not check_github_accessible():
             signals.error.emit("Cannot access GitHub. Please check your internet connection and try again.")
             return
-        
-        # Step 3: Get latest release info (20%)
+          # Step 3: Get latest release info (20%)
         signals.progress.emit(15, "Getting latest release information...")
         github_url = config.get("app_update_url", "")
         repo_info = extract_repo_info(github_url)
@@ -260,31 +259,25 @@ def perform_update(config, base_dir, signals):
         
         username, repo_name = repo_info
         latest_release = get_latest_release_info(username, repo_name)
-        if not latest_release or 'assets' not in latest_release:
+        if not latest_release:
             signals.error.emit("Failed to retrieve release information from GitHub.")
             return
         
-        # Step 4: Find the appropriate ZIP asset to download (25%)
+        # Step 4: Setup the download for source code ZIP from GitHub (25%)
         signals.progress.emit(20, "Finding download package...")
-        zip_asset = None
-        for asset in latest_release.get('assets', []):
-            if asset.get('name', '').endswith('.zip'):
-                zip_asset = asset
-                break
-        
-        if not zip_asset:
-            signals.error.emit("No ZIP package found in the latest release.")
+        tag_name = latest_release.get('tag_name')
+        if not tag_name:
+            signals.error.emit("No tag name found in the latest release.")
             return
-        
-        download_url = zip_asset.get('browser_download_url')
-        if not download_url:
-            signals.error.emit("Failed to get download URL for the latest release.")
-            return
-        
-        # Step 5: Download the ZIP file (50%)
-        signals.progress.emit(25, f"Downloading {zip_asset.get('name')}...")
+            
+        # GitHub automatically provides source code archives for each release
+        # Format: https://github.com/{username}/{repo}/archive/refs/tags/{tag_name}.zip
+        download_url = f"https://github.com/{username}/{repo_name}/archive/refs/tags/{tag_name}.zip"
+        zip_filename = f"{repo_name}-{tag_name}.zip"
+          # Step 5: Download the ZIP file (50%)
+        signals.progress.emit(25, f"Downloading {zip_filename}...")
         temp_dir = tempfile.mkdtemp()
-        zip_path = os.path.join(temp_dir, zip_asset.get('name'))
+        zip_path = os.path.join(temp_dir, zip_filename)
         
         try:
             download_file(download_url, zip_path, signals)
