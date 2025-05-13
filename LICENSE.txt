@@ -1,4 +1,4 @@
-MIT License
+The MIT License (MIT)
 
 Copyright (c) 2025 Mudrikul Hikam, Desainia Studio
 
@@ -22,7 +22,7 @@ SOFTWARE.
 
 ------------------------------------------------------------------------
 
-Lisensi MIT
+The MIT License (MIT)
 
 Hak Cipta (c) 2025 Mudrikul Hikam, Desainia Studio
 
