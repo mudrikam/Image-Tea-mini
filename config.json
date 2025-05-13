@@ -16,7 +16,7 @@
     "app_remote_commit_hash": "e2c65b1d1cd3743ad893928b226c09de0729e136",
     "app_remote_version": "1.0.2",
     "app_remote_version_date": "2025-05-13",
-    "app_last_update_check": "2025-05-13T21:56:02Z",
+    "app_last_update_check": "2025-05-13T21:59:21Z",
     "app_automatic_update": true,
     "app_update_url": "https://github.com/mudrikam/Image-Tea-mini/releases",
     "app_update_message": "New version available! Please update to the latest version for new features and bug fixes.",
