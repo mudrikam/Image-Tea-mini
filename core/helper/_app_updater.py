@@ -155,8 +155,11 @@ def update_complete(dialog, success, message, base_dir):
         base_dir: Base directory of the application
     """
     if success:
-        # Complete the progress bar
+        # Complete the progress bar immediately
         dialog.progressBar.setValue(100)
+        
+        # Force immediate UI update
+        QtCore.QCoreApplication.processEvents()
         
         # Ask user if they want to restart the application
         reply = QMessageBox.question(
@@ -323,14 +326,16 @@ def perform_update(config, base_dir, signals):
         # Step 9: Clean up temporary files
         signals.progress.emit(95, "Cleaning up...")
         shutil.rmtree(temp_dir, ignore_errors=True)
-        
-        # Step 10: Update complete (100%)
+          # Step 10: Update complete (100%)
         signals.progress.emit(100, "Update completed successfully!")
         
         # Update the config with the new version information
         updated_config = config.copy()
         updated_config['app_version'] = latest_release.get('tag_name', '').lstrip('v')
         updated_config['app_version_hash'] = latest_release.get('target_commitish', '')
+        
+        # Also update app_commit_hash and app_commit_date to match the new version
+        updated_config['app_commit_hash'] = latest_release.get('target_commitish', '')
         
         # Format the date
         if 'published_at' in latest_release:
@@ -342,8 +347,10 @@ def perform_update(config, base_dir, signals):
                     dt = datetime.datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
                     formatted_date = dt.strftime("%Y-%m-%d")
                     updated_config['app_version_date'] = formatted_date
+                    updated_config['app_commit_date'] = formatted_date  # Also update app_commit_date
                 except:
                     updated_config['app_version_date'] = published_at.split('T')[0]
+                    updated_config['app_commit_date'] = published_at.split('T')[0]  # Also update app_commit_date
         
         # Save the updated config
         save_config(updated_config, base_dir)
