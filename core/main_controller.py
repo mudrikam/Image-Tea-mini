@@ -10,6 +10,8 @@ from core.helper._main_menu_icons import apply_icons
 from core.helper._about_dialog import show_about_dialog
 from core.helper._license_dialog import show_license_dialog
 from core.helper._contributors_dialog import show_contributors_dialog
+from core.helper._updater_dialog import show_updater_dialog
+from core.helper._url_handler import open_url
 
 class MainController:
     def __init__(self, base_dir=None):
@@ -116,6 +118,18 @@ class MainController:
         # Connect the Contributors action
         self.window.actionContributors.triggered.connect(self.show_contributors_dialog)
         
+        # Connect the WhatsApp Group action
+        self.window.actionWhatsApp_Group.triggered.connect(self.open_whatsapp_group)
+        
+        # Connect the GitHub Repository action
+        self.window.actionGithub_Repository.triggered.connect(self.open_github_repository)
+        
+        # Connect the Report Issue action
+        self.window.actionReport_Issue.triggered.connect(self.open_report_issue)
+        
+        # Connect the Check for Updates action
+        self.window.actionCheck_for_Updates.triggered.connect(self.show_updater_dialog)
+        
         # Connect the Quit action
         self.window.actionQuit.triggered.connect(self.app.quit)
     
@@ -130,6 +144,28 @@ class MainController:
     def show_contributors_dialog(self):
         """Show the Contributors dialog with contributors information."""
         show_contributors_dialog(self.window, self.config, self.BASE_DIR)
+    
+    def show_updater_dialog(self):
+        """Show the updater dialog to check for updates."""
+        show_updater_dialog(self.window, self.config, self.BASE_DIR)
+    
+    def open_whatsapp_group(self):
+        """Open the WhatsApp group link in the default browser."""
+        whatsapp_url = self.config.get("app_whatsapp", "")
+        if whatsapp_url:
+            open_url(whatsapp_url)
+    
+    def open_github_repository(self):
+        """Open the GitHub repository in the default browser."""
+        repo_url = self.config.get("app_repository", "")
+        if repo_url:
+            open_url(repo_url)
+    
+    def open_report_issue(self):
+        """Open the issue reporting page in the default browser."""
+        issue_url = self.config.get("app_report_issue", "")
+        if issue_url:
+            open_url(issue_url)
     
     def show_window(self):
         """Open the main window and start the program."""

@@ -8,6 +8,10 @@ from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtGui import QIcon
 import os
 
+# Import the license dialog helper and URL opener
+from core.helper._license_dialog import show_license_dialog
+from core.helper._url_handler import open_url
+
 def show_about_dialog(parent, config, base_dir):
     """
     Show the About dialog with application information.
@@ -46,6 +50,18 @@ def show_about_dialog(parent, config, base_dir):
         about_dialog.lblCommitInfo.setText(f"Build: {commit_hash[:7]} ({commit_date})")
     else:
         about_dialog.lblCommitInfo.setVisible(False)
+    
+    # Center the See License button
+    about_dialog.verticalLayout.setAlignment(about_dialog.btnSeeLicense, QtCore.Qt.AlignHCenter)
+    
+    # Connect the See License button to show the license dialog
+    about_dialog.btnSeeLicense.clicked.connect(lambda: show_license_dialog(parent, config, base_dir))
+    
+    # If we have email info, make it clickable
+    email = config.get("app_author_email", "")
+    if email:
+        about_dialog.lblEmail.setText(f'<a href="mailto:{email}">{email}</a>')
+        about_dialog.lblEmail.setOpenExternalLinks(True)
     
     # Show the dialog as modal
     about_dialog.exec()
