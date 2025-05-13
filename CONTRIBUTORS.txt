@@ -1,0 +1,15 @@
+# Image Tea Mini Contributors
+
+## Core Development Team
+- Mudrikul Hikam - Project Lead, Core Development
+- Studio Desainia - Design and UI/UX
+
+## Additional Contributors
+- [Add additional contributors here]
+
+## Acknowledgements
+- All libraries and frameworks used in this project
+- All community members who provided feedback and support
+- Everyone who contributed directly or indirectly to this project
+
+Thank you to everyone who has contributed to making this project possible!

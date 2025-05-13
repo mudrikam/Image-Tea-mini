@@ -1,0 +1,14 @@
+{
+    "app_name": "Image Tea Mini",
+    "app_icon": "image_tea.ico",
+    "app_description": "Image Tea Mini is a lightweight image and video metadata generator using Artifical Intelligence.",
+    "app_author": "Mudrikul Hikam",
+    "app_author_email": "kyutkitten@gmail.com",
+    "app_license": "MIT",
+    "app_repository": "",
+    "app_report_issue": "",
+    "app_copyright": "2025 Mudrikul Hikam",
+    "app_commit_hash": "abc123def456",
+    "app_commit_date": "2025-01-01",
+    "app_version": "1.0.0"
+}

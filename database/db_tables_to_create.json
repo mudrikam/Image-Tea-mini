@@ -1,0 +1,17 @@
+{
+  "app_config": {
+    "field": [
+      ["key", "TEXT", "UNIQUE"],
+      ["value", "TEXT"],
+      ["description", "TEXT"]
+    ],
+    "initial_data": [
+      ["app_version", "1.0.0", "Application version number"],
+      ["repository_url", "https://github.com/mudrikam/Nikinapa", "GitHub repository URL"],
+      ["app_name", "Nikinapa", "Application name"],
+      ["theme", "dark", "Application theme (dark/light)"],
+      ["window_width", "800", "Minimal window width in pixels"],
+      ["window_height", "600", "Minimal window height in pixels"]
+    ]
+  }
+}
