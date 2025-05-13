@@ -41,6 +41,17 @@ def save_config(config, base_dir):
         return False
 
 
+def reload_config(base_dir):
+    """Reload the configuration from the config.json file."""
+    try:
+        config_path = os.path.join(base_dir, "config.json")
+        with open(config_path, 'r') as config_file:
+            return json.load(config_file)
+    except Exception as e:
+        print(f"Error reloading config: {e}")
+        return None
+
+
 def open_update_url(url):
     """Open the update URL in the default web browser."""
     if url:
@@ -61,10 +72,23 @@ def save_auto_update_setting(state, config, base_dir):
     
     # Update the original config object for the dialog session
     config['app_automatic_update'] = is_checked
+    
+    # Ensure the main_controller's config is updated as well
+    # This makes sure the updated setting is available to the entire application
+    updated_config = reload_config(base_dir)
+    if updated_config:
+        config.update(updated_config)
 
 
 def show_updater_dialog(parent, config, base_dir):
     """Show the updater dialog to check for updates."""
+    # Refresh config from file to get the latest values
+    refreshed_config = reload_config(base_dir)
+    if refreshed_config:
+        # Use the refreshed config but update the original config object as well
+        # This ensures other parts of the app see the changes
+        config.update(refreshed_config)
+    
     # Load the UI file for the updater dialog
     updater_ui_path = os.path.join(base_dir, "gui", "updater_window.ui")
     
@@ -217,8 +241,7 @@ def update_check_worker(dialog, config, base_dir):
             Qt.ConnectionType.QueuedConnection,
             QtCore.Q_ARG(str, f"Latest Version: {latest_version_detail}")
         )
-        
-        # Update the config file with the latest remote version information
+          # Update the config file with the latest remote version information
         updated_config = config.copy()
         updated_config['app_remote_version'] = latest_version
         updated_config['app_remote_commit_hash'] = latest_hash
@@ -227,6 +250,9 @@ def update_check_worker(dialog, config, base_dir):
         
         # Save the updated config
         save_config(updated_config, base_dir)
+        
+        # Update the original config object to reflect changes
+        config.update(updated_config)
         
         # Show the result
         if is_update_available:
