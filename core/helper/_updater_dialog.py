@@ -10,6 +10,9 @@ from urllib.error import URLError, HTTPError
 from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtCore import Qt
 
+# Import the app updater module
+from core.helper._app_updater import launch_app_updater
+
 
 def get_current_datetime_iso():
     """Return the current date and time in ISO 8601 format."""
@@ -56,6 +59,15 @@ def open_update_url(url):
     """Open the update URL in the default web browser."""
     if url:
         webbrowser.open(url)
+
+
+def launch_app_updater_dialog(parent, config, base_dir):
+    """Launch the application updater dialog."""
+    # Close the updater check dialog first
+    parent.accept()
+    
+    # Launch the app updater
+    launch_app_updater(parent.parentWidget(), config, base_dir)
 
 
 def save_auto_update_setting(state, config, base_dir):
@@ -123,8 +135,7 @@ def show_updater_dialog(parent, config, base_dir):
         dialog.lblUpdateVersion.setText(f"Latest Version: {remote_detail}")
     else:
         dialog.lblUpdateVersion.setText(f"Latest Version: Click 'Check' to verify")
-    
-    # Show when last update check was performed
+      # Show when last update check was performed
     last_check = config.get("app_last_update_check", "")
     if last_check:
         formatted_last_check = get_formatted_datetime(last_check)
@@ -136,9 +147,8 @@ def show_updater_dialog(parent, config, base_dir):
     dialog.pushButton.clicked.connect(dialog.accept)  # Close button
     dialog.btnCheck.clicked.connect(lambda: check_for_updates(dialog, config, base_dir))
     
-    # Connect the Update Now button to open the release page
-    update_url = config.get("app_update_url", "")
-    dialog.btnUpdate.clicked.connect(lambda: open_update_url(update_url))
+    # Connect the Update Now button to launch the app updater
+    dialog.btnUpdate.clicked.connect(lambda: launch_app_updater_dialog(dialog, config, base_dir))
     dialog.btnUpdate.setEnabled(bool(remote_version and compare_versions(current_version, remote_version)))
     
     # Set up automatic update checkbox
