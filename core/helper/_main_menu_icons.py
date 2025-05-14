@@ -23,6 +23,9 @@ def apply_icons(window):
     # Apply icons to Settings menu actions
     _apply_settings_menu_icons(window)
     
+    # Apply icons to Prompt menu actions
+    _apply_prompt_menu_icons(window)
+    
     # Apply icons to Help menu actions
     _apply_help_menu_icons(window)
 
@@ -61,6 +64,14 @@ def _apply_settings_menu_icons(window):
     window.actionPreferences.setIcon(qta.icon('fa6s.gear'))
     window.actionGoogle_Gemini.setIcon(qta.icon('fa6s.star'))
     window.actionOpen_AI.setIcon(qta.icon('fa6s.brain'))
+
+def _apply_prompt_menu_icons(window):
+    """Apply icons to Prompt menu actions."""
+    window.actionDefault_Prompt.setIcon(qta.icon('fa6s.sliders'))
+    window.actionCustom_Prompt.setIcon(qta.icon('fa6s.pen-fancy'))
+    window.actionNegative_Prompt.setIcon(qta.icon('fa6s.ban'))
+    window.actionMetadata_Prompt_2.setIcon(qta.icon('fa6s.tags'))
+    window.actionPrompt_Preferences.setIcon(qta.icon('fa6s.puzzle-piece'))
 
 def _apply_help_menu_icons(window):
     """Apply icons to Help menu actions."""
