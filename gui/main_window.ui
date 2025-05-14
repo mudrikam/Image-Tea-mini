@@ -98,9 +98,21 @@
     <addaction name="actionDonate"/>
     <addaction name="actionAbout_2"/>
    </widget>
+   <widget class="QMenu" name="menuPrompt">
+    <property name="title">
+     <string>Prompt</string>
+    </property>
+    <addaction name="actionDefault_Prompt"/>
+    <addaction name="actionCustom_Prompt"/>
+    <addaction name="actionNegative_Prompt"/>
+    <addaction name="actionMetadata_Prompt_2"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrompt_Preferences"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuPrompt"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
@@ -462,6 +474,31 @@
    </property>
    <property name="text">
     <string>Donate</string>
+   </property>
+  </action>
+  <action name="actionDefault_Prompt">
+   <property name="text">
+    <string>Default Prompt</string>
+   </property>
+  </action>
+  <action name="actionCustom_Prompt">
+   <property name="text">
+    <string>Custom Prompt</string>
+   </property>
+  </action>
+  <action name="actionNegative_Prompt">
+   <property name="text">
+    <string>Negative Prompt</string>
+   </property>
+  </action>
+  <action name="actionMetadata_Prompt_2">
+   <property name="text">
+    <string>Metadata Prompt</string>
+   </property>
+  </action>
+  <action name="actionPrompt_Preferences">
+   <property name="text">
+    <string>Prompt Preferences</string>
    </property>
   </action>
  </widget>
