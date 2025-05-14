@@ -110,7 +110,6 @@ class MainController:
         self.connect_menu_actions()
             
         return self
-    
     def connect_menu_actions(self):
         """Connect menu actions to their respective handlers."""
         # Connect the About action
@@ -136,6 +135,9 @@ class MainController:
         
         # Connect the Donate action
         self.window.actionDonate.triggered.connect(self.show_donation_dialog)
+        
+        # Connect the Preferences action
+        self.window.actionPreferences.triggered.connect(self.show_global_preferences_dialog)
         
         # Connect the Quit action
         self.window.actionQuit.triggered.connect(self.app.quit)
@@ -173,6 +175,14 @@ class MainController:
         issue_url = self.config.get("app_report_issue", "")
         if issue_url:
             open_url(issue_url)
+    
+    def show_global_preferences_dialog(self):
+        """Show the global preferences dialog."""
+        # Import here to avoid circular imports
+        from core.helper._global_preferences import show_global_preferences
+        
+        # Show the global preferences dialog
+        show_global_preferences(self.window, self.config, self.BASE_DIR)
     
     def show_donation_dialog(self):
         """Show the donation dialog."""
