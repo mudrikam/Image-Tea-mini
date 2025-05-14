@@ -328,16 +328,58 @@ def perform_update(config, base_dir, signals):
         shutil.rmtree(temp_dir, ignore_errors=True)
           # Step 10: Update complete (100%)
         signals.progress.emit(100, "Update completed successfully!")
-        
-        # Update the config with the new version information
+          # Update the config with the new version information
         updated_config = config.copy()
-        updated_config['app_version'] = latest_release.get('tag_name', '').lstrip('v')
-        updated_config['app_version_hash'] = latest_release.get('target_commitish', '')
         
-        # Also update app_commit_hash and app_commit_date to match the new version
-        updated_config['app_commit_hash'] = latest_release.get('target_commitish', '')
+        # Get the version (removing 'v' prefix if present)
+        tag_name = latest_release.get('tag_name', '')
+        updated_config['app_version'] = tag_name.lstrip('v')
         
-        # Format the date
+        # Get the actual commit hash, not just target_commitish (which could be "main" or "master")
+        commit_hash = ''
+        target_commitish = latest_release.get('target_commitish', '')
+        
+        # If target_commitish is a commit hash (not "main" or "master"), use it
+        if target_commitish and not target_commitish.lower() in ['main', 'master', 'develop', 'trunk']:
+            commit_hash = target_commitish
+        
+        # If we don't have a proper commit hash, try to get it from the tag itself
+        if not commit_hash or len(commit_hash) < 7:
+            try:
+                # Get the commit SHA from the tag reference
+                tag_url = f"https://api.github.com/repos/{username}/{repo_name}/git/refs/tags/{tag_name}"
+                tag_req = Request(tag_url)
+                tag_req.add_header('User-Agent', 'Mozilla/5.0')
+                tag_response = urlopen(tag_req, timeout=5)
+                tag_data = json.loads(tag_response.read().decode())
+                
+                # If it's an annotated tag, we need to get the tagged object
+                if tag_data.get('object', {}).get('type') == 'tag':
+                    tag_sha = tag_data.get('object', {}).get('sha', '')
+                    if tag_sha:
+                        # Get the tag object
+                        tag_obj_url = f"https://api.github.com/repos/{username}/{repo_name}/git/tags/{tag_sha}"
+                        tag_obj_req = Request(tag_obj_url)
+                        tag_obj_req.add_header('User-Agent', 'Mozilla/5.0')
+                        tag_obj_response = urlopen(tag_obj_req, timeout=5)
+                        tag_obj_data = json.loads(tag_obj_response.read().decode())
+                        commit_hash = tag_obj_data.get('object', {}).get('sha', '')
+                else:
+                    # Lightweight tag points directly to the commit
+                    commit_hash = tag_data.get('object', {}).get('sha', '')
+            except Exception as e:
+                print(f"Error getting commit hash from tag: {e}")
+                # Fall back to target_commitish if we can't get the commit hash
+                commit_hash = target_commitish
+        
+        # If we still don't have a commit hash, use remote_commit_hash from config
+        if not commit_hash or commit_hash.lower() in ['main', 'master', 'develop', 'trunk']:
+            commit_hash = config.get('app_remote_commit_hash', '')
+            
+        # Update the hash values in config
+        updated_config['app_version_hash'] = commit_hash
+        updated_config['app_commit_hash'] = commit_hash
+          # Format the date
         if 'published_at' in latest_release:
             published_at = latest_release.get('published_at', '')
             if published_at:
@@ -348,9 +390,12 @@ def perform_update(config, base_dir, signals):
                     formatted_date = dt.strftime("%Y-%m-%d")
                     updated_config['app_version_date'] = formatted_date
                     updated_config['app_commit_date'] = formatted_date  # Also update app_commit_date
-                except:
-                    updated_config['app_version_date'] = published_at.split('T')[0]
-                    updated_config['app_commit_date'] = published_at.split('T')[0]  # Also update app_commit_date
+                except Exception as e:
+                    print(f"Error formatting date: {e}")
+                    # Fallback to simple date extraction
+                    simple_date = published_at.split('T')[0]
+                    updated_config['app_version_date'] = simple_date
+                    updated_config['app_commit_date'] = simple_date
         
         # Save the updated config
         save_config(updated_config, base_dir)
