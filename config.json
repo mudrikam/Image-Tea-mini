@@ -16,12 +16,76 @@
     "app_remote_commit_hash": "b3542c0fa03751fa40e94aeb1280296c9b6342f6",
     "app_remote_version": "1.0.7",
     "app_remote_version_date": "2025-05-13",
-    "app_last_update_check": "2025-05-14T07:54:07Z",
-    "app_automatic_update": true,
+    "app_last_update_check": "2025-05-14T07:55:12Z",
+    "app_automatic_update": false,
     "app_update_url": "https://github.com/mudrikam/Image-Tea-mini/releases",
     "app_update_message": "New version available! Please update to the latest version for new features and bug fixes.",
     "app_update_message_no_internet": "No internet connection. Please check your connection and try again.",
     "app_update_message_no_update": "You are using the latest version of Image Tea Mini.",
     "app_update_message_error": "Error checking for updates. Please try again later.",
-    "app_whatsapp": "https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3"
+    "app_whatsapp": "https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3",
+    "donation_dialog": {
+        "title": "Support Image Tea Mini",
+        "message": "If you like this app, please consider supporting its development. \nYour contribution helps us continue improving and adding new features.",
+        "ewallet": [
+            {
+                "name": "DANA",
+                "number": "085172230405",
+                "account_name": "Muhamad Mudrikul Hikam",
+                "color": "#2F80ED",
+                "image": "res/dana.png",
+                "max_width": 30
+            },
+            {
+                "name": "OVO",
+                "number": "085172230405",
+                "account_name": "Muhamad Mudrikul Hikam",
+                "color": "#4F3AA0",
+                "image": "res/ovo.png",
+                "max_width": 30
+            },
+            {
+                "name": "Gopay",
+                "number": "085172230405",
+                "account_name": "Muhamad Mudrikul Hikam",
+                "color": "#00AEEF",
+                "image": "res/gopay.png",
+                "max_width": 30
+            }
+        ],
+        "bank": [
+            {
+                "name": "Bank BCA",
+                "number": "0131953347",
+                "account_name": "Muhamad Mudrikul Hikam",
+                "color": "#1868B0",
+                "image": "res/bca.png",
+                "max_width": 30
+            },
+            {
+                "name": "Bank BRI",
+                "number": "008101073232509",
+                "account_name": "Muhamad Mudrikul Hikam",
+                "color": "#00529C",
+                "image": "res/bri.png",
+                "max_width": 30
+            },
+            {
+                "name": "Bank Jago",
+                "number": "108279976960",
+                "account_name": "Muhamad Mudrikul Hikam",
+                "color": "#FF6F44",
+                "image": "res/jago.png",
+                "max_width": 30
+            }
+        ],
+        "QRIS": [
+            {
+                "name": "QRIS",
+                "image": "res/qris.jpeg",
+                "max_width": 400,
+                "description": "Scan this QR code with any Indonesian e-wallet app"
+            }
+        ]
+    }
 }

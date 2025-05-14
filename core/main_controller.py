@@ -2,7 +2,7 @@ import sys
 import os
 import json
 from PySide6 import QtWidgets, QtUiTools, QtCore
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QDialog
 from PySide6.QtGui import QIcon
 
 # Import our helpers
@@ -12,6 +12,7 @@ from core.helper._license_dialog import show_license_dialog
 from core.helper._contributors_dialog import show_contributors_dialog
 from core.helper._updater_dialog import show_updater_dialog
 from core.helper._url_handler import open_url
+from core.helper._donation_dialog import populate_donation_dialog
 
 class MainController:
     def __init__(self, base_dir=None):
@@ -130,6 +131,9 @@ class MainController:
         # Connect the Check for Updates action
         self.window.actionCheck_for_Updates.triggered.connect(self.show_updater_dialog)
         
+        # Connect the Donate action
+        self.window.actionDonate.triggered.connect(self.show_donation_dialog)
+        
         # Connect the Quit action
         self.window.actionQuit.triggered.connect(self.app.quit)
     
@@ -166,6 +170,30 @@ class MainController:
         issue_url = self.config.get("app_report_issue", "")
         if issue_url:
             open_url(issue_url)
+    
+    def show_donation_dialog(self):
+        """Show the donation dialog."""
+        # Use the centralized BASE_DIR to get the UI file
+        ui_path = os.path.join(self.BASE_DIR, "gui", "donation_window.ui")
+        
+        # Load the donation UI file
+        loader = QtUiTools.QUiLoader()
+        ui_file = QtCore.QFile(ui_path)
+        ui_file.open(QtCore.QFile.ReadOnly)
+        
+        # Create the donation dialog
+        donation_dialog = loader.load(ui_file, self.window)
+        ui_file.close()
+        
+        # Populate the dialog with content from config
+        populate_donation_dialog(donation_dialog, self.config, self.BASE_DIR)
+        
+        # Connect the Close button to close the dialog
+        if hasattr(donation_dialog, 'closeButton'):
+            donation_dialog.closeButton.clicked.connect(donation_dialog.close)
+        
+        # Show the dialog as modal
+        donation_dialog.exec()
     
     def show_window(self):
         """Open the main window and start the program."""

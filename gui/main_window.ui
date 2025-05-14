@@ -95,6 +95,7 @@
     <addaction name="actionGithub_Repository"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_for_Updates"/>
+    <addaction name="actionDonate"/>
     <addaction name="actionAbout_2"/>
    </widget>
    <addaction name="menuFile"/>
@@ -446,6 +447,15 @@
    </property>
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionDonate">
+   <property name="icon">
+    <iconset theme="emblem-favorite">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Donate</string>
    </property>
   </action>
  </widget>

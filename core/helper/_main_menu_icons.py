@@ -59,7 +59,7 @@ def _apply_edit_menu_icons(window):
 def _apply_settings_menu_icons(window):
     """Apply icons to Settings menu actions."""
     window.actionPreferences.setIcon(qta.icon('fa6s.gear'))
-    window.actionGoogle_Gemini.setIcon(qta.icon('fa6s.robot'))
+    window.actionGoogle_Gemini.setIcon(qta.icon('fa6s.star'))
     window.actionOpen_AI.setIcon(qta.icon('fa6s.brain'))
 
 def _apply_help_menu_icons(window):
@@ -70,4 +70,5 @@ def _apply_help_menu_icons(window):
     window.actionReport_Issue.setIcon(qta.icon('fa6s.bug'))
     window.actionGithub_Repository.setIcon(qta.icon('fa6b.github'))
     window.actionCheck_for_Updates.setIcon(qta.icon('fa6s.download'))
+    window.actionDonate.setIcon(qta.icon('fa6s.heart', color='#ff1764'))
     window.actionAbout_2.setIcon(qta.icon('fa6s.circle-info'))

@@ -1,0 +1,12 @@
+// This file contains a list of supporters who have donated to the Image Tea Mini project.
+// Each line represents one supporter.
+// Lines starting with // are comments and will be ignored.
+// Empty lines are also ignored.
+
+John Doe
+Jane Smith
+Ahmad Rahman
+Budi Santoso
+Ucup Surucup
+Alex Johnson
+Maria Garcia
