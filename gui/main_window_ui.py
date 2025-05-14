@@ -312,6 +312,9 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
+        self.statusbar.setStyleSheet(u"QStatusBar{\n"
+"	border-top: 1px solid rgba(114, 114, 114, 0.2); \n"
+"}")
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menuFile.menuAction())

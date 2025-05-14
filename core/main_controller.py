@@ -13,6 +13,7 @@ from core.helper._contributors_dialog import show_contributors_dialog
 from core.helper._updater_dialog import show_updater_dialog
 from core.helper._url_handler import open_url
 from core.helper._donation_dialog import populate_donation_dialog
+from core.helper._status_bar_actions import setup_status_bar
 
 class MainController:
     def __init__(self, base_dir=None):
@@ -99,9 +100,11 @@ class MainController:
         if os.path.exists(icon_path):
             window_icon = QIcon(icon_path)
             self.window.setWindowIcon(window_icon)
-        
-        # Apply QtAwesome icons to menu actions using our helper
+          # Apply QtAwesome icons to menu actions using our helper
         apply_icons(self.window)
+        
+        # Set up status bar with buttons and information
+        setup_status_bar(self.window, self.config, self.BASE_DIR)
         
         # Connect menu actions to handlers
         self.connect_menu_actions()

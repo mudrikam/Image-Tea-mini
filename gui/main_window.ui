@@ -103,7 +103,13 @@
    <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true">QStatusBar{
+	border-top: 1px solid rgba(114, 114, 114, 0.2); 
+}</string>
+   </property>
+  </widget>
   <action name="actionOpen_Image">
    <property name="icon">
     <iconset theme="document-open">
