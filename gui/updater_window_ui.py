@@ -120,18 +120,6 @@ class Ui_UpdaterWindow(object):
         self.lblCurrentVersion.setText(QCoreApplication.translate("UpdaterWindow", u"Current Version: ", None))
         self.lblUpdateMessage.setText(QCoreApplication.translate("UpdaterWindow", u"Checking for updates...", None))
         self.progressUpdate.setFormat("")
-        self.progressUpdate.setStyleSheet(QCoreApplication.translate("UpdaterWindow", u"QProgressBar {\n"
-"    border: 1px solid gray;\n"
-"    border-radius: 3px;\n"
-"    background-color: #f0f0f0;\n"
-"}\n"
-"QProgressBar::chunk {\n"
-"    background-color: #4CAF50;\n"
-"    width: 10px;\n"
-"}\n"
-"QProgressBar::chunk:disabled {\n"
-"    background-color: #aaaaaa;\n"
-"}", None))
         self.checkBox.setText(QCoreApplication.translate("UpdaterWindow", u"Automatic check for update", None))
         self.btnCheck.setText(QCoreApplication.translate("UpdaterWindow", u"Check", None))
         self.btnUpdate.setText(QCoreApplication.translate("UpdaterWindow", u"Update Now", None))

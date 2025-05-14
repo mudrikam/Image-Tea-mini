@@ -67,8 +67,7 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <property name="spacing">
         <number>6</number>
-       </property>
-       <item>
+       </property>       <item>
         <widget class="QProgressBar" name="progressUpdate">
          <property name="minimumSize">
           <size>
@@ -84,20 +83,6 @@
          </property>
          <property name="format">
           <string/>
-         </property>
-         <property name="styleSheet">
-          <string>QProgressBar {
-    border: 1px solid gray;
-    border-radius: 3px;
-    background-color: #f0f0f0;
-}
-QProgressBar::chunk {
-    background-color: #4CAF50;
-    width: 10px;
-}
-QProgressBar::chunk:disabled {
-    background-color: #aaaaaa;
-}</string>
          </property>
         </widget>
        </item>
