@@ -102,7 +102,7 @@ def show_updater_dialog(parent, config, base_dir):
         config.update(refreshed_config)
     
     # Load the UI file for the updater dialog
-    updater_ui_path = os.path.join(base_dir, "gui", "updater_window.ui")
+    updater_ui_path = os.path.join(base_dir, "gui", "dialogs", "updater_window.ui")
     
     loader = QtUiTools.QUiLoader()
     ui_file = QtCore.QFile(updater_ui_path)

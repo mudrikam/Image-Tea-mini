@@ -18,7 +18,7 @@ def show_license_dialog(parent, config, base_dir):
         base_dir: Base directory path
     """
     # Load the License window UI
-    ui_path = os.path.join(base_dir, "gui", "license_window.ui")
+    ui_path = os.path.join(base_dir, "gui", "dialogs", "license_window.ui")
     loader = QtUiTools.QUiLoader()
     ui_file = QtCore.QFile(ui_path)
     ui_file.open(QtCore.QFile.ReadOnly)

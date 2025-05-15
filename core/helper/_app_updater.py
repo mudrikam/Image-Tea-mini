@@ -31,7 +31,7 @@ def launch_app_updater(parent, config, base_dir):
         base_dir: The base directory of the application
     """
     # Load the UI file for the app updater dialog
-    ui_path = os.path.join(base_dir, "gui", "app_updater_window.ui")
+    ui_path = os.path.join(base_dir, "gui", "dialogs", "app_updater_window.ui")
     
     loader = QtUiTools.QUiLoader()
     ui_file = QtCore.QFile(ui_path)

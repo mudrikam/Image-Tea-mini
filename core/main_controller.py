@@ -76,7 +76,7 @@ class MainController:
     def load_ui(self):
         """Load the main window interface."""
         # Use the centralized BASE_DIR to get the UI file
-        ui_path = os.path.join(self.BASE_DIR, "gui", "main_window.ui")
+        ui_path = os.path.join(self.BASE_DIR, "gui", "layout", "main_window.ui")
         
         # PySide6 needs to use a loader and file objects to read UI files
         # This loads the XML UI file created with Qt Designer
@@ -187,7 +187,7 @@ class MainController:
     def show_donation_dialog(self):
         """Show the donation dialog."""
         # Use the centralized BASE_DIR to get the UI file
-        ui_path = os.path.join(self.BASE_DIR, "gui", "donation_window.ui")
+        ui_path = os.path.join(self.BASE_DIR, "gui", "dialogs", "donation_window.ui")
         
         # Load the donation UI file
         loader = QtUiTools.QUiLoader()

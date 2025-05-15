@@ -115,7 +115,7 @@ def show_donation_dialog_wrapper(window, config, base_dir):
         base_dir: The base directory path
     """
     # Load the donation UI file
-    ui_path = QtCore.QFile(f"{base_dir}/gui/donation_window.ui")
+    ui_path = QtCore.QFile(f"{base_dir}/gui/dialogs/donation_window.ui")
     ui_path.open(QtCore.QFile.ReadOnly)
     
     loader = QtUiTools.QUiLoader()

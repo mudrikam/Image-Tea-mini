@@ -21,7 +21,7 @@ def show_global_preferences(parent, config, base_dir):
     logging.debug("Opening global preferences dialog")  # Change to debug level
     
     # Load the UI file
-    ui_path = os.path.join(base_dir, "gui", "global_preferences_window.ui")
+    ui_path = os.path.join(base_dir, "gui", "dialogs", "global_preferences_window.ui")
     
     loader = QtUiTools.QUiLoader()
     ui_file = QtCore.QFile(ui_path)
