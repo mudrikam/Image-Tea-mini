@@ -17,4 +17,7 @@ Thank you to everyone who has contributed to making this project possible!
 ## List of requested features
 - [Luthfi] - [May 14, 2025] - [To make metadata creation more efficient and flexible] - [Default prompt and custom prompt features]
 - [Saiful] - [May 14, 2025] - [To handle interruptions during the process] - [Feature to stop metadata generation midway]
-- [Feri] - [15 May 2025] - [OpenAI API Support] - [Integrated OpenAI API for generating metadata for images and videos]
+- [Feri] - [May 14, 2025] - [OpenAI API Support] - [Integrated OpenAI API for generating metadata for images and videos]
+- [Ridho] - [May 15, 2025] - [Feature for automatic retry when metadata generation fails] - [Feature for automatic retry when metadata generation fails]
+- [BANGOJI] - [May 15, 2025] - [To automate categorization and streamline CSV exports for microstock platforms] - [Auto category, Auto Export CSV for microstock (optional)]
+- [Fahrul] - [May 15, 2025] - [Add support for image/video description in metadata] - [Additional feature for image/video description]
