@@ -4,12 +4,17 @@
 - Mudrikul Hikam - Project Lead, Core Development
 - Studio Desainia - Design and UI/UX
 
-## Additional Contributors
-- [Add additional contributors here]
-
 ## Acknowledgements
 - All libraries and frameworks used in this project
 - All community members who provided feedback and support
 - Everyone who contributed directly or indirectly to this project
 
 Thank you to everyone who has contributed to making this project possible!
+
+## Additional Contributors
+- [Yoga Binhar S. Ars] - [April 22, 2025] - [Export CSV according to platform format] - [Provided CSV samples for Freepik, Shutterstock, Adobe Stock, and iStock]
+
+## List of requested features
+- [Luthfi] - [May 14, 2025] - [To make metadata creation more efficient and flexible] - [Default prompt and custom prompt features]
+- [Saiful] - [May 14, 2025] - [To handle interruptions during the process] - [Feature to stop metadata generation midway]
+- [Feri] - [15 May 2025] - [OpenAI API Support] - [Integrated OpenAI API for generating metadata for images and videos]

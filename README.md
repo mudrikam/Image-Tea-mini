@@ -1,0 +1,8 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
+[![Code Size](https://img.shields.io/github/languages/code-size/mudrikam/Image-Tea-mini)](https://github.com/mudrikam/Image-Tea-mini)
+[![Release](https://img.shields.io/github/v/release/mudrikam/Image-Tea-mini?include_prereleases)](https://github.com/mudrikam/Image-Tea-mini/releases)
+[![Issues](https://img.shields.io/github/issues/mudrikam/Image-Tea-mini)](https://github.com/mudrikam/Image-Tea-mini/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Downloads](https://img.shields.io/github/downloads/mudrikam/Image-Tea-mini/total)](https://github.com/mudrikam/Image-Tea-mini/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/mudrikam/Image-Tea-mini)](https://github.com/mudrikam/Image-Tea-mini/commits/main)
