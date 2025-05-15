@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2025 Mudrikul Hikam, Desainia Studio
+Copyright (c) 2025 Mudrikul Hikam
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,27 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-------------------------------------------------------------------------
-
-The MIT License (MIT)
-
-Hak Cipta (c) 2025 Mudrikul Hikam, Desainia Studio
-
-Izin dengan ini diberikan, tanpa biaya, kepada siapa pun yang memperoleh salinan
-perangkat lunak ini dan file dokumentasi terkait ("Perangkat Lunak"), untuk menangani
-Perangkat Lunak tanpa batasan, termasuk tanpa batasan hak
-untuk menggunakan, menyalin, memodifikasi, menggabungkan, mempublikasikan, mendistribusikan, mensublisensikan, dan/atau menjual
-salinan Perangkat Lunak, dan untuk mengizinkan orang yang Perangkat Lunak ini
-diberikan untuk melakukannya, dengan tunduk pada ketentuan berikut:
-
-Pemberitahuan hak cipta di atas dan pemberitahuan izin ini akan disertakan dalam semua
-salinan atau bagian substansial dari Perangkat Lunak.
-
-PERANGKAT LUNAK INI DISEDIAKAN "SEBAGAIMANA ADANYA", TANPA JAMINAN DARI JENIS APA PUN, TERSURAT MAUPUN
-TERSIRAT, TERMASUK TETAPI TIDAK TERBATAS PADA JAMINAN KELAYAKAN UNTUK DIPERDAGANGKAN,
-KESESUAIAN UNTUK TUJUAN TERTENTU, DAN NONPELANGGARAN. DALAM KONDISI APA PUN
-PENULIS ATAU PEMEGANG HAK CIPTA BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN, ATAU
-KEWAJIBAN LAINNYA, BAIK DALAM TINDAKAN KONTRAK, KESALAHAN ATAU LAINNYA, YANG TIMBUL DARI,
-DI LUAR ATAU BERHUBUNGAN DENGAN PERANGKAT LUNAK ATAU PENGGUNAAN ATAU URUSAN LAIN DALAM
-PERANGKAT LUNAK.
