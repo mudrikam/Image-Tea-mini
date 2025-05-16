@@ -55,9 +55,8 @@ Launcher.bat
 ```bash
 # Linux & MacOS
 Launcher.sh
-
-# Note: I tested this on a VM because I'm not rich enough to be an Apple boy yet. But theoretically, according to Python docs, it should work on all platforms. If you find a better way to run this on Linux or macOS, do me a favor and make a pull request, would ya?
 ```
+> *Note: I tested this on a VM because I'm not rich enough to be an Apple boy yet. But theoretically, according to Python docs, it should work on all platforms. If you find a better way to run this on Linux or macOS, do me a favor and make a pull request, would ya?*
 
 ### That's it!
 ### Seriously. If you can't handle these two steps, maybe metadata generation is the least of your problems.
@@ -78,75 +77,66 @@ Got problems? Here's what you can do:
 - Join the WhatsApp group and complain with everyone else: [Join Chat](https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3)
 
 ## 💰 Donation
-```
-Not required, but if you've somehow got a noble heart hidden in there, you can donate. Just run the app first and look for the heart icon (my heart, actually) in the bottom right corner.
+> Not required, but if you've somehow got a noble heart hidden in there, you can donate. Just run the app first and look for the heart icon (my heart, actually) in the bottom right corner.
 
 I want to make sure if you're giving away your precious money, the app is actually useful to you first. Oh, and I'll pray it becomes our ongoing charity together.
-```
 
 ## ❓ Questions and More Questions
 
-```
-Q: 🦠 Is this a virus?
-A: I'm literally staying up every night sipping tea making this script, and the initial purpose was to make my life easier with metadata. And you get to use it for free.
-```
-```
-Q: 💾 How big is this application?
-A: First things first, this is more accurately called a Python script rather than a desktop app like you're used to. The actual script files are under 1MB, but it will install dependencies. How much exactly? I don't know, just have decent SSD space ready. And please use an SSD because I don't want to hear complaints about the app running slow just because you're still using an HDD to run applications.
-```
-```
-Q: 💰 Is it really free?
+### Q: 🦠 Is this a virus?
+
+> A: I'm literally staying up every night sipping tea making this script, and the initial purpose was to make my life easier with metadata. And you get to use it for free.
+
+### Q: 💾 How big is this application?
+A: First things first, this is more accurately called a Python script rather than a desktop app like you're used to. The actual script files are under 1MB, but it will install dependencies. How much exactly? I don't know, just have decent SSD space ready. 
+
+> And please use an SSD because I don't want to hear complaints about the app running slow just because you're still using an HDD to run applications.
+
+### Q: 💰 Is it really free?
 A: Hell yes it's free. No registration, no license keys, no payment gateways, no subscription traps. Free as in "go to sleep and don't worry about your wallet."
 
-But if you're asking about API keys? That's on you and whatever platform you choose to use. I can't pay for everyone's API usage, I'm not made of money. And no, I won't explain what an API is, and please don't ask me where to get API keys from.
-```
-```
-Q: 🔑 Where can I get the API keys?
-A: Fine, if you're going to be pushy about it. 
+> But if you're asking about API keys? That's on you and whatever platform you choose to use. I can't pay for everyone's API usage, I'm not made of money. And no, I won't explain what an API is, and please don't ask me where to get API keys from.
 
-For Gemini: Go to AI Studio (https://aistudio.google.com/app/apikey), create an account, go to "API keys" section, and generate a key. They offer a free tier.
+### Q: 🔑 Where can I get the API keys?
+ A: Fine, if you're going to be pushy about it. 
 
-For OpenAI: Head to platform.openai.com, create an account, navigate to API keys section and create one. But heads up - OpenAI isn't free. You'll need to add payment info and they charge based on usage.
+> For Gemini: Go to [AI Studio](https://aistudio.google.com/app/apikey), create an account, go to "API keys" section, and generate a key. They offer a free tier.
+
+> For OpenAI: Head to platform.openai.com, create an account, navigate to API keys section and create one. But heads up - OpenAI isn't free. You'll need to add payment info and they charge based on usage.
 
 Happy now? Geez.
-```
-```
-Q: ⚖️ What's the license for this?
+
+### Q: ⚖️ What's the license for this?
 A: MIT. I don't understand all the legal mumbo-jumbo either, but basically:
 
-- You can use it however you want
-- You can modify it however you want
-- You can distribute it however you want
-- You don't have to pay me anything
-- But don't sue me if it breaks something
+> - You can use it however you want
+> - You can modify it however you want
+> - You can distribute it however you want
+> - You don't have to pay me anything
+> - But don't sue me if it breaks something
 
 That's it. No fancy lawyer talk needed. Just don't be a jerk and claim you wrote it yourself.
-```
-```
-Q: 💼 Can I sell this application?
-A: Whatever. Modify it, sell it, donate it, etc. It's up to you as long as it complies with the MIT license. Just remember what I said about not being a jerk and claiming you wrote it from scratch.
-```
-```
-Q: 👨‍💻 Did you write the code yourself?
+
+### Q: 💼 Can I sell this application?
+> A: Whatever. Modify it, sell it, donate it, etc. It's up to you as long as it complies with the MIT license. Just remember what I said about not being a jerk and claiming you wrote it from scratch.
+
+### Q: 👨‍💻 Did you write the code yourself?
 A: Nope, I'm a designer not a programmer, so I don't really know how.
 
-So how did the app come together? GitHub Copilot, baby! I just designed the workflow and made requests (more like complained when Copilot messed things up), but that doesn't mean the application was written entirely by AI.
+> So how did the app come together? GitHub Copilot, baby! I just designed the workflow and made requests (more like complained when Copilot messed things up), but that doesn't mean the application was written entirely by AI.
 
-I have no idea what half the Python script actually does. Copilot typed out hundreds of lines of code - I just care that it works the way I wanted. But that doesn't mean I don't deserve credit for it.
-```
-```
-Q: 💥 Why doesn't the application run on my device?
-A: Yeah, I experience that sometimes too. Just close it and try running it again. If it still doesn't work, please check the system requirements. I don't have thousands of devices to test with. You can report issues to the WhatsApp group as mentioned above.
-```
-```
-Q: 🎬 Do you have a step-by-step video tutorial on how to use this?
-A: Blame me for being too lazy to make a video tutorial. I'm assuming you already understand the basics of metadata and how to use API keys. If you don't get it, ask the group. If you're still confused, go ahead and write your metadata manually.
-```
-```
-Q: 🛠️ Why is this application constantly showing errors?
-A: Hell no, I'm not fixing things if they're not broken for me. If I start "fixing" things that aren't broken when I use them, I'll just end up breaking them worse and spiral into frustration.
-```
-```
-Q: 🔍 Why isn't this feature included?
-A: If you really need that feature, request it in the group. Some features I deliberately left out because I don't understand the logic yet and they're still too complicated for me to implement. Doesn't mean I haven't thought about it. I'm not an idiot.
-```
+> I have no idea what half the Python script actually does. Copilot typed out hundreds of lines of code - I just care that it works the way I wanted. But that doesn't mean I don't deserve credit for it.
+
+### Q: 💥 Why doesn't the application run on my device?
+> A: Yeah, I experience that sometimes too. Just close it and try running it again. If it still doesn't work, please check the system requirements. I don't have thousands of devices to test with. You can report issues to the WhatsApp group as mentioned above.
+
+### Q: 🎬 Do you have a step-by-step video tutorial on how to use this?
+> A: Blame me for being too lazy to make a video tutorial. I'm assuming you already understand the basics of metadata and how to use API keys. If you don't get it, ask the group. If you're still confused, go ahead and write your metadata manually.
+
+### Q: 🛠️ Why is this application constantly showing errors?
+> A: Hell no, I'm not fixing things if they're not broken for me. If I start "fixing" things that aren't broken when I use them, I'll just end up breaking them worse and spiral into frustration.
+
+### Q: 🔍 Why isn't this feature included?
+A: If you really need that feature, request it in the group.
+
+>Some features I deliberately left out because I don't understand the logic yet and they're still too complicated for me to implement. Doesn't mean I haven't thought about it. I'm not an idiot.
