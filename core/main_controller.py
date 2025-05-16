@@ -55,7 +55,7 @@ class MainController:
             return {
                 "app_name": "Image Tea Mini",
                 "app_version": "1.0.0",
-                "app_icon": "image_tea.ico"
+                "app_icon": "res/image_tea.ico"
             }
     
     def set_application_icon(self):
@@ -65,7 +65,7 @@ class MainController:
             return
             
         # Use the centralized BASE_DIR to locate the icon
-        icon_path = os.path.join(self.BASE_DIR, self.config.get("app_icon", "image_tea.ico"))
+        icon_path = os.path.join(self.BASE_DIR, "res", self.config.get("app_icon", "image_tea.ico"))
         
         # Only set the icon if the file actually exists
         # This prevents crashes if the icon file is missing
@@ -95,7 +95,7 @@ class MainController:
         
         # Add the program icon to the window itself
         # Use the centralized BASE_DIR
-        icon_path = os.path.join(self.BASE_DIR, self.config.get("app_icon", "image_tea.ico"))
+        icon_path = os.path.join(self.BASE_DIR, "res", self.config.get("app_icon", "image_tea.ico"))
         
         if os.path.exists(icon_path):
             window_icon = QIcon(icon_path)

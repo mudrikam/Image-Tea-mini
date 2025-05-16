@@ -35,7 +35,7 @@ def show_global_preferences(parent, config, base_dir):
     preferences_dialog.setWindowTitle("Global Preferences")
     
     # Set window icon from application config
-    icon_path = os.path.join(base_dir, config.get("app_icon", "image_tea.ico"))
+    icon_path = os.path.join(base_dir, "res", config.get("app_icon", "image_tea.ico"))
     if os.path.exists(icon_path):
         preferences_dialog.setWindowIcon(QIcon(icon_path))
     

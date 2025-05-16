@@ -26,7 +26,7 @@ def show_contributors_dialog(parent, config, base_dir):
     ui_file.close()
     
     # Set window icon
-    icon_path = os.path.join(base_dir, config.get("app_icon", "image_tea.ico"))
+    icon_path = os.path.join(base_dir, "res", config.get("app_icon", "image_tea.ico"))
     if os.path.exists(icon_path):
         contributors_dialog.setWindowIcon(QIcon(icon_path))
     
