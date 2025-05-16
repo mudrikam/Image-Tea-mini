@@ -140,3 +140,33 @@ A: Nope, I'm a designer not a programmer, so I don't really know how.
 A: If you really need that feature, request it in the group.
 
 >Some features I deliberately left out because I don't understand the logic yet and they're still too complicated for me to implement. Doesn't mean I haven't thought about it. I'm not an idiot.
+
+### Q: 💻 Can you teach me how to code?
+> A: Nope.
+
+### Q: 💹 Did using this increase your stock sales?
+> A: Yes and no. Yes because I can see my content is more discoverable now. No because I'm still too lazy to create enough content.
+
+### Q: 🧩 Why is it hard to contribute to this project when the code is such a mess?
+> A: It's pretty obvious that I already said I don't understand how half the code works. GitHub Copilot wrote almost everything, so sorry if it's not up to your precious standards. What did you expect from someone who's not a programmer?
+
+### Q: ⚠️ Will this script harm my files, modify them, or cause corruption/crashes?
+A: I've done my best to make the application safe and isolated. It won't modify anything unless you explicitly allow it to. I'm not out here trying to destroy your work.
+
+> Look, I use this thing for my own professional work too. You think I want to corrupt my own files? Of course I built it to be safe. I need it to work properly just as much as you do.
+
+### Q: 📜 Could using this can affect my account regarding Terms of Service violations?
+> A: Sorry, that's beyond the scope of this application since it only generates metadata. I've done my best to ensure the prompts avoid anything that would violate ToS, and I've strictly applied these safeguards to the default prompts.
+
+### Q: ⚖️ What's your responsibility if something bad happens?
+> A: Please study up on MIT licenses more. Seriously.
+
+### Q: 💸 Aren't you worried about giving away such a good application for free?
+> A: Aren't you worried about paying for similar applications? Yeah, thought so.
+
+### Q: 📉 Aren't you ruining the market for similar applications?
+> A: That makes no sense. I made an app that makes my job easier and gives me more vacation time, and it just happens that people can use it for free. What, should I charge money for something that saves me time just to protect some "market"? I'd rather be at my desk sipping my warm tea.
+
+### Q: 📦 Why can't I find a setup file or .exe file?
+> A: I was too lazy to build an exe because it's a hassle and you don't need it anyway. An exe would just run the launcher script which you can already double-click directly. Why add extra steps?
+
