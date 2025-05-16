@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="vfFDQBbXONL042J2SR9M" name="Page-1">
-        <mxGraphModel dx="1980" dy="893" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1980" dy="1113" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -23,7 +23,7 @@
                     <mxGeometry x="180" y="630" width="1340" height="840" as="geometry"/>
                 </mxCell>
                 <mxCell id="30" value="tab pertama berisi tabel dan tab kedua berisi preview image,&amp;nbsp;&lt;div&gt;datanya sama dengan yang tabel bedanya hanya cara view&lt;/div&gt;" style="strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.containers.marginRect2;rectMarginTop=32;strokeColor=#666666;gradientColor=none;whiteSpace=wrap;" vertex="1" parent="1">
-                    <mxGeometry x="450" y="810" width="770" height="490" as="geometry"/>
+                    <mxGeometry x="450" y="810" width="770" height="460" as="geometry"/>
                 </mxCell>
                 <mxCell id="31" value="Tab 1" style="strokeColor=inherit;fillColor=inherit;gradientColor=inherit;strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.containers.rrect;rSize=0;fontSize=17;fontColor=#666666;gradientColor=none;" vertex="1" parent="30">
                     <mxGeometry width="60" height="25" relative="1" as="geometry">
@@ -101,6 +101,12 @@
                 </mxCell>
                 <mxCell id="55" value="Help" style="text;strokeColor=inherit;align=center;verticalAlign=middle;spacingLeft=10;spacingRight=10;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;fillColor=inherit;fontColor=inherit;fontSize=17;" vertex="1" parent="49">
                     <mxGeometry x="450" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="63" value="Table" style="strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.buttons.button;strokeColor=#666666;fontColor=#ffffff;mainText=;buttonStyle=round;fontSize=17;fontStyle=1;fillColor=#008cff;whiteSpace=wrap;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="1280" width="105" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="Grid" style="strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.buttons.button;strokeColor=#666666;fontColor=#ffffff;mainText=;buttonStyle=round;fontSize=17;fontStyle=1;fillColor=#008cff;whiteSpace=wrap;" vertex="1" parent="1">
+                    <mxGeometry x="570" y="1280" width="105" height="30" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
