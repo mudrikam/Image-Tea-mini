@@ -13,6 +13,7 @@ from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtCore import Qt, QMetaObject, Signal, QObject, QUrl
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QDesktopServices
+from core.helper._window_utils import center_window
 
 
 class UpdateSignals(QObject):
@@ -74,21 +75,12 @@ def launch_app_updater(parent, config, base_dir):
     # Make the dialog modal (blocks interaction with parent window)
     dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
     
-    # Center the dialog on the screen
-    center_on_screen(dialog)
+    # Center the dialog on the screen using the helper
+    center_window(dialog)
     
     # Show the dialog as modal
     dialog.exec()
     return dialog
-
-
-def center_on_screen(window):
-    """Center a window on the screen."""
-    screen = QtWidgets.QApplication.primaryScreen().availableGeometry()
-    window_size = window.frameGeometry()
-    x = (screen.width() - window_size.width()) // 2
-    y = (screen.height() - window_size.height()) // 2
-    window.move(x, y)
 
 
 def start_update_process(dialog, config, base_dir):

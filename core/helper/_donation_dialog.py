@@ -6,9 +6,60 @@ This module handles populating the donation dialog with content from the config 
 
 import os
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QApplication, QToolTip
-from PySide6.QtGui import QPixmap, QCursor  # Import QCursor from QtGui
-from PySide6 import QtCore, QtWidgets
+from PySide6.QtGui import QPixmap, QCursor
+from PySide6 import QtCore, QtWidgets, QtUiTools
 import qtawesome as qta
+from core.helper._window_utils import center_window
+
+def show_donation_dialog(parent, config, base_dir):
+    """
+    Show the donation dialog with content from the config file.
+    
+    Args:
+        parent: The parent window
+        config: The application configuration dictionary
+        base_dir: Base directory path
+    """
+    # Load the donation UI file
+    ui_path = os.path.join(base_dir, "gui", "dialogs", "donation_window.ui")
+    
+    loader = QtUiTools.QUiLoader()
+    ui_file = QtCore.QFile(ui_path)
+    ui_file.open(QtCore.QFile.ReadOnly)
+    donation_dialog = loader.load(ui_file, parent)
+    ui_file.close()
+    
+    # Populate the dialog with content from config
+    populate_donation_dialog(donation_dialog, config, base_dir)
+    
+    # Connect the Close button to close the dialog
+    if hasattr(donation_dialog, 'closeButton'):
+        donation_dialog.closeButton.clicked.connect(donation_dialog.close)
+    
+    # Process events to ensure the dialog has its final size
+    QtWidgets.QApplication.processEvents()
+    
+    # Set a reasonable maximum size to ensure it fits on most screens
+    screen = QtWidgets.QApplication.primaryScreen().availableGeometry()
+    max_height = min(800, int(screen.height() * 0.8))  # 80% of screen height or 800px, whichever is smaller
+    max_width = min(600, int(screen.width() * 0.8))    # 80% of screen width or 600px, whichever is smaller
+    
+    # Set maximum size
+    donation_dialog.setMaximumHeight(max_height)
+    donation_dialog.setMaximumWidth(max_width)
+    
+    # Force sizing to take effect
+    donation_dialog.adjustSize()
+    
+    # Position at the center of the screen before showing
+    position = screen.center() - donation_dialog.rect().center()
+    donation_dialog.move(position)
+    
+    # Force another update cycle to ensure everything is calculated correctly
+    QtWidgets.QApplication.processEvents()
+    
+    # Show the dialog as modal
+    donation_dialog.exec()
 
 def populate_donation_dialog(dialog, config, base_dir):
     """
@@ -52,13 +103,11 @@ def _copy_to_clipboard(text):
     """Copy text to clipboard and show a tooltip."""
     clipboard = QApplication.clipboard()
     clipboard.setText(text)
-    # Fix the parameter order for showText
-    QToolTip.showText(QCursor.pos(), "Copied to clipboard!", None)  # Remove the timeout parameter
+    QToolTip.showText(QCursor.pos(), "Copied to clipboard!", None)
 
 def _populate_payment_tab(tab, payment_methods):
     """Create a layout with modern payment method cards."""
 
-    
     layout = QVBoxLayout()
     layout.setSpacing(10)
     layout.setContentsMargins(20, 20, 20, 20)

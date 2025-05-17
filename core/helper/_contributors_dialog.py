@@ -7,6 +7,7 @@ This module contains functions to show the Contributors dialog with content from
 from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtGui import QIcon
 import os
+from core.helper._window_utils import center_window
 
 def show_contributors_dialog(parent, config, base_dir):
     """
@@ -49,6 +50,9 @@ def show_contributors_dialog(parent, config, base_dir):
     
     # Display the contributors text
     contributors_dialog.textContributors.setPlainText(contributors_text)
+    
+    # Center the dialog on screen
+    center_window(contributors_dialog)
     
     # Show the dialog as modal
     contributors_dialog.exec()

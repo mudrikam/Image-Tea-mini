@@ -8,6 +8,7 @@ from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtGui import QIcon
 import os
 import logging
+from core.helper._window_utils import center_window
 
 def show_global_preferences(parent, config, base_dir):
     """
@@ -76,6 +77,9 @@ def show_global_preferences(parent, config, base_dir):
         index = preferences_dialog.logLevelComboBox.findText(level)
         if index >= 0:
             preferences_dialog.logLevelComboBox.setCurrentIndex(index)
+    
+    # Center the dialog on screen
+    center_window(preferences_dialog)
     
     # Show the dialog as modal
     result = preferences_dialog.exec()

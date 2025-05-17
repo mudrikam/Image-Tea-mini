@@ -11,6 +11,7 @@ import os
 # Import the license dialog helper and URL opener
 from core.helper._license_dialog import show_license_dialog
 from core.helper._url_handler import open_url
+from core.helper._window_utils import center_window
 
 def show_about_dialog(parent, config, base_dir):
     """
@@ -62,6 +63,9 @@ def show_about_dialog(parent, config, base_dir):
     if email:
         about_dialog.lblEmail.setText(f'<a href="mailto:{email}">{email}</a>')
         about_dialog.lblEmail.setOpenExternalLinks(True)
+    
+    # Center the dialog on the screen using the helper function
+    center_window(about_dialog)
     
     # Show the dialog as modal
     about_dialog.exec()

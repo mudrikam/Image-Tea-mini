@@ -7,6 +7,7 @@ This module contains functions to show the License dialog with content from LICE
 from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtGui import QIcon
 import os
+from core.helper._window_utils import center_window
 
 def show_license_dialog(parent, config, base_dir):
     """
@@ -53,6 +54,9 @@ def show_license_dialog(parent, config, base_dir):
     
     # Display the license text
     license_dialog.textLicense.setPlainText(license_text)
+    
+    # Center the dialog on screen
+    center_window(license_dialog)
     
     # Show the dialog as modal
     license_dialog.exec()

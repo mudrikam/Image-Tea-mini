@@ -12,6 +12,7 @@ from PySide6.QtCore import Qt
 
 # Import the app updater module
 from core.helper._app_updater import launch_app_updater
+from core.helper._window_utils import center_window
 
 
 def get_current_datetime_iso():
@@ -165,6 +166,9 @@ def show_updater_dialog(parent, config, base_dir):
     if auto_update:
         # Short delay to allow the dialog to show up first
         QtCore.QTimer.singleShot(500, lambda: check_for_updates(dialog, config, base_dir))
+    
+    # Center the dialog on screen
+    center_window(dialog)
     
     # Show the dialog
     dialog.exec()

@@ -12,8 +12,10 @@ import qtawesome as qta
 from core.helper._url_handler import open_url
 from core.helper._about_dialog import show_about_dialog
 from core.helper._license_dialog import show_license_dialog
-from core.helper._donation_dialog import populate_donation_dialog
+# Update import to use the new function
+from core.helper._donation_dialog import show_donation_dialog
 from PySide6 import QtUiTools, QtCore
+from core.helper._window_utils import center_window
 
 def setup_status_bar(window, config, base_dir):
     """
@@ -105,29 +107,7 @@ def create_button(icon, tooltip):
 
 def show_donation_dialog_wrapper(window, config, base_dir):
     """
-    Show the donation dialog.
-    
-    This is a wrapper around the donation dialog to handle the UI loading.
-    
-    Args:
-        window: The main window object
-        config: The application configuration
-        base_dir: The base directory path
+    Show the donation dialog wrapper.
     """
-    # Load the donation UI file
-    ui_path = QtCore.QFile(f"{base_dir}/gui/dialogs/donation_window.ui")
-    ui_path.open(QtCore.QFile.ReadOnly)
-    
-    loader = QtUiTools.QUiLoader()
-    donation_dialog = loader.load(ui_path, window)
-    ui_path.close()
-    
-    # Populate the dialog with content
-    populate_donation_dialog(donation_dialog, config, base_dir)
-    
-    # Connect the Close button
-    if hasattr(donation_dialog, 'closeButton'):
-        donation_dialog.closeButton.clicked.connect(donation_dialog.close)
-    
-    # Show the dialog
-    donation_dialog.exec()
+    # Use the new simplified helper function
+    show_donation_dialog(window, config, base_dir)

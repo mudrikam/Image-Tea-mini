@@ -12,8 +12,9 @@ from core.helper._license_dialog import show_license_dialog
 from core.helper._contributors_dialog import show_contributors_dialog
 from core.helper._updater_dialog import show_updater_dialog
 from core.helper._url_handler import open_url
-from core.helper._donation_dialog import populate_donation_dialog
+from core.helper._donation_dialog import populate_donation_dialog, show_donation_dialog
 from core.helper._status_bar_actions import setup_status_bar
+from core.helper._window_utils import center_window
 
 class MainController:
     def __init__(self, base_dir=None):
@@ -191,34 +192,18 @@ class MainController:
     
     def show_donation_dialog(self):
         """Show the donation dialog."""
-        # Use the centralized BASE_DIR to get the UI file
-        ui_path = os.path.join(self.BASE_DIR, "gui", "dialogs", "donation_window.ui")
-        
-        # Load the donation UI file
-        loader = QtUiTools.QUiLoader()
-        ui_file = QtCore.QFile(ui_path)
-        ui_file.open(QtCore.QFile.ReadOnly)
-        
-        # Create the donation dialog
-        donation_dialog = loader.load(ui_file, self.window)
-        ui_file.close()
-        
-        # Populate the dialog with content from config
-        populate_donation_dialog(donation_dialog, self.config, self.BASE_DIR)
-        
-        # Connect the Close button to close the dialog
-        if hasattr(donation_dialog, 'closeButton'):
-            donation_dialog.closeButton.clicked.connect(donation_dialog.close)
-        
-        # Show the dialog as modal
-        donation_dialog.exec()
-    
+        show_donation_dialog(self.window, self.config, self.BASE_DIR)
+   
     def show_window(self):
         """Open the main window and start the program."""
         # Make sure we have a window before showing it
         # This lazy-loading approach means we only create the window when needed
         if self.window is None:
             self.load_ui()
+        
+        # Center the window on the screen before showing it
+        # Use the helper function directly
+        center_window(self.window)
         
         # Make the window visible to the user
         self.window.show()
