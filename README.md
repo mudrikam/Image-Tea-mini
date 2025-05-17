@@ -105,7 +105,7 @@ A: Hell yes it's free. No registration, no license keys, no payment gateways, no
 
 > For Gemini: Go to [AI Studio](https://aistudio.google.com/app/apikey), create an account, go to "API keys" section, and generate a key. They offer a free tier.
 
-> For OpenAI: Head to platform.openai.com, create an account, navigate to API keys section and create one. But heads up - OpenAI isn't free. You'll need to add payment info and they charge based on usage.
+> For OpenAI: Head to [Open AI](https://platform.openai.com/), create an account, navigate to API keys section and create one. But heads up - OpenAI isn't free. You'll need to add payment info and they charge based on usage.
 
 Happy now? Geez.
 
