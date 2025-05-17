@@ -19,7 +19,7 @@ REM =====================================================================
 REM Set base directory to the location of this batch file (removes trailing backslash)
 set "BASE_DIR=%~dp0"
 set "BASE_DIR=%BASE_DIR:~0,-1%"
-set "PYTHON_DIR=%BASE_DIR%\python"
+set "PYTHON_DIR=%BASE_DIR%\python\Windows"
 set "PYTHON_EXE=%PYTHON_DIR%\python.exe"
 set "MAIN_PY=%BASE_DIR%\main.py"
 

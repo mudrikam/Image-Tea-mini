@@ -21,6 +21,11 @@ class MainController:
         # Create the Qt application instance - required before any UI elements
         # This is the core object that manages all Qt resources and event loop
         self.app = QApplication(sys.argv)
+        
+        # Force the menu to stay with the window on macOS instead of using the native menu bar
+        if sys.platform == 'darwin':
+            self.app.setAttribute(QtCore.Qt.AA_DontUseNativeMenuBar, True)
+            
         self.window = None
         
         # Store the base directory path passed from main.py

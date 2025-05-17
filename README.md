@@ -52,9 +52,12 @@ cd Image-Tea-mini
 Launcher.bat
 ```
 (Just double-click the Launcher.bat file. That's literally it.)
+
+Launcher.sh
 ```bash
 # Linux & MacOS
-Launcher.sh
+chmod +x Launcher.sh
+./Launcher.sh
 ```
 > *Note: I tested this on a VM because I'm not rich enough to be an Apple boy yet. But theoretically, according to Python docs, it should work on all platforms. If you find a better way to run this on Linux or macOS, do me a favor and make a pull request, would ya?*
 
@@ -169,4 +172,12 @@ A: I've done my best to make the application safe and isolated. It won't modify 
 
 ### Q: 📦 Why can't I find a setup file or .exe file?
 > A: I was too lazy to build an exe because it's a hassle and you don't need it anyway. An exe would just run the launcher script which you can already double-click directly. Why add extra steps?
+
+### Q: 🐧 How do I launch Launcher.sh in Linux/MacOS terminal?
+> A: For Linux and Mac users - if you don't know how to run a shell script, I'm not going to teach you. Your device is YOUR responsibility. I don't even own any Apple devices, so don't come crying to me if it doesn't work. Either learn your own OS or stick with Windows.
+
+### Q: 🌐 Do I need high-speed internet for this?
+> A: Technically, dial-up would work. But as for your sanity waiting for responses? That's not my problem. This thing uses AI services so yeah, it will eat some data. Like a few MB per operation. And ping? Well, lower is better as always, but it's not a twitch shooter game. It'll work even if your connection isn't great, you'll just wait longer. But again, your patience level isn't my responsibility.
+
+> Whether you're using Wi-Fi or mobile data, I don't care. You just need internet, period. And don't whine about data usage - I've even added a "Submit scale" feature to help with that, so stop being so needy. Where is it? Just read the damn menu bar.
 
