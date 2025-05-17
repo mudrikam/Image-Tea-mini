@@ -15,6 +15,7 @@ from core.helper._url_handler import open_url
 from core.helper._donation_dialog import populate_donation_dialog, show_donation_dialog
 from core.helper._status_bar_actions import setup_status_bar
 from core.helper._window_utils import center_window
+from core.layout_controller import LayoutController
 
 class MainController:
     def __init__(self, base_dir=None):
@@ -28,6 +29,7 @@ class MainController:
             self.app.setAttribute(QtCore.Qt.AA_DontUseNativeMenuBar, True)
             
         self.window = None
+        self.layout_controller = None
         
         # Store the base directory path passed from main.py
         # If not provided, calculate it (for backward compatibility)
@@ -92,6 +94,13 @@ class MainController:
         self.window = loader.load(ui_file)
         ui_file.close()
         
+        # Initialize the layout controller after the main window is loaded
+        self.layout_controller = LayoutController(self.window, self.BASE_DIR)
+        self.layout_controller.setup_ui()
+        
+        # Connect signals to save layout when dock widgets are moved/resized
+        self.setup_layout_save_signals()
+        
         # Set window title from settings to show application name and version
         # This is nicer than hardcoding it in the UI file
         if self.config:
@@ -116,6 +125,48 @@ class MainController:
         self.connect_menu_actions()
             
         return self
+    
+    def setup_layout_save_signals(self):
+        """Connect signals to save layout when it changes."""
+        # Connect to individual dock widgets' signals
+        # We'll connect to dockLocationChanged and visibilityChanged signals of each dock widget
+        for dock_widget in self.window.findChildren(QtWidgets.QDockWidget):
+            dock_widget.dockLocationChanged.connect(self.save_layout_delayed)
+            dock_widget.visibilityChanged.connect(self.save_layout_delayed)
+        
+        # Save layout when the window is resized or moved
+        self.window.resizeEvent = self.wrap_event(self.window.resizeEvent, self.save_layout_delayed)
+        self.window.moveEvent = self.wrap_event(self.window.moveEvent, self.save_layout_delayed)
+    
+    def wrap_event(self, original_event, additional_handler):
+        """Wrap an existing event handler to add functionality."""
+        def wrapped_event(event):
+            # Call the original handler if it exists
+            if original_event:
+                original_event(event)
+            # Call our additional handler
+            additional_handler()
+            
+        return wrapped_event
+    
+    def save_layout_delayed(self):
+        """Save layout after a short delay to avoid excessive writes."""
+        # Use a single-shot timer to avoid saving too frequently
+        if hasattr(self, '_layout_save_timer'):
+            self._layout_save_timer.stop()
+        else:
+            self._layout_save_timer = QtCore.QTimer()
+            self._layout_save_timer.setSingleShot(True)
+            self._layout_save_timer.timeout.connect(self.save_current_layout)
+        
+        # Save after 1 second of inactivity (adjust as needed)
+        self._layout_save_timer.start(1000)
+    
+    def save_current_layout(self):
+        """Save the current layout immediately."""
+        if self.layout_controller:
+            self.layout_controller.save_layout()
+    
     def connect_menu_actions(self):
         """Connect menu actions to their respective handlers."""
         # Connect the About action
@@ -145,8 +196,26 @@ class MainController:
         # Connect the Preferences action
         self.window.actionPreferences.triggered.connect(self.show_global_preferences_dialog)
         
+        # Connect View menu actions
+        # Appearance submenu
+        self.window.actionFull_Screen.triggered.connect(self.set_fullscreen)
+        self.window.actionWindowed.triggered.connect(self.set_windowed)
+        self.window.actionCenter.triggered.connect(self.center_window)
+        
+        # Layout submenu
+        self.window.actionDefault.triggered.connect(self.reset_layout_to_default)
+        
         # Connect the Quit action
         self.window.actionQuit.triggered.connect(self.app.quit)
+    
+    def reset_layout_to_default(self):
+        """Reset the application layout to default positioning without removing widgets."""
+        if self.layout_controller:
+            # Reset widgets to their default positions (this also clears settings)
+            self.layout_controller.reset_widgets_to_default()
+            
+            # Show a confirmation message
+            self.window.statusBar().showMessage("Layout reset to default", 3000)
     
     def show_about_dialog(self):
         """Show the About dialog with application information."""
@@ -193,6 +262,25 @@ class MainController:
     def show_donation_dialog(self):
         """Show the donation dialog."""
         show_donation_dialog(self.window, self.config, self.BASE_DIR)
+    
+    def set_fullscreen(self):
+        """Set the window to fullscreen mode."""
+        if self.window:
+            self.window.showFullScreen()
+            self.window.statusBar().showMessage("Switched to fullscreen mode", 3000)
+    
+    def set_windowed(self):
+        """Set the window to windowed mode."""
+        if self.window:
+            self.window.showNormal()
+            self.window.statusBar().showMessage("Switched to windowed mode", 3000)
+    
+    def center_window(self):
+        """Center the window on the screen."""
+        if self.window:
+            # Use the existing center_window function from the helper module
+            center_window(self.window)
+            self.window.statusBar().showMessage("Window centered", 3000)
    
     def show_window(self):
         """Open the main window and start the program."""
@@ -226,8 +314,11 @@ class MainController:
         
     def shutdown(self):
         """Clean up before closing."""
-        # This is where we would save application state, close files, etc.
-        # Currently it's empty but can be expanded as the app grows
+        # Save the current layout
+        if self.layout_controller:
+            self.layout_controller.save_layout()
+        
+        # This is where we would do other cleanup tasks
         pass
 
 def run_application():

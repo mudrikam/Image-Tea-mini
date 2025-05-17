@@ -69,6 +69,30 @@
     <addaction name="actionRename"/>
     <addaction name="actionRename_All"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuAppearance">
+     <property name="title">
+      <string>Appearance</string>
+     </property>
+     <addaction name="actionFull_Screen"/>
+     <addaction name="actionWindowed"/>
+     <addaction name="actionCenter"/>
+    </widget>
+    <widget class="QMenu" name="menuLayout">
+     <property name="title">
+      <string>Layout</string>
+     </property>
+     <addaction name="actionDefault"/>
+     <addaction name="actionBatch_Processing"/>
+     <addaction name="actionMetadata_Editing"/>
+     <addaction name="actionMetadata_Analysis"/>
+    </widget>
+    <addaction name="menuAppearance"/>
+    <addaction name="menuLayout"/>
+   </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
@@ -113,6 +137,7 @@
    <addaction name="menuEdit"/>
    <addaction name="menuSettings"/>
    <addaction name="menuPrompt"/>
+   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
@@ -499,6 +524,50 @@
   <action name="actionPrompt_Preferences">
    <property name="text">
     <string>Prompt Preferences</string>
+   </property>
+  </action>
+  <action name="actionFull_Screen">
+   <property name="text">
+    <string>Full Screen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
+  <action name="actionWindowed">
+   <property name="text">
+    <string>Windowed</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionCenter">
+   <property name="text">
+    <string>Center</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionDefault">
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionBatch_Processing">
+   <property name="text">
+    <string>Batch Processing</string>
+   </property>
+  </action>
+  <action name="actionMetadata_Editing">
+   <property name="text">
+    <string>Metadata Editing</string>
+   </property>
+  </action>
+  <action name="actionMetadata_Analysis">
+   <property name="text">
+    <string>Metadata Analysis</string>
    </property>
   </action>
  </widget>

@@ -74,3 +74,4 @@ coverage.xml
 database/database.db
 *_ui.py
 test/
+config/
