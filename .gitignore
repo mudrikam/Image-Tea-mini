@@ -76,3 +76,5 @@ database/database.db
 test/
 config/
 *expired_year.txt
+*.db-shm
+*.db-wal

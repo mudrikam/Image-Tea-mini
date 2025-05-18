@@ -369,9 +369,7 @@ class ExplorerWidget:
         self.month_colors = {}
         self.day_colors = {}
         
-        # Define the bold font for years
-        bold_font = QFont()
-        bold_font.setBold(True)
+        # Remove the bold font for years - no longer needed
         
         # If no data is provided, try to fetch it
         if project_data is None:
@@ -396,9 +394,8 @@ class ExplorerWidget:
             # Create text color without alpha
             year_color_fg = QColor(year_color_rgb[0], year_color_rgb[1], year_color_rgb[2])
             
-            # Create year item
+            # Create year item - no longer setting bold font
             year_item = QTreeWidgetItem(self.tree, [year_str])
-            year_item.setFont(0, bold_font)
             
             # Add calendar icon for year
             year_icon = qta.icon('fa6s.calendar-days', color=year_color_fg.name())
