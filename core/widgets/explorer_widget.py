@@ -65,6 +65,23 @@ class ExplorerWidget:
             }
         """)
         
+        # Connect item click signal to handler - proper PySide6 signal handling
+        try:
+            # Check if our method is already connected (PySide6 way)
+            if hasattr(self, '_old_connection') and self._old_connection:
+                try:
+                    self.tree.itemClicked.disconnect(self._old_connection)
+                except TypeError:
+                    pass
+                    
+            # Connect the signal and save the connection reference
+            self.tree.itemClicked.connect(self.handle_item_clicked)
+            self._old_connection = self.handle_item_clicked
+            
+        except Exception as e:
+            from core.utils.logger import error
+            error(f"Failed to connect click handler: {str(e)}")
+        
         # Create sample hierarchical data structure
         self.create_sample_data()
         
@@ -76,6 +93,54 @@ class ExplorerWidget:
         layout.addWidget(self.tree)
         
         return self.widget
+
+    def handle_item_clicked(self, item, column):
+        """Handle click events on tree items."""
+        from core.utils.logger import log, debug
+        
+        # Get the full path of the clicked item (text of all parent items)
+        path = []
+        temp_item = item
+        while temp_item is not None:
+            path.insert(0, temp_item.text(0))
+            temp_item = temp_item.parent()
+        
+        path_str = " > ".join(path)
+        
+        # Check if the clicked item is an ID item (level 4 - has 3 parent levels)
+        parents = 0
+        temp_item = item.parent()
+        while temp_item is not None:
+            parents += 1
+            temp_item = temp_item.parent()
+        
+        if parents == 3:  # It's an ID item (year > month > day > ID)
+            # Parse the ID from the text (format: YYYY-MM-DD_ID_STATUS)
+            item_text = item.text(0)
+            try:
+                parts = item_text.split('_')
+                if len(parts) >= 2:
+                    id_value = parts[1]
+                    status = parts[2] if len(parts) > 2 else "unknown"
+                    
+                    # Log the selection using the proper logger
+                    log(f"Selected ID: {id_value} (Status: {status}) - Path: {path_str}")
+                    
+                    # Force process events to update UI immediately
+                    from PySide6.QtWidgets import QApplication
+                    QApplication.processEvents()
+            except Exception as e:
+                debug(f"Error parsing ID item: {e}")
+        else:
+            # It's not an ID item, log with level name
+            level_name = "Year" if parents == 0 else "Month" if parents == 1 else "Day" if parents == 2 else "Unknown"
+            
+            # Log with the proper logger
+            log(f"Selected {level_name}: {item.text(0)} - Path: {path_str}")
+            
+            # Force process events to update UI immediately
+            from PySide6.QtWidgets import QApplication
+            QApplication.processEvents()
 
     def create_sample_data(self):
         """Create sample hierarchical data and store references."""
@@ -160,9 +225,16 @@ class ExplorerWidget:
             self.ids["2025"]["September"][day] = {}
         
         # IDs for September 15
-        sep_15_ids = ["451654", "451655"]
-        for id_value in sep_15_ids:
-            id_item = QTreeWidgetItem(self.days["2025"]["September"]["15"], [id_value])
+        sep_15_ids = [
+            {"id": "451654", "status": "finished"},
+            {"id": "451655", "status": "draft"}
+        ]
+        for id_data in sep_15_ids:
+            id_value = id_data["id"]
+            status = id_data["status"]
+            formatted_id = f"2025-09-15_{id_value}_{status}"
+            
+            id_item = QTreeWidgetItem(self.days["2025"]["September"]["15"], [formatted_id])
             # Use table icon and inherit color from parent date
             table_icon = qta.icon('fa6s.table', color=sep_15_color_fg.name())
             id_item.setIcon(0, table_icon)
@@ -170,9 +242,17 @@ class ExplorerWidget:
             self.ids["2025"]["September"]["15"][id_value] = id_item
         
         # IDs for September 23
-        sep_23_ids = ["462789", "462790", "462791"]
-        for id_value in sep_23_ids:
-            id_item = QTreeWidgetItem(self.days["2025"]["September"]["23"], [id_value])
+        sep_23_ids = [
+            {"id": "462789", "status": "process"},
+            {"id": "462790", "status": "finished"},
+            {"id": "462791", "status": "draft"}
+        ]
+        for id_data in sep_23_ids:
+            id_value = id_data["id"]
+            status = id_data["status"]
+            formatted_id = f"2025-09-23_{id_value}_{status}"
+            
+            id_item = QTreeWidgetItem(self.days["2025"]["September"]["23"], [formatted_id])
             # Use table icon and inherit color from parent date
             table_icon = qta.icon('fa6s.table', color=sep_23_color_fg.name())
             id_item.setIcon(0, table_icon)
@@ -180,10 +260,11 @@ class ExplorerWidget:
             self.ids["2025"]["September"]["23"][id_value] = id_item
         
         # IDs for September 30
-        id_sep_30_1 = QTreeWidgetItem(self.days["2025"]["September"]["30"], ["475123"])
+        formatted_id = f"2025-09-30_475123_process"
+        id_sep_30_1 = QTreeWidgetItem(self.days["2025"]["September"]["30"], [formatted_id])
         table_icon = qta.icon('fa6s.table', color=sep_30_color_fg.name())
         id_sep_30_1.setIcon(0, table_icon)
-        id_sep_30_1.setForeground(0, QBrush(sep_30_color_fg))  # Use parent date color (no background)
+        id_sep_30_1.setForeground(0, QBrush(sep_30_color_fg))
         self.ids["2025"]["September"]["30"]["475123"] = id_sep_30_1
         
         # === October 2025 ===
@@ -235,19 +316,35 @@ class ExplorerWidget:
             self.ids["2025"]["October"][day] = {}
         
         # IDs for October 05
-        oct_05_ids = ["481234", "481235"]
-        for id_value in oct_05_ids:
-            id_item = QTreeWidgetItem(self.days["2025"]["October"]["05"], [id_value])
+        oct_05_ids = [
+            {"id": "481234", "status": "finished"},
+            {"id": "481235", "status": "draft"}
+        ]
+        for id_data in oct_05_ids:
+            id_value = id_data["id"]
+            status = id_data["status"]
+            formatted_id = f"2025-10-05_{id_value}_{status}"
+            
+            id_item = QTreeWidgetItem(self.days["2025"]["October"]["05"], [formatted_id])
             table_icon = qta.icon('fa6s.table', color=oct_05_color_fg.name())
             id_item.setIcon(0, table_icon)
-            id_item.setForeground(0, QBrush(oct_05_color_fg))  # Use parent date color (no background)
+            id_item.setForeground(0, QBrush(oct_05_color_fg))
             self.ids["2025"]["October"]["05"][id_value] = id_item
         
         # IDs for October 12
-        oct_12_ids = ["492001", "492002", "492003", "492004"]
-        for id_value in oct_12_ids:
-            id_item = QTreeWidgetItem(self.days["2025"]["October"]["12"], [id_value])
+        oct_12_ids = [
+            {"id": "492001", "status": "process"},
+            {"id": "492002", "status": "finished"},
+            {"id": "492003", "status": "draft"},
+            {"id": "492004", "status": "process"}
+        ]
+        for id_data in oct_12_ids:
+            id_value = id_data["id"]
+            status = id_data["status"]
+            formatted_id = f"2025-10-12_{id_value}_{status}"
+            
+            id_item = QTreeWidgetItem(self.days["2025"]["October"]["12"], [formatted_id])
             table_icon = qta.icon('fa6s.table', color=oct_12_color_fg.name())
             id_item.setIcon(0, table_icon)
-            id_item.setForeground(0, QBrush(oct_12_color_fg))  # Use parent date color (no background)
+            id_item.setForeground(0, QBrush(oct_12_color_fg))
             self.ids["2025"]["October"]["12"][id_value] = id_item
