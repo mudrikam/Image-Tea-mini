@@ -1,9 +1,83 @@
 import os
 import sqlite3
+import random
 from datetime import datetime
 from core.utils.logger import log, debug, warning, error, exception
 from database.db_config import connect_to_database, close_database_connection
 from core.utils.event_system import EventSystem
+
+def generate_random_color(max_value=170):
+    """
+    Generate a truly random RGB color with one component always at max_value (170) and one at 0.
+    For readability on dark themes:
+    - When blue=170, green must be >105 or red must be >90
+    
+    Args:
+        max_value (int): Maximum RGB value (default 170 instead of 255 for softer colors)
+        
+    Returns:
+        list: RGB color as [r, g, b] where one component is max_value, one is 0, and one is random
+    """
+    # Determine which channel gets which value
+    # 0: Red is max (170), Blue is 0, Green is random
+    # 1: Green is max (170), Red is 0, Blue is random
+    # 2: Blue is max (170), Green is 0, Red must be at least 91
+    # 3: Blue is max (170), Red is 0, Green must be at least 106
+    # 4: Red is max (170), Green is 0, Blue is random
+    # 5: Green is max (170), Blue is 0, Red is random
+    channel_assignment = random.randint(0, 5)
+    
+    if channel_assignment == 0:
+        # Red is max, Blue is 0, Green is random
+        return [max_value, random.randint(0, max_value), 0]
+    elif channel_assignment == 1:
+        # Green is max, Red is 0, Blue is random
+        return [0, max_value, random.randint(0, max_value)]
+    elif channel_assignment == 2:
+        # Blue is max, Green is 0, Red must be at least 170
+        return [random.randint(170, max_value), 0, max_value]
+    elif channel_assignment == 3:
+        # Blue is max, Red is 0, Green must be at least 70
+        return [0, random.randint(70, max_value), max_value]
+    elif channel_assignment == 4:
+        # Red is max, Green is 0, Blue is random
+        return [max_value, 0, random.randint(0, max_value)]
+    else:  # channel_assignment == 5
+        # Green is max, Blue is 0, Red is random
+        return [random.randint(0, max_value), max_value, 0]
+
+def generate_year_color():
+    """
+    Generate a random color for a year.
+    Each color has one component at 170, one at 0, and one random component.
+    Colors are completely random and not thematically linked.
+    
+    Returns:
+        list: RGB color values as [r, g, b]
+    """
+    return generate_random_color(max_value=170)
+
+def generate_month_color():
+    """
+    Generate a completely random color for a month.
+    Each color has one component at 170, one at 0, and one random component.
+    Not based on the year color at all - completely random.
+    
+    Returns:
+        list: RGB color values as [r, g, b]
+    """
+    return generate_random_color(max_value=170)
+
+def generate_day_color():
+    """
+    Generate a completely random color for a day.
+    Each color has one component at 170, one at 0, and one random component.
+    Not based on the month color at all - completely random.
+    
+    Returns:
+        list: RGB color values as [r, g, b]
+    """
+    return generate_random_color(max_value=170)
 
 class ProjectFilesModel:
     """
@@ -25,6 +99,18 @@ class ProjectFilesModel:
             bool or int: Record ID if successful, False otherwise
         """
         try:
+            # Generate random colors for year, month, and day if not provided
+            if 'year_color' not in file_details:
+                file_details['year_color'] = str(generate_year_color())
+                
+            if 'month_color' not in file_details:
+                # Completely independent from year color
+                file_details['month_color'] = str(generate_month_color())
+                
+            if 'day_color' not in file_details:
+                # Completely independent from month color
+                file_details['day_color'] = str(generate_day_color())
+            
             conn = connect_to_database()
             cursor = conn.cursor()
             
@@ -258,6 +344,11 @@ class ProjectFilesModel:
             # This ensures all files from this folder share the same ID
             operation_id = get_new_operation_id()
             
+            # Generate completely random colors for all files in this folder
+            year_color = generate_year_color()
+            month_color = generate_month_color()  # Not based on year_color
+            day_color = generate_day_color()      # Not based on month_color
+            
             # Get supported extensions
             image_extensions = get_image_extensions()
             video_extensions = get_video_extensions()
@@ -275,6 +366,11 @@ class ProjectFilesModel:
                             # Reuse the get_file_details function with our operation ID
                             file_details = get_file_details(file_path, operation_id)
                             if file_details:
+                                # Add colors to the file details
+                                file_details['year_color'] = str(year_color)
+                                file_details['month_color'] = str(month_color)
+                                file_details['day_color'] = str(day_color)
+                                
                                 # Add file individually using add_file
                                 file_id = self.add_file(file_details)
                                 if file_id:
@@ -311,6 +407,11 @@ class ProjectFilesModel:
         from core.global_operations.file_operations import get_new_operation_id
         multi_folder_operation_id = get_new_operation_id()
         
+        # Generate completely random colors for this whole multi-folder operation
+        year_color = generate_year_color()
+        month_color = generate_month_color()  # Not based on year_color
+        day_color = generate_day_color()      # Not based on month_color
+        
         for folder_path in folder_paths:
             if not folder_path or not os.path.isdir(folder_path):
                 continue
@@ -340,6 +441,11 @@ class ProjectFilesModel:
                                 # Use the multi-folder operation ID for all files
                                 file_details = get_file_details(file_path, multi_folder_operation_id)
                                 if file_details:
+                                    # Add colors to the file details
+                                    file_details['year_color'] = str(year_color)
+                                    file_details['month_color'] = str(month_color)
+                                    file_details['day_color'] = str(day_color)
+                                    
                                     # Add file individually using add_file
                                     file_id = self.add_file(file_details)
                                     if file_id:

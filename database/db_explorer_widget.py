@@ -378,11 +378,26 @@ def update_previous_years_colors():
         # Get current year
         current_year = str(datetime.datetime.now().year)
         
-        # Check if we already processed this year by checking the marker file
-        marker_path = os.path.join(db_config.get_database_dir(), f"year_processed_{current_year}.marker")
+        # Check if we already processed this year by checking the expired_year file
+        expired_year_path = os.path.join(db_config.get_database_dir(), "expired_year.txt")
+        last_processed_year = None
         
-        # If marker exists, we already processed this year
-        if os.path.exists(marker_path):
+        # Read last processed year if file exists
+        if os.path.exists(expired_year_path):
+            try:
+                with open(expired_year_path, 'r') as f:
+                    content = f.read().strip()
+                    # Split by pipe character to get year and timestamp
+                    if '|' in content:
+                        last_processed_year = content.split('|')[0]
+                    else:
+                        last_processed_year = content  # Backwards compatibility
+            except:
+                # If reading fails, assume it's invalid
+                last_processed_year = None
+        
+        # If marker exists and year matches, we already processed this year
+        if last_processed_year == current_year:
             debug(f"Previous years already processed for year {current_year}")
             return False
             
@@ -412,9 +427,9 @@ def update_previous_years_colors():
         updated_rows = cursor.rowcount
         conn.commit()
         
-        # Create marker file to indicate we've processed this year
-        with open(marker_path, 'w') as f:
-            f.write(f"Processed on {datetime.datetime.now().isoformat()}")
+        # Create or update expired_year.txt file to indicate we've processed this year
+        with open(expired_year_path, 'w') as f:
+            f.write(f"{current_year}|{datetime.datetime.now().isoformat()}")
         
         log(f"Updated {updated_rows} records from previous years to gray colors")
         return True
@@ -441,23 +456,27 @@ def check_and_update_year_colors():
         # Get current year
         current_year = str(datetime.datetime.now().year)
         
-        # Check for stored year value in database directory
-        year_file_path = os.path.join(db_config.get_database_dir(), "last_year.txt")
+        # Use the expired_year.txt file for checking
+        expired_year_path = os.path.join(db_config.get_database_dir(), "expired_year.txt")
         last_processed_year = None
         
         # Read last processed year if file exists
-        if os.path.exists(year_file_path):
-            with open(year_file_path, 'r') as f:
-                last_processed_year = f.read().strip()
+        if os.path.exists(expired_year_path):
+            try:
+                with open(expired_year_path, 'r') as f:
+                    content = f.read().strip()
+                    # Split by pipe character to get year and timestamp
+                    if '|' in content:
+                        last_processed_year = content.split('|')[0]
+                    else:
+                        last_processed_year = content  # Backwards compatibility
+            except:
+                # If reading fails, assume it's invalid
+                last_processed_year = None
         
         # If year changed or file doesn't exist, update colors
         if last_processed_year != current_year:
             result = update_previous_years_colors()
-            
-            # Store current year for future checks
-            with open(year_file_path, 'w') as f:
-                f.write(current_year)
-            
             return result
         
         return False

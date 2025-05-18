@@ -75,5 +75,4 @@ database/database.db
 *_ui.py
 test/
 config/
-*last_year.txt
-*year_processed_2025.marker
+*expired_year.txt
