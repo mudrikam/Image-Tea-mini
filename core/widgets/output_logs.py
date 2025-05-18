@@ -236,7 +236,7 @@ class OutputLogsWidget:
             elif level == "DEBUG":
                 formatted = f"<span style='color:#88cc88;'>{log_message}</span>"
             else:  # INFO
-                formatted = f"{log_message}"  # Default color for INFO
+                formatted = f"<span style='color:#919191;'>{log_message}</span>"  # Default color for INFO
             
             # Append the formatted log message
             self.log_text.append(formatted)

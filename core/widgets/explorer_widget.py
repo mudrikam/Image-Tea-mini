@@ -486,36 +486,33 @@ class ExplorerWidget:
                     
                     # Debug the items before sorting
                     for item in item_list:
-                        debug(f"Before sort - Item ID: {item.get('id')}, Created at: {item.get('created_at')}")
+                        debug(f"Before sort - Database ID: {item.get('id')}, Item ID: {item.get('item_id')}")
                     
-                    # Sort items by created_at timestamp in descending order (newest first)
-                    # Use special function to properly handle datetime strings
-                    def get_created_timestamp(item):
+                    # Sort items by database ID (primary key) in descending order
+                    # Higher ID values were created more recently
+                    def get_db_id_for_sort(item):
                         try:
-                            timestamp = item.get('created_at', '')
-                            # Return the timestamp as is, string comparison works for ISO format dates
-                            return timestamp
-                        except:
-                            return ''
+                            # Try to convert database ID to integer for numeric sorting
+                            return int(item.get('id', '0'))
+                        except (TypeError, ValueError):
+                            # If conversion fails, return 0 as fallback
+                            return 0
                     
-                    # Sort using our timestamp extraction function
+                    # Sort using the database ID extraction function (descending order)
                     sorted_items = sorted(
                         item_list,
-                        key=get_created_timestamp,
-                        reverse=False  # Sort in descending order
+                        key=get_db_id_for_sort,
+                        reverse=True  # Descending order - newest items (with highest IDs) first
                     )
                     
                     # Debug the sorted items
                     for item in sorted_items:
-                        debug(f"Sorted - Item ID: {item.get('id')}, Created at: {item.get('created_at')}")
+                        debug(f"Sorted - Database ID: {item.get('id')}, Item ID: {item.get('item_id')}")
                     
                     for item_data in sorted_items:
-                        id_value = item_data.get('id')
+                        id_value = item_data.get('item_id')  # Use item_id for display
                         status = item_data.get('status', 'unknown')
                         
-                        if not id_value:
-                            continue
-                            
                         # Create the formatted ID string: YYYY-MM-DD_ID_STATUS
                         # Pad month and day with leading zeros if needed
                         month_num = self._month_name_to_number(month_name)
