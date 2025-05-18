@@ -3,6 +3,8 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PySide6 import QtUiTools, QtCore
 from PySide6.QtGui import QColor, QBrush, QFont
 import qtawesome as qta  # Import qtawesome for icons
+from database import db_explorer_widget
+from core.utils.logger import log, debug, warning, error, exception
 
 class ExplorerWidget:
     def __init__(self, base_dir=None):
@@ -21,7 +23,7 @@ class ExplorerWidget:
         self.year_colors = {}    # {year_str: QColor}
         self.month_colors = {}   # {year_str: {month_str: QColor}}
         self.day_colors = {}     # {year_str: {month_str: {day_str: QColor}}
-
+        
     def load_ui(self):
         """Load the dock widget from UI file."""
         # Load UI file
@@ -79,11 +81,14 @@ class ExplorerWidget:
             self._old_connection = self.handle_item_clicked
             
         except Exception as e:
-            from core.utils.logger import error
             error(f"Failed to connect click handler: {str(e)}")
         
-        # Create sample hierarchical data structure
-        self.create_sample_data()
+        # Load data from the database
+        if not self.load_data_from_database():
+            warning("Failed to load project data from database")
+            # Instead of loading sample data, just show an empty tree
+            empty_item = QTreeWidgetItem(self.tree, ["No project data available"])
+            empty_item.setForeground(0, QBrush(QColor(150, 150, 150)))
         
         # Expand the top levels by default
         for year_item in self.years.values():
@@ -93,6 +98,24 @@ class ExplorerWidget:
         layout.addWidget(self.tree)
         
         return self.widget
+
+    def load_data_from_database(self):
+        """Load project data from the database using db_explorer_widget."""
+        try:
+            # Get project structure directly from the database module
+            project_data = db_explorer_widget.get_project_structure(self.BASE_DIR)
+            
+            if not project_data:
+                warning("No project structure data found in database")
+                return False
+                
+            # Load the data into the tree using the helper that processes the hierarchical structure
+            success = self.load_project_data(project_data)
+            return success
+                
+        except Exception as e:
+            exception(e, "Error loading data from database")
+            return False
 
     def handle_item_clicked(self, item, column):
         """Handle click events on tree items."""
@@ -142,209 +165,209 @@ class ExplorerWidget:
             from PySide6.QtWidgets import QApplication
             QApplication.processEvents()
 
-    def create_sample_data(self):
-        """Create sample hierarchical data and store references."""
+    def load_project_data(self, project_data=None):
+        """
+        Load actual project data into the explorer tree in descending order (newest first).
+        
+        Args:
+            project_data: A dictionary containing the project structure data from the database.
+                         If None, will try to load from database directly.
+        """
+        # Clear existing tree first
+        self.tree.clear()
+        
+        # Clear our internal data structures
+        self.years = {}
+        self.months = {}
+        self.days = {}
+        self.ids = {}
+        self.year_colors = {}
+        self.month_colors = {}
+        self.day_colors = {}
+        
         # Define the bold font for years
         bold_font = QFont()
         bold_font.setBold(True)
         
-        # === Year 2025 ===
-        # Create year-specific color - use alpha=20 for background
-        year_2025_color_bg = QColor(60, 120, 216, 20)  # Blue with alpha=20
-        year_2025_color_fg = QColor(60, 120, 216)     # Same blue with full opacity for text
+        # If no data is provided, try to fetch it
+        if project_data is None:
+            # Try to get data from database
+            project_data = db_explorer_widget.get_project_structure(self.BASE_DIR)
+            if not project_data:
+                warning("Failed to get project structure from database")
+                return False
         
-        year_2025 = QTreeWidgetItem(self.tree, ["2025"])
-        year_2025.setFont(0, bold_font)
-        
-        # Add calendar icon for year
-        year_icon = qta.icon('fa6s.calendar-days', color=year_2025_color_fg.name())
-        year_2025.setIcon(0, year_icon)
-        
-        # Set both background and text color
-        year_2025.setBackground(0, QBrush(year_2025_color_bg))
-        year_2025.setForeground(0, QBrush(year_2025_color_fg))
-        
-        self.years["2025"] = year_2025
-        self.year_colors["2025"] = year_2025_color_bg
-        self.months["2025"] = {}
-        self.month_colors["2025"] = {}
-        self.days["2025"] = {}
-        self.day_colors["2025"] = {}
-        self.ids["2025"] = {}
-        
-        # === September 2025 ===
-        # Create month-specific color with higher opacity
-        sep_color_bg = QColor(46, 139, 87, 20)  # Green with alpha=20
-        sep_color_fg = QColor(46, 139, 87)      # Same green with full opacity for text
-        
-        month_sep = QTreeWidgetItem(year_2025, ["September"])
-        
-        # Add month icon
-        month_icon = qta.icon('fa6s.calendar-week', color=sep_color_fg.name())
-        month_sep.setIcon(0, month_icon)
-        
-        # Set both background and text colors
-        month_sep.setBackground(0, QBrush(sep_color_bg))
-        month_sep.setForeground(0, QBrush(sep_color_fg))
-        
-        self.months["2025"]["September"] = month_sep
-        self.month_colors["2025"]["September"] = sep_color_bg
-        self.days["2025"]["September"] = {}
-        self.day_colors["2025"]["September"] = {}
-        self.ids["2025"]["September"] = {}
-        
-        # Days in September with specific background/text colors
-        sep_15_color_bg = QColor(255, 140, 0, 20)    # Orange with alpha=20
-        sep_15_color_fg = QColor(255, 140, 0)        # Same orange with full opacity
-        
-        sep_23_color_bg = QColor(255, 100, 100, 20)  # Light red with alpha=20
-        sep_23_color_fg = QColor(255, 100, 100)      # Same light red with full opacity
-        
-        sep_30_color_bg = QColor(200, 200, 100, 20)  # Yellow-ish with alpha=20
-        sep_30_color_fg = QColor(200, 200, 100)      # Same yellow-ish with full opacity
-        
-        day_date_colors = [
-            ("15", sep_15_color_bg, sep_15_color_fg),
-            ("23", sep_23_color_bg, sep_23_color_fg),
-            ("30", sep_30_color_bg, sep_30_color_fg)
-        ]
-        
-        for day, bg_color, fg_color in day_date_colors:
-            day_item = QTreeWidgetItem(month_sep, [day])
+        # Process each year from the data (data should already be sorted in descending order)
+        for year_data in project_data.get('items', []):
+            year_str = year_data.get('year')
+            if not year_str:
+                continue
+                
+            # Create colors for the year
+            year_color_rgb = year_data.get('color', [60, 120, 216])  # Default to blue if not specified
             
-            # Add day icon
-            day_icon = qta.icon('fa6s.calendar-day', color=fg_color.name())
-            day_item.setIcon(0, day_icon)
+            # Create background color with alpha
+            year_color_bg = QColor(year_color_rgb[0], year_color_rgb[1], year_color_rgb[2], 20)
             
-            # Set both background and text colors
-            day_item.setBackground(0, QBrush(bg_color))
-            day_item.setForeground(0, QBrush(fg_color))
+            # Create text color without alpha
+            year_color_fg = QColor(year_color_rgb[0], year_color_rgb[1], year_color_rgb[2])
             
-            self.days["2025"]["September"][day] = day_item
-            self.day_colors["2025"]["September"][day] = bg_color
-            self.ids["2025"]["September"][day] = {}
-        
-        # IDs for September 15
-        sep_15_ids = [
-            {"id": "451654", "status": "finished"},
-            {"id": "451655", "status": "draft"}
-        ]
-        for id_data in sep_15_ids:
-            id_value = id_data["id"]
-            status = id_data["status"]
-            formatted_id = f"2025-09-15_{id_value}_{status}"
+            # Create year item
+            year_item = QTreeWidgetItem(self.tree, [year_str])
+            year_item.setFont(0, bold_font)
             
-            id_item = QTreeWidgetItem(self.days["2025"]["September"]["15"], [formatted_id])
-            # Use table icon and inherit color from parent date
-            table_icon = qta.icon('fa6s.table', color=sep_15_color_fg.name())
-            id_item.setIcon(0, table_icon)
-            id_item.setForeground(0, QBrush(sep_15_color_fg))  # Use parent date color (no background)
-            self.ids["2025"]["September"]["15"][id_value] = id_item
-        
-        # IDs for September 23
-        sep_23_ids = [
-            {"id": "462789", "status": "process"},
-            {"id": "462790", "status": "finished"},
-            {"id": "462791", "status": "draft"}
-        ]
-        for id_data in sep_23_ids:
-            id_value = id_data["id"]
-            status = id_data["status"]
-            formatted_id = f"2025-09-23_{id_value}_{status}"
+            # Add calendar icon for year
+            year_icon = qta.icon('fa6s.calendar-days', color=year_color_fg.name())
+            year_item.setIcon(0, year_icon)
             
-            id_item = QTreeWidgetItem(self.days["2025"]["September"]["23"], [formatted_id])
-            # Use table icon and inherit color from parent date
-            table_icon = qta.icon('fa6s.table', color=sep_23_color_fg.name())
-            id_item.setIcon(0, table_icon)
-            id_item.setForeground(0, QBrush(sep_23_color_fg))  # Use parent date color (no background)
-            self.ids["2025"]["September"]["23"][id_value] = id_item
-        
-        # IDs for September 30
-        formatted_id = f"2025-09-30_475123_process"
-        id_sep_30_1 = QTreeWidgetItem(self.days["2025"]["September"]["30"], [formatted_id])
-        table_icon = qta.icon('fa6s.table', color=sep_30_color_fg.name())
-        id_sep_30_1.setIcon(0, table_icon)
-        id_sep_30_1.setForeground(0, QBrush(sep_30_color_fg))
-        self.ids["2025"]["September"]["30"]["475123"] = id_sep_30_1
-        
-        # === October 2025 ===
-        # Create month-specific color with higher opacity
-        oct_color_bg = QColor(100, 149, 237, 20)  # Cornflower blue with alpha=20
-        oct_color_fg = QColor(100, 149, 237)      # Same cornflower blue with full opacity
-        
-        month_oct = QTreeWidgetItem(year_2025, ["October"])
-        
-        # Add month icon for October
-        month_icon = qta.icon('fa6s.calendar-week', color=oct_color_fg.name())
-        month_oct.setIcon(0, month_icon)
-        
-        # Set both background and text colors
-        month_oct.setBackground(0, QBrush(oct_color_bg))
-        month_oct.setForeground(0, QBrush(oct_color_fg))
-        
-        self.months["2025"]["October"] = month_oct
-        self.month_colors["2025"]["October"] = oct_color_bg
-        self.days["2025"]["October"] = {}
-        self.day_colors["2025"]["October"] = {}
-        self.ids["2025"]["October"] = {}
-        
-        # Days in October with specific colors
-        oct_05_color_bg = QColor(180, 120, 240, 20)  # Purple-ish with alpha=20
-        oct_05_color_fg = QColor(180, 120, 240)      # Same purple-ish with full opacity
-        
-        oct_12_color_bg = QColor(100, 200, 200, 20)  # Teal-ish with alpha=20
-        oct_12_color_fg = QColor(100, 200, 200)      # Same teal-ish with full opacity
-        
-        day_date_colors = [
-            ("05", oct_05_color_bg, oct_05_color_fg),
-            ("12", oct_12_color_bg, oct_12_color_fg)
-        ]
-        
-        for day, bg_color, fg_color in day_date_colors:
-            day_item = QTreeWidgetItem(month_oct, [day])
+            # Set colors
+            year_item.setBackground(0, QBrush(year_color_bg))
+            year_item.setForeground(0, QBrush(year_color_fg))
             
-            # Add day icon
-            day_icon = qta.icon('fa6s.calendar-day', color=fg_color.name())
-            day_item.setIcon(0, day_icon)
+            # Store references
+            self.years[year_str] = year_item
+            self.year_colors[year_str] = year_color_bg
+            self.months[year_str] = {}
+            self.month_colors[year_str] = {}
+            self.days[year_str] = {}
+            self.day_colors[year_str] = {}
+            self.ids[year_str] = {}
             
-            # Set both background and text colors
-            day_item.setBackground(0, QBrush(bg_color))
-            day_item.setForeground(0, QBrush(fg_color))
-            
-            self.days["2025"]["October"][day] = day_item
-            self.day_colors["2025"]["October"][day] = bg_color
-            self.ids["2025"]["October"][day] = {}
+            # Process each month in this year (months should already be sorted in descending order)
+            for month_data in year_data.get('months', []):
+                month_name = month_data.get('name')
+                if not month_name:
+                    continue
+                    
+                # Create colors for the month
+                month_color_rgb = month_data.get('color', [100, 100, 100])  # Default gray if not specified
+                
+                # Create background color with alpha
+                month_color_bg = QColor(month_color_rgb[0], month_color_rgb[1], month_color_rgb[2], 20)
+                
+                # Create text color without alpha
+                month_color_fg = QColor(month_color_rgb[0], month_color_rgb[1], month_color_rgb[2])
+                
+                # Create month item
+                month_item = QTreeWidgetItem(year_item, [month_name])
+                
+                # Add month icon
+                month_icon = qta.icon('fa6s.calendar-week', color=month_color_fg.name())
+                month_item.setIcon(0, month_icon)
+                
+                # Set colors
+                month_item.setBackground(0, QBrush(month_color_bg))
+                month_item.setForeground(0, QBrush(month_color_fg))
+                
+                # Store references
+                self.months[year_str][month_name] = month_item
+                self.month_colors[year_str][month_name] = month_color_bg
+                self.days[year_str][month_name] = {}
+                self.day_colors[year_str][month_name] = {}
+                self.ids[year_str][month_name] = {}
+                
+                # Process each day in this month (days should already be sorted in descending order)
+                for day_data in month_data.get('days', []):
+                    day_str = day_data.get('day')
+                    if not day_str:
+                        continue
+                        
+                    # Create colors for the day
+                    day_color_rgb = day_data.get('color', [80, 80, 80])  # Default dark gray if not specified
+                    
+                    # Create background color with alpha
+                    day_color_bg = QColor(day_color_rgb[0], day_color_rgb[1], day_color_rgb[2], 20)
+                    
+                    # Create text color without alpha
+                    day_color_fg = QColor(day_color_rgb[0], day_color_rgb[1], day_color_rgb[2])
+                    
+                    # Create day item
+                    day_item = QTreeWidgetItem(month_item, [day_str])
+                    
+                    # Add day icon
+                    day_icon = qta.icon('fa6s.calendar-day', color=day_color_fg.name())
+                    day_item.setIcon(0, day_icon)
+                    
+                    # Set colors
+                    day_item.setBackground(0, QBrush(day_color_bg))
+                    day_item.setForeground(0, QBrush(day_color_fg))
+                    
+                    # Store references
+                    self.days[year_str][month_name][day_str] = day_item
+                    self.day_colors[year_str][month_name][day_str] = day_color_bg
+                    self.ids[year_str][month_name][day_str] = {}
+                    
+                    # Process each item (ID) for this day
+                    # Sort items by status priority: "process", "draft", "finished"
+                    item_list = day_data.get('items', [])
+                    status_priority = {"process": 0, "draft": 1, "finished": 2}
+                    sorted_items = sorted(item_list, key=lambda x: status_priority.get(x.get('status', ''), 999))
+                    
+                    for item_data in sorted_items:
+                        id_value = item_data.get('id')
+                        status = item_data.get('status', 'unknown')
+                        
+                        if not id_value:
+                            continue
+                            
+                        # Create the formatted ID string: YYYY-MM-DD_ID_STATUS
+                        # Pad month and day with leading zeros if needed
+                        month_num = self._month_name_to_number(month_name)
+                        day_num = day_str.zfill(2)  # Ensure day is two digits
+                        formatted_id = f"{year_str}-{month_num}-{day_num}_{id_value}_{status}"
+                        
+                        # Create ID item
+                        id_item = QTreeWidgetItem(day_item, [formatted_id])
+                        
+                        # Add table icon using parent day's color
+                        table_icon = qta.icon('fa6s.table', color=day_color_fg.name())
+                        id_item.setIcon(0, table_icon)
+                        
+                        # Set text color (inherit from parent day)
+                        id_item.setForeground(0, QBrush(day_color_fg))
+                        
+                        # Store reference
+                        self.ids[year_str][month_name][day_str][id_value] = id_item
         
-        # IDs for October 05
-        oct_05_ids = [
-            {"id": "481234", "status": "finished"},
-            {"id": "481235", "status": "draft"}
-        ]
-        for id_data in oct_05_ids:
-            id_value = id_data["id"]
-            status = id_data["status"]
-            formatted_id = f"2025-10-05_{id_value}_{status}"
+        # Expand all year items by default
+        for year_item in self.years.values():
+            self.tree.expandItem(year_item)
             
-            id_item = QTreeWidgetItem(self.days["2025"]["October"]["05"], [formatted_id])
-            table_icon = qta.icon('fa6s.table', color=oct_05_color_fg.name())
-            id_item.setIcon(0, table_icon)
-            id_item.setForeground(0, QBrush(oct_05_color_fg))
-            self.ids["2025"]["October"]["05"][id_value] = id_item
+        from core.utils.logger import log
+        log(f"Loaded project data: {len(self.years)} years, {sum(len(months) for months in self.months.values())} months, {sum(sum(len(days) for days in month.values()) for month in self.days.values())} days")
         
-        # IDs for October 12
-        oct_12_ids = [
-            {"id": "492001", "status": "process"},
-            {"id": "492002", "status": "finished"},
-            {"id": "492003", "status": "draft"},
-            {"id": "492004", "status": "process"}
-        ]
-        for id_data in oct_12_ids:
-            id_value = id_data["id"]
-            status = id_data["status"]
-            formatted_id = f"2025-10-12_{id_value}_{status}"
-            
-            id_item = QTreeWidgetItem(self.days["2025"]["October"]["12"], [formatted_id])
-            table_icon = qta.icon('fa6s.table', color=oct_12_color_fg.name())
-            id_item.setIcon(0, table_icon)
-            id_item.setForeground(0, QBrush(oct_12_color_fg))
-            self.ids["2025"]["October"]["12"][id_value] = id_item
+        return True
+    
+    def _month_name_to_number(self, month_name):
+        """Convert month name to two-digit number string."""
+        months = {
+            'January': '01',
+            'February': '02',
+            'March': '03',
+            'April': '04',
+            'May': '05',
+            'June': '06',
+            'July': '07',
+            'August': '08',
+            'September': '09',
+            'October': '10',
+            'November': '11',
+            'December': '12'
+        }
+        return months.get(month_name, '01')  # Default to '01' if not found
+
+    def update_item_status(self, item_id, new_status):
+        """Update an item's status in the database and refresh the UI."""
+        if db_explorer_widget.update_item_status(item_id, new_status):
+            # Refresh the tree to show updated data
+            self.load_data_from_database()
+            return True
+        return False
+        
+    def add_new_item(self, year, month, day, item_id, status="draft"):
+        """Add a new item to the database and refresh the UI."""
+        if db_explorer_widget.add_project_item(year, month, day, item_id, status):
+            # Refresh the tree to show the new item
+            self.load_data_from_database()
+            return True
+        return False

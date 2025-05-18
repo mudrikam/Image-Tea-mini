@@ -12,6 +12,7 @@ from core.helper._status_bar_actions import setup_status_bar
 from core.helper._window_utils import center_window
 from core.layout_controller import LayoutController
 from core.utils.logger import log, debug, warning, error, exception
+from database import db_config  # Import the database module
 
 class MainController:
     def __init__(self, base_dir=None):
@@ -32,11 +33,27 @@ class MainController:
         if self.BASE_DIR is None:
             self.BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
+        # Initialize database
+        self.init_database()
+        
         # Load program settings
         self.config = self.load_config()
         
         # Configure the app icon
         self.set_application_icon()
+    
+    def init_database(self):
+        """Initialize the database connection and create necessary tables."""
+        try:
+            # Initialize database with BASE_DIR
+            db_path = db_config.initialize(self.BASE_DIR)
+            
+            # Create database if needed and set up tables
+            db_config.main(self.BASE_DIR)
+            
+            log(f"Database initialized at {db_path}")
+        except Exception as e:
+            exception(e, "Failed to initialize database")
     
     def load_config(self):
         """Get the program settings from config.json."""
