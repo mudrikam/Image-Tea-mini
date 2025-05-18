@@ -116,7 +116,7 @@ def select_folder(parent=None, start_dir=None):
         start_dir: Starting directory for the dialog (defaults to user's home dir)
         
     Returns:
-        dict: Dictionary with folder path and current datetime values
+        str: Selected folder path or None if canceled
     """
     if start_dir is None:
         start_dir = os.path.expanduser('~')
@@ -129,22 +129,7 @@ def select_folder(parent=None, start_dir=None):
     
     if folder_path:
         log(f"Selected folder: {folder_path}")
-        now = datetime.datetime.now()
-        
-        return {
-            "year": str(now.year),
-            "month": now.strftime('%B'),
-            "day": str(now.day).zfill(2),
-            "item_id": now.strftime('%y%m%d%H%M%S'),
-            "status": "folder",
-            "filename": os.path.basename(folder_path),
-            "extension": "folder",
-            "filepath": folder_path,
-            "filesize": 0,
-            "created_at": now.isoformat(),
-            "updated_at": now.isoformat(),
-            "deleted_at": None
-        }
+        return folder_path
     return None
 
 def select_multiple_folders(parent=None, start_dir=None):
@@ -156,15 +141,15 @@ def select_multiple_folders(parent=None, start_dir=None):
         start_dir: Starting directory for the dialog (defaults to user's home dir)
         
     Returns:
-        list: List of folder detail dictionaries
+        list: List of selected folder paths
     """
     results = []
     keep_selecting = True
     
     while keep_selecting:
-        folder_details = select_folder(parent, start_dir)
-        if folder_details:
-            results.append(folder_details)
+        folder_path = select_folder(parent, start_dir)
+        if folder_path:
+            results.append(folder_path)
             from PySide6.QtWidgets import QMessageBox
             reply = QMessageBox.question(
                 parent, 
@@ -175,8 +160,9 @@ def select_multiple_folders(parent=None, start_dir=None):
             )
             keep_selecting = (reply == QMessageBox.Yes)
             
-            if keep_selecting and folder_details.get('filepath'):
-                start_dir = os.path.dirname(folder_details['filepath'])
+            # Update the start dir to the parent of the selected folder for convenience
+            if keep_selecting:
+                start_dir = os.path.dirname(folder_path)
         else:
             keep_selecting = False
     

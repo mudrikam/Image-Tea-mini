@@ -300,14 +300,10 @@ class ProjectFilesModel:
             return results
             
         for folder_path in folder_paths:
-            # Handle both string paths and dictionary folder details
-            if isinstance(folder_path, dict):
-                folder_path = folder_path.get('filepath', '')
-                
             if not folder_path or not os.path.isdir(folder_path):
                 continue
                 
-            # Process the folder without passing folder details
+            # Process the folder without folder details
             _, processed_count = self.process_folder(folder_path)
             
             # Add to results

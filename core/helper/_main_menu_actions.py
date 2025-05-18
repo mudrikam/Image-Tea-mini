@@ -175,6 +175,7 @@ class MenuActionHandler(QObject):
             result = self.project_files_model.add_file(file_details)
             if result:  # result will be the record ID if successful
                 self.show_status_message(f"Opened image: {file_details['filename']} (ID: {result})")
+                log(f"Added image file '{file_details['filename']}' to project with ID: {result}")
             else:
                 self.show_status_message("Failed to add image to project")
         else:
@@ -195,6 +196,7 @@ class MenuActionHandler(QObject):
             # Add the files to the database
             success_ids = self.project_files_model.add_multiple_files(file_details_list)
             self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} images to project")
+            log(f"Added {len(success_ids)} of {len(file_details_list)} image files to project")
         else:
             self.show_status_message("No images selected")
     
@@ -225,20 +227,16 @@ class MenuActionHandler(QObject):
         # Get the user's home directory for dialog starting location
         start_dir = self._get_user_home_directory()
         
-        # Open dialog to select a folder, starting from the home directory
-        folder_details = select_folder(self.window, start_dir)
+        # Open dialog to select a folder
+        folder_path = select_folder(self.window, start_dir)
         
-        if folder_details:
-            folder_path = folder_details.get('filepath', '')
-            if not folder_path or not os.path.isdir(folder_path):
-                self.show_status_message("Invalid folder selected")
-                return
-            
-            # Process the folder using the database model
-            folder_id, processed_files = self.project_files_model.process_folder(folder_path, folder_details)
+        if folder_path and os.path.isdir(folder_path):
+            # Process the folder using the database model (no folder details needed)
+            _, processed_files = self.project_files_model.process_folder(folder_path)
             
             if processed_files > 0:
-                self.show_status_message(f"Processed folder: {os.path.basename(folder_path)} - Added {processed_files} files")
+                self.show_status_message(f"Processed folder: {os.path.basename(folder_path)} - Added {processed_files} files to project")
+                log(f"Added {processed_files} files from folder '{os.path.basename(folder_path)}' to project")
             else:
                 self.show_status_message(f"No compatible files found in folder: {os.path.basename(folder_path)}")
         else:
@@ -252,15 +250,16 @@ class MenuActionHandler(QObject):
         # Get the user's home directory for dialog starting location
         start_dir = self._get_user_home_directory()
         
-        # Open dialog to select multiple folders, starting from the home directory
-        folder_details_list = select_multiple_folders(self.window, start_dir)
+        # Open dialog to select multiple folders
+        folder_paths = select_multiple_folders(self.window, start_dir)
         
-        if folder_details_list:
+        if folder_paths:
             # Process all folders using the database model
-            results = self.project_files_model.process_multiple_folders(folder_details_list)
+            results = self.project_files_model.process_multiple_folders(folder_paths)
             
             if results['total_files'] > 0:
-                self.show_status_message(f"Processed {results['total_folders']} folders - Added {results['total_files']} files")
+                self.show_status_message(f"Processed {results['total_folders']} folders - Added {results['total_files']} files to project")
+                log(f"Added {results['total_files']} files from {results['total_folders']} folders to project")
             else:
                 self.show_status_message(f"No compatible files found in selected folders")
         else:
@@ -279,8 +278,10 @@ class MenuActionHandler(QObject):
         
         if file_details:
             # Add the file to the database
-            if self.project_files_model.add_file(file_details):
-                self.show_status_message(f"Opened video: {file_details['filename']}")
+            result = self.project_files_model.add_file(file_details)
+            if result:  # result will be the record ID if successful
+                self.show_status_message(f"Opened video: {file_details['filename']} (ID: {result})")
+                log(f"Added video file '{file_details['filename']}' to project with ID: {result}")
             else:
                 self.show_status_message("Failed to add video to project")
         else:
@@ -299,8 +300,9 @@ class MenuActionHandler(QObject):
         
         if file_details_list:
             # Add the files to the database
-            success_count = self.project_files_model.add_multiple_files(file_details_list)
-            self.show_status_message(f"Added {success_count} of {len(file_details_list)} videos to project")
+            success_ids = self.project_files_model.add_multiple_files(file_details_list)
+            self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} videos to project")
+            log(f"Added {len(success_ids)} of {len(file_details_list)} video files to project")
         else:
             self.show_status_message("No videos selected")
     
