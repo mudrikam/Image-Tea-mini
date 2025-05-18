@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
+    <width>250</width>
     <height>300</height>
    </rect>
   </property>
@@ -16,10 +16,30 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QDockWidget {
+    background: transparent;
+    border: none;
+}
+QDockWidget::title {
+    background-color: rgba(114, 114, 114, 0.2);
+    padding: 5px;
+    padding-left: 10px;
+}
+QDockWidget::contents {
+    border: 1px solid rgba(114, 114, 114, 0.2);
+}</string>
+  </property>
   <property name="windowTitle">
    <string>Explorer</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
+   <property name="styleSheet">
+    <string notr="true">QWidget {
+    background: transparent;
+    border: none;
+}</string>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>

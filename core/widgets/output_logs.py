@@ -59,7 +59,8 @@ class OutputLogsWidget:
         # Create the text edit for logs
         self.log_text = QTextEdit(content_widget)
         self.log_text.setReadOnly(True)
-        self.log_text.setLineWrapMode(QTextEdit.NoWrap)
+        # Change from NoWrap to WidgetWidth to enable word wrapping
+        self.log_text.setLineWrapMode(QTextEdit.WidgetWidth)
         self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # Use native scrollbar when needed
         
         # Set monospace font and dark theme style, but with native scrollbars
@@ -82,12 +83,10 @@ class OutputLogsWidget:
         # Create welcome messages with consistent formatting
         welcome_msg1 = f"[{os_name}] [INFO] {date} {time} - System - === Image Tea Mini - Output Logs ==="
         welcome_msg2 = f"[{os_name}] [INFO] {date} {time} - System - Application started successfully"
-        welcome_msg3 = f"[{os_name}] [INFO] {date} {time} - System - Ready for commands"
         
         # Apply consistent formatting with HTML color - first message is green
         self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg1}</span>")
         self.log_text.append(f"<span style='color:#f0f0f0;'>{welcome_msg2}</span>")
-        self.log_text.append(f"<span style='color:#f0f0f0;'>{welcome_msg3}</span>")
         
         # Add the text edit to the layout
         layout.addWidget(self.log_text)
@@ -212,12 +211,10 @@ class OutputLogsWidget:
             # Create welcome messages with consistent formatting
             welcome_msg1 = f"[{os_name}] [INFO] {date} {time} - System - === Image Tea Mini - Output Logs ==="
             welcome_msg2 = f"[{os_name}] [INFO] {date} {time} - System - Logs cleared"
-            welcome_msg3 = f"[{os_name}] [INFO] {date} {time} - System - Ready for commands"
             
             # Apply consistent formatting with HTML color - first message is green
             self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg1}</span>")
             self.log_text.append(f"<span style='color:#f0f0f0;'>{welcome_msg2}</span>")
-            self.log_text.append(f"<span style='color:#f0f0f0;'>{welcome_msg3}</span>")
     
     def save_logs(self):
         """Save the logs to a file."""
