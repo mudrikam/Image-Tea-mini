@@ -43,7 +43,7 @@ def reset_widget_to_default(widget, ui_path):
             QtCore.QTimer.singleShot(100, lambda: reset_size_constraints(widget))
             
             widget_name = widget.windowTitle() or "Unknown widget"
-            log(f"Reset {widget_name} to default size.")
+            # log(f"Reset {widget_name} to default size.")
             return True
         except Exception as e:
             error(f"Error resetting widget size: {e}")

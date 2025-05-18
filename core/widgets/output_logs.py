@@ -63,17 +63,68 @@ class OutputLogsWidget:
         self.log_text.setLineWrapMode(QTextEdit.WidgetWidth)
         self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # Use native scrollbar when needed
         
-        # Set monospace font and dark theme style, but with native scrollbars
+        # Set monospace font and dark theme style with modern scrollbars
         self.log_text.setStyleSheet("""
             QTextEdit {
-                background-color: #1e1e1e;
-                color: #f0f0f0;
+                background-color: rgba(129, 154, 165, 0.06);
                 font-family: Consolas, monospace;
                 font-size: 10pt;
                 border: none;
             }
+            
+            /* Subtle scrollbar styling with lower opacity */
+            QScrollBar:vertical {
+                border: none;
+                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+                width: 8px;  /* Slightly narrower */
+                margin: 0px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:vertical {
+                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:vertical:hover {
+                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+            }
+            
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            
+            QScrollBar:horizontal {
+                border: none;
+                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+                height: 8px;  /* Slightly narrower */
+                margin: 0px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:horizontal {
+                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+                min-width: 20px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:horizontal:hover {
+                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+            }
+            
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }
         """)
-        
         
         # Add initial welcome content using the same format as append_log
         os_name = platform.system()[:3]  # Shorten OS name (e.g., "Win", "Mac", "Lin")
@@ -185,7 +236,7 @@ class OutputLogsWidget:
             elif level == "DEBUG":
                 formatted = f"<span style='color:#88cc88;'>{log_message}</span>"
             else:  # INFO
-                formatted = f"<span style='color:#f0f0f0;'>{log_message}</span>"  # Default color for INFO
+                formatted = f"{log_message}"  # Default color for INFO
             
             # Append the formatted log message
             self.log_text.append(formatted)

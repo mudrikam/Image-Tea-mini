@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QSizePolicy
 from PySide6 import QtUiTools, QtCore
 from PySide6.QtGui import QColor, QBrush, QFont
 import qtawesome as qta  # Import qtawesome for icons
@@ -52,24 +52,89 @@ class ExplorerWidget:
             item = layout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        
-        # Create the tree widget without a header
+                
+        # Create the tree widget directly (no scroll area)
         self.tree = QTreeWidget(content_widget)
         self.tree.setHeaderHidden(True)  # Hide the header
         
-        # Important: Simply set this property to show branch lines
-        self.tree.setRootIsDecorated(True)  # This controls whether branch indicators are shown
+        # Set size policy to allow the tree to expand
+        self.tree.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
-        # Add item padding to prevent crowding
+        # Show branch lines
+        self.tree.setRootIsDecorated(True)
+        
+        # Use standard scrollbar policies - built into QTreeWidget
+        self.tree.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.tree.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
+        # Set modern scrollbar styling with more subtle appearance
         self.tree.setStyleSheet("""
+            QTreeWidget {
+                border: none;
+                background-color: transparent;
+            }
+            
             QTreeWidget::item {
                 padding: 3px 0px;
             }
+            
+            /* Subtle scrollbar styling with lower opacity */
+            QScrollBar:vertical {
+                border: none;
+                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+                width: 8px;  /* Slightly narrower */
+                margin: 0px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:vertical {
+                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:vertical:hover {
+                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+            }
+            
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+            
+            QScrollBar:horizontal {
+                border: none;
+                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+                height: 8px;  /* Slightly narrower */
+                margin: 0px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:horizontal {
+                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+                min-width: 20px;
+                border-radius: 4px;
+            }
+            
+            QScrollBar::handle:horizontal:hover {
+                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+            }
+            
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+            
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                background: none;
+            }
         """)
         
-        # Connect item click signal to handler - proper PySide6 signal handling
+        # Connect item click signal to handler
         try:
-            # Check if our method is already connected (PySide6 way)
+            # Check if our method is already connected
             if hasattr(self, '_old_connection') and self._old_connection:
                 try:
                     self.tree.itemClicked.disconnect(self._old_connection)
@@ -94,7 +159,7 @@ class ExplorerWidget:
         for year_item in self.years.values():
             self.tree.expandItem(year_item)
         
-        # Add tree to the layout
+        # Add tree directly to the layout
         layout.addWidget(self.tree)
         
         return self.widget
