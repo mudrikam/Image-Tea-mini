@@ -21,6 +21,15 @@ from core.helper._donation_dialog import show_donation_dialog
 from core.helper._window_utils import center_window
 from core.utils.logger import log, debug, warning, error, exception
 
+# Import the new modules we created
+from core.global_operations.file_operations import (
+    select_image_file, select_multiple_image_files,
+    select_folder, select_multiple_folders,
+    select_video_file, select_multiple_video_files,
+    get_image_extensions, get_video_extensions
+)
+from database.db_project_files import ProjectFilesModel
+
 class MenuActionHandler(QObject):
     """Class that handles menu actions for the main window."""
     
@@ -38,6 +47,7 @@ class MenuActionHandler(QObject):
         self.config = config
         self.BASE_DIR = base_dir
         self.layout_controller = layout_controller
+        self.project_files_model = ProjectFilesModel()
     
     def connect_all_actions(self):
         """Connect all menu actions to their respective handlers."""
@@ -106,7 +116,7 @@ class MenuActionHandler(QObject):
             self.window.actionMetadata_Analysis.triggered.connect(self.handle_metadata_analysis_layout)
     
     def connect_settings_menu_actions(self):
-        """Connect Settings menu actions to their handlers."""
+        """Connect Settings menu actions to their handlers.""" 
         # Connect preferences action
         self.window.actionPreferences.triggered.connect(self.handle_preferences)
         
@@ -142,7 +152,7 @@ class MenuActionHandler(QObject):
         self.window.actionCheck_for_Updates.triggered.connect(self.handle_check_for_updates)
         self.window.actionDonate.triggered.connect(self.handle_donate)
 
-    # File menu handlers
+    # Updated File menu handlers
     def handle_new(self):
         """Handle New action."""
         log("Creating new project")
@@ -151,39 +161,148 @@ class MenuActionHandler(QObject):
     
     def handle_open_image(self):
         """Handle Open Image action."""
-        log("Opening image")
-        # Implement specific Open Image functionality
-        self.show_status_message("Opening image...")
+        log("Opening image file dialog")
+        self.show_status_message("Select an image file...")
+        
+        # Get the user's home directory for dialog starting location
+        start_dir = self._get_user_home_directory()
+        
+        # Open file dialog to select an image, starting from the home directory
+        file_details = select_image_file(self.window, start_dir)
+        
+        if file_details:
+            # Add the file to the database
+            result = self.project_files_model.add_file(file_details)
+            if result:  # result will be the record ID if successful
+                self.show_status_message(f"Opened image: {file_details['filename']} (ID: {result})")
+            else:
+                self.show_status_message("Failed to add image to project")
+        else:
+            self.show_status_message("No image selected")
     
     def handle_open_multiple_images(self):
         """Handle Open Multiple Images action."""
-        log("Opening multiple images")
-        # Implement specific Open Multiple Images functionality
-        self.show_status_message("Opening multiple images...")
+        log("Opening multiple images file dialog")
+        self.show_status_message("Select image files...")
+        
+        # Get the user's home directory for dialog starting location
+        start_dir = self._get_user_home_directory()
+        
+        # Open file dialog to select multiple images, starting from the home directory
+        file_details_list = select_multiple_image_files(self.window, start_dir)
+        
+        if file_details_list:
+            # Add the files to the database
+            success_ids = self.project_files_model.add_multiple_files(file_details_list)
+            self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} images to project")
+        else:
+            self.show_status_message("No images selected")
+    
+    def _process_files_in_folder(self, folder_path):
+        """
+        Process all image and video files in a folder and add them to the database.
+        This method has been deprecated. Use project_files_model.process_folder instead.
+        """
+        warning("Using deprecated _process_files_in_folder method")
+        _, processed_count = self.project_files_model.process_folder(folder_path)
+        return processed_count
+    
+    def _get_user_home_directory(self):
+        """
+        Get the user's home directory in a cross-platform way.
+        
+        Returns:
+            str: Path to the user's home directory
+        """
+        # os.path.expanduser('~') works on Windows, macOS, and Linux
+        return os.path.expanduser('~')
     
     def handle_open_folder(self):
         """Handle Open Folder action."""
-        log("Opening folder")
-        # Implement specific Open Folder functionality
-        self.show_status_message("Opening folder...")
+        log("Opening folder dialog")
+        self.show_status_message("Select a folder...")
+        
+        # Get the user's home directory for dialog starting location
+        start_dir = self._get_user_home_directory()
+        
+        # Open dialog to select a folder, starting from the home directory
+        folder_details = select_folder(self.window, start_dir)
+        
+        if folder_details:
+            folder_path = folder_details.get('filepath', '')
+            if not folder_path or not os.path.isdir(folder_path):
+                self.show_status_message("Invalid folder selected")
+                return
+            
+            # Process the folder using the database model
+            folder_id, processed_files = self.project_files_model.process_folder(folder_path, folder_details)
+            
+            if processed_files > 0:
+                self.show_status_message(f"Processed folder: {os.path.basename(folder_path)} - Added {processed_files} files")
+            else:
+                self.show_status_message(f"No compatible files found in folder: {os.path.basename(folder_path)}")
+        else:
+            self.show_status_message("No folder selected")
     
     def handle_open_multiple_folders(self):
         """Handle Open Multiple Folders action."""
-        log("Opening multiple folders")
-        # Implement specific Open Multiple Folders functionality
-        self.show_status_message("Opening multiple folders...")
+        log("Opening multiple folders dialog")
+        self.show_status_message("Select folders...")
+        
+        # Get the user's home directory for dialog starting location
+        start_dir = self._get_user_home_directory()
+        
+        # Open dialog to select multiple folders, starting from the home directory
+        folder_details_list = select_multiple_folders(self.window, start_dir)
+        
+        if folder_details_list:
+            # Process all folders using the database model
+            results = self.project_files_model.process_multiple_folders(folder_details_list)
+            
+            if results['total_files'] > 0:
+                self.show_status_message(f"Processed {results['total_folders']} folders - Added {results['total_files']} files")
+            else:
+                self.show_status_message(f"No compatible files found in selected folders")
+        else:
+            self.show_status_message("No folders selected")
     
     def handle_open_video(self):
         """Handle Open Video action."""
-        log("Opening video")
-        # Implement specific Open Video functionality
-        self.show_status_message("Opening video...")
+        log("Opening video file dialog")
+        self.show_status_message("Select a video file...")
+        
+        # Get the user's home directory for dialog starting location
+        start_dir = self._get_user_home_directory()
+        
+        # Open file dialog to select a video, starting from the home directory
+        file_details = select_video_file(self.window, start_dir)
+        
+        if file_details:
+            # Add the file to the database
+            if self.project_files_model.add_file(file_details):
+                self.show_status_message(f"Opened video: {file_details['filename']}")
+            else:
+                self.show_status_message("Failed to add video to project")
+        else:
+            self.show_status_message("No video selected")
     
     def handle_open_multiple_videos(self):
         """Handle Open Multiple Videos action."""
-        log("Opening multiple videos")
-        # Implement specific Open Multiple Videos functionality
-        self.show_status_message("Opening multiple videos...")
+        log("Opening multiple videos file dialog")
+        self.show_status_message("Select video files...")
+        
+        # Get the user's home directory for dialog starting location
+        start_dir = self._get_user_home_directory()
+        
+        # Open file dialog to select multiple videos, starting from the home directory
+        file_details_list = select_multiple_video_files(self.window, start_dir)
+        
+        if file_details_list:
+            # Add the files to the database
+            success_count = self.project_files_model.add_multiple_files(file_details_list)
+            self.show_status_message(f"Added {success_count} of {len(file_details_list)} videos to project")
+        else:
+            self.show_status_message("No videos selected")
     
     def handle_save_logs(self):
         """Handle Save Logs action."""
@@ -236,7 +355,7 @@ class MenuActionHandler(QObject):
 
     # Edit menu handlers
     def handle_cut(self):
-        """Handle Cut action."""
+        """Handle Cut action.""" 
         # This needs to be connected to the currently focused widget
         try:
             focused_widget = self.window.focusWidget()

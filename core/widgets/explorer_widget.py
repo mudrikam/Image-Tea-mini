@@ -1,10 +1,12 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QSizePolicy
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QSizePolicy, QPushButton, QHBoxLayout
 from PySide6 import QtUiTools, QtCore
 from PySide6.QtGui import QColor, QBrush, QFont
 import qtawesome as qta  # Import qtawesome for icons
 from database import db_explorer_widget
 from core.utils.logger import log, debug, warning, error, exception
+from core.utils.event_system import EventSystem
+import time
 
 class ExplorerWidget:
     def __init__(self, base_dir=None):
@@ -12,6 +14,11 @@ class ExplorerWidget:
         self.BASE_DIR = base_dir
         self.widget = None
         self.tree = None
+        
+        # Add cache for loaded data to speed up refreshes
+        self._data_cache = None
+        self._last_load_time = 0
+        self._cache_valid = False
         
         # Store references to hierarchical data for future implementation
         self.years = {}      # Dictionary to store year nodes: {year_str: year_item}
@@ -23,6 +30,17 @@ class ExplorerWidget:
         self.year_colors = {}    # {year_str: QColor}
         self.month_colors = {}   # {year_str: {month_str: QColor}}
         self.day_colors = {}     # {year_str: {month_str: {day_str: QColor}}
+        
+        # Subscribe to the project_data_changed event
+        EventSystem.subscribe('project_data_changed', self.on_project_data_changed)
+        
+    def on_project_data_changed(self):
+        """Called when project data changes in the database."""
+        if self.tree:
+            log("Project data changed. Refreshing explorer view.")
+            # Invalidate cache when data changes
+            self._cache_valid = False
+            self.refresh_data()
         
     def load_ui(self):
         """Load the dock widget from UI file."""
@@ -150,9 +168,9 @@ class ExplorerWidget:
         
         # Load data from the database
         if not self.load_data_from_database():
-            warning("Failed to load project data from database")
+            # warning("Failed to load project data from database")
             # Instead of loading sample data, just show an empty tree
-            empty_item = QTreeWidgetItem(self.tree, ["No project data available"])
+            empty_item = QTreeWidgetItem(self.tree, ["No data available"])
             empty_item.setForeground(0, QBrush(QColor(150, 150, 150)))
         
         # Expand the top levels by default
@@ -164,23 +182,122 @@ class ExplorerWidget:
         
         return self.widget
 
+    def refresh_data(self):
+        """Reload project data from the database and refresh the tree."""
+        start_time = time.time()
+        log("Refreshing explorer data...")
+        
+        # Force cache refresh if it's been more than 30 seconds since last load
+        if time.time() - self._last_load_time > 30:
+            self._cache_valid = False
+            
+        success = self.load_data_from_database()
+        
+        if success:
+            # Track time for performance monitoring
+            elapsed = time.time() - start_time
+            log(f"Explorer data refreshed successfully in {elapsed:.3f} seconds.")
+        else:
+            warning("Failed to refresh explorer data.")
+        
+        # Force process events to update UI immediately
+        from PySide6.QtWidgets import QApplication
+        QApplication.processEvents()
+
     def load_data_from_database(self):
         """Load project data from the database using db_explorer_widget."""
         try:
-            # Get project structure directly from the database module
-            project_data = db_explorer_widget.get_project_structure(self.BASE_DIR)
+            # Save expanded state of tree items before updating
+            expanded_states = {}
+            if self.tree and self.tree.topLevelItemCount() > 0:
+                self._save_expanded_states(expanded_states)
+            
+            # Use cached data if valid and available
+            if self._cache_valid and self._data_cache is not None:
+                debug("Using cached project structure data")
+                project_data = self._data_cache
+            else:
+                # Get project structure directly from the database module
+                start_time = time.time()
+                project_data = db_explorer_widget.get_project_structure(self.BASE_DIR)
+                query_time = time.time() - start_time
+                debug(f"Database query completed in {query_time:.3f} seconds")
+                
+                # Cache the data for future use
+                if project_data:
+                    self._data_cache = project_data
+                    self._last_load_time = time.time()
+                    self._cache_valid = True
             
             if not project_data:
-                warning("No project structure data found in database")
                 return False
                 
             # Load the data into the tree using the helper that processes the hierarchical structure
-            success = self.load_project_data(project_data)
+            start_time = time.time()
+            success = self.load_project_data(project_data, expanded_states)
+            ui_update_time = time.time() - start_time
+            debug(f"UI tree update completed in {ui_update_time:.3f} seconds")
+            
             return success
                 
         except Exception as e:
             exception(e, "Error loading data from database")
             return False
+
+    def _save_expanded_states(self, expanded_states, parent_path="", item=None):
+        """
+        Recursively save the expanded state of all tree items.
+        
+        Args:
+            expanded_states (dict): Dictionary to store the expanded states
+            parent_path (str): Path of parent items
+            item (QTreeWidgetItem): Current item being processed
+        """
+        if item is None:
+            # Start with top level items
+            for i in range(self.tree.topLevelItemCount()):
+                top_item = self.tree.topLevelItem(i)
+                self._save_expanded_states(expanded_states, top_item.text(0), top_item)
+            return
+            
+        # Build the current path
+        current_path = f"{parent_path}/{item.text(0)}" if parent_path else item.text(0)
+        
+        # Save the expanded state of this item
+        expanded_states[current_path] = item.isExpanded()
+        
+        # Process children
+        for i in range(item.childCount()):
+            child_item = item.child(i)
+            self._save_expanded_states(expanded_states, current_path, child_item)
+
+    def _restore_expanded_states(self, expanded_states, parent_path="", item=None):
+        """
+        Recursively restore the expanded state of all tree items.
+        
+        Args:
+            expanded_states (dict): Dictionary with stored expanded states
+            parent_path (str): Path of parent items
+            item (QTreeWidgetItem): Current item being processed
+        """
+        if item is None:
+            # Start with top level items
+            for i in range(self.tree.topLevelItemCount()):
+                top_item = self.tree.topLevelItem(i)
+                self._restore_expanded_states(expanded_states, top_item.text(0), top_item)
+            return
+            
+        # Build the current path
+        current_path = f"{parent_path}/{item.text(0)}" if parent_path else item.text(0)
+        
+        # Restore the expanded state if found in saved states
+        if current_path in expanded_states:
+            item.setExpanded(expanded_states[current_path])
+        
+        # Process children
+        for i in range(item.childCount()):
+            child_item = item.child(i)
+            self._restore_expanded_states(expanded_states, current_path, child_item)
 
     def handle_item_clicked(self, item, column):
         """Handle click events on tree items."""
@@ -230,13 +347,14 @@ class ExplorerWidget:
             from PySide6.QtWidgets import QApplication
             QApplication.processEvents()
 
-    def load_project_data(self, project_data=None):
+    def load_project_data(self, project_data=None, expanded_states=None):
         """
         Load actual project data into the explorer tree in descending order (newest first).
         
         Args:
             project_data: A dictionary containing the project structure data from the database.
                          If None, will try to load from database directly.
+            expanded_states: Dictionary containing saved expanded states of tree items
         """
         # Clear existing tree first
         self.tree.clear()
@@ -394,12 +512,16 @@ class ExplorerWidget:
                         # Store reference
                         self.ids[year_str][month_name][day_str][id_value] = id_item
         
-        # Expand all year items by default
-        for year_item in self.years.values():
-            self.tree.expandItem(year_item)
+        # Restore expanded states if provided, otherwise expand years by default
+        if expanded_states:
+            self._restore_expanded_states(expanded_states)
+        else:
+            # Default behavior - expand all year items
+            for year_item in self.years.values():
+                self.tree.expandItem(year_item)
             
         from core.utils.logger import log
-        log(f"Loaded project data: {len(self.years)} years, {sum(len(months) for months in self.months.values())} months, {sum(sum(len(days) for days in month.values()) for month in self.days.values())} days")
+        # log(f"Loaded project data: {len(self.years)} years, {sum(len(months) for months in self.months.values())} months, {sum(sum(len(days) for days in month.values()) for month in self.days.values())} days")
         
         return True
     
@@ -436,3 +558,10 @@ class ExplorerWidget:
             self.load_data_from_database()
             return True
         return False
+
+    def __del__(self):
+        """Clean up event subscriptions when the widget is destroyed."""
+        try:
+            EventSystem.unsubscribe('project_data_changed', self.on_project_data_changed)
+        except:
+            pass

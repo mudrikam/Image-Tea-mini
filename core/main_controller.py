@@ -15,13 +15,30 @@ from core.utils.logger import log, debug, warning, error, exception
 from database import db_config  # Import the database module
 
 class MainController:
+    """
+    Main controller class for the application.
+    
+    This class:
+    1. Manages the main window and UI components
+    2. Handles application lifecycle (init, run, shutdown)
+    3. Coordinates between different parts of the application
+    """
+    
     def __init__(self, base_dir=None):
-        """Set up the main program controller."""
-        # Create the Qt application instance
-        self.app = QApplication(sys.argv)
+        """
+        Initialize the main controller.
+        
+        Args:
+            base_dir (str): Base directory of the application
+        """
+        # Store the base directory
+        self.base_dir = base_dir
+        
+        # Get existing QApplication instance instead of creating a new one
+        self.app = QApplication.instance()
         
         # Force the menu to stay with the window on macOS
-        if sys.platform == 'darwin':
+        if sys.platform == 'darwin' and self.app:
             self.app.setAttribute(QtCore.Qt.AA_DontUseNativeMenuBar, True)
             
         self.window = None

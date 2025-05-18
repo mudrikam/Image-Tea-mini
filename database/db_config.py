@@ -77,15 +77,41 @@ def create_tables(conn, tables_config):
         if initial_data:
             # Get the column names from field definitions
             column_names = [field[0] for field in table_info.get('field', [])]
-            placeholders = ", ".join(["?" for _ in range(len(column_names))])
             
-            insert_query = f"INSERT OR IGNORE INTO {table_name} ({', '.join(column_names)}) VALUES ({placeholders})"
-            for row in initial_data:
-                cursor.execute(insert_query, row)
+            # For auto-increment fields, we need to exclude them from the INSERT statement
+            has_autoincrement = any("AUTOINCREMENT" in field[2].upper() if len(field) > 2 else False 
+                                  for field in table_info.get('field', []))
+            
+            if has_autoincrement:
+                # Find columns that don't have AUTOINCREMENT
+                non_auto_columns = []
+                non_auto_indices = []
+                for i, field in enumerate(table_info.get('field', [])):
+                    if len(field) <= 2 or "AUTOINCREMENT" not in field[2].upper():
+                        non_auto_columns.append(field[0])
+                        non_auto_indices.append(i)
+                
+                # Create placeholders for non-autoincrement columns
+                placeholders = ", ".join(["?" for _ in non_auto_columns])
+                
+                # Insert query for non-autoincrement columns
+                insert_query = f"INSERT INTO {table_name} ({', '.join(non_auto_columns)}) VALUES ({placeholders})"
+                
+                # Extract values for non-autoincrement columns
+                for row in initial_data:
+                    values = [row[i] for i in non_auto_indices]
+                    cursor.execute(insert_query, values)
+            else:
+                # Standard insert for tables without autoincrement
+                placeholders = ", ".join(["?" for _ in column_names])
+                insert_query = f"INSERT OR IGNORE INTO {table_name} ({', '.join(column_names)}) VALUES ({placeholders})"
+                for row in initial_data:
+                    cursor.execute(insert_query, row)
+                    
             debug(f"Inserted {len(initial_data)} rows of initial data into {table_name}")
     
     conn.commit()
-    
+
 def main(base_dir=None):
     """Main function to check and create the database and tables."""
     if base_dir:

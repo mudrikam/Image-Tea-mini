@@ -1,16 +1,26 @@
 import sqlite3
+import os
+import datetime
 from core.utils.logger import log, debug, warning, error, exception
 from database import db_config
 
-def get_project_structure(base_dir=None):
+def get_project_structure(base_dir=None, refresh=False):
     """
     Get the project structure data from the database and transform it into the hierarchical format
     required by the explorer widget, sorted in descending order (newest first).
+    
+    Args:
+        base_dir (str): Optional base directory path
+        refresh (bool): Whether this is a refresh call
     
     Returns:
         dict: A hierarchical structure containing years, months, days, and items
         or None if there was an error
     """
+    # Check and update colors for previous years on startup
+    if not refresh:
+        check_and_update_year_colors()
+    
     conn = None
     try:
         # Get a database connection
@@ -27,11 +37,15 @@ def get_project_structure(base_dir=None):
         count = cursor.fetchone()[0]
         
         if count == 0:
-            warning("No project data found in database")
+            # warning("No project data found in database")
             return None
             
-        # Query all project data rows
-        cursor.execute("SELECT year, month, day, item_id, status, year_color, month_color, day_color FROM project_data")
+        # Query all project data rows with DISTINCT item_id to avoid duplicates
+        cursor.execute("""
+            SELECT DISTINCT year, month, day, item_id, status, year_color, month_color, day_color 
+            FROM project_data
+            WHERE deleted_at IS NULL
+        """)
         rows = cursor.fetchall()
         
         if not rows:
@@ -46,9 +60,16 @@ def get_project_structure(base_dir=None):
         
         # Process rows and build the hierarchical structure
         years_dict = {}  # Hold year data temporarily for processing
+        item_ids_added = set()  # Track which item_ids have been added
         
         for row in rows:
             year, month, day, item_id, status, year_color_str, month_color_str, day_color_str = row
+            
+            # Skip if this item_id has already been added
+            if item_id in item_ids_added:
+                continue
+                
+            item_ids_added.add(item_id)
             
             # Parse color strings to arrays
             try:
@@ -125,7 +146,13 @@ def get_project_structure(base_dir=None):
             year_obj['months'] = months_list  # Replace dict with list
             project_structure['items'].append(year_obj)
         
-        log(f"Successfully built project structure with {len(project_structure['items'])} years")
+        # Calculate and log summary statistics
+        total_years = len(project_structure['items'])
+        total_months = sum(len(year_obj['months']) for year_obj in project_structure['items'])
+        total_days = sum(sum(len(month_obj['days']) for month_obj in year_obj['months']) 
+                        for year_obj in project_structure['items'])
+        
+        # log(f"Loaded project data: {total_years} years, {total_months} months, {total_days} days")
         return project_structure
         
     except sqlite3.Error as e:
@@ -331,3 +358,132 @@ def add_project_item(year, month, day, item_id, status="draft", year_color=None,
     finally:
         if conn:
             db_config.close_database_connection(conn)
+
+def update_previous_years_colors():
+    """
+    Update the colors of all records from previous years to gray.
+    This function checks if the current year differs from the last processed year
+    and only performs updates when necessary.
+
+    Returns:
+        bool: True if the update was performed, False if not needed or failed
+    """
+    conn = None
+    try:
+        # Get current year
+        current_year = str(datetime.datetime.now().year)
+        
+        # Check if we already processed this year by checking the marker file
+        marker_path = os.path.join(db_config.get_database_dir(), f"year_processed_{current_year}.marker")
+        
+        # If marker exists, we already processed this year
+        if os.path.exists(marker_path):
+            debug(f"Previous years already processed for year {current_year}")
+            return False
+            
+        # Get database connection
+        conn = db_config.connect_to_database()
+        if not conn:
+            warning("Could not connect to database")
+            return False
+            
+        cursor = conn.cursor()
+        
+        # Define gray colors
+        gray_color = "[120,120,120]"  # Medium gray
+        dark_gray_color = "[100,100,100]"  # Darker gray
+        light_gray_color = "[140,140,140]"  # Lighter gray
+        
+        # Update all records from previous years
+        cursor.execute(
+            """
+            UPDATE project_data 
+            SET year_color = ?, month_color = ?, day_color = ? 
+            WHERE year != ?
+            """,
+            (dark_gray_color, gray_color, light_gray_color, current_year)
+        )
+        
+        updated_rows = cursor.rowcount
+        conn.commit()
+        
+        # Create marker file to indicate we've processed this year
+        with open(marker_path, 'w') as f:
+            f.write(f"Processed on {datetime.datetime.now().isoformat()}")
+        
+        log(f"Updated {updated_rows} records from previous years to gray colors")
+        return True
+        
+    except sqlite3.Error as e:
+        error(f"Database error while updating previous years colors: {e}")
+        return False
+    except Exception as e:
+        exception(e, "Error updating previous years colors")
+        return False
+    finally:
+        if conn:
+            db_config.close_database_connection(conn)
+
+def check_and_update_year_colors():
+    """
+    Check if the year has changed since last run and update colors if needed.
+    This function should be called during application startup.
+    
+    Returns:
+        bool: True if update was performed, False otherwise
+    """
+    try:
+        # Get current year
+        current_year = str(datetime.datetime.now().year)
+        
+        # Check for stored year value in database directory
+        year_file_path = os.path.join(db_config.get_database_dir(), "last_year.txt")
+        last_processed_year = None
+        
+        # Read last processed year if file exists
+        if os.path.exists(year_file_path):
+            with open(year_file_path, 'r') as f:
+                last_processed_year = f.read().strip()
+        
+        # If year changed or file doesn't exist, update colors
+        if last_processed_year != current_year:
+            result = update_previous_years_colors()
+            
+            # Store current year for future checks
+            with open(year_file_path, 'w') as f:
+                f.write(current_year)
+            
+            return result
+        
+        return False
+    
+    except Exception as e:
+        exception(e, "Error in check_and_update_year_colors")
+        return False
+
+def initialize_explorer():
+    """
+    Initialize the explorer widget functionality.
+    This function should be called once at startup.
+    
+    Returns:
+        bool: True if initialization was successful
+    """
+    try:
+        # Update colors for previous years' records
+        check_and_update_year_colors()
+        log("Explorer widget initialized")
+        return True
+    except Exception as e:
+        exception(e, "Error initializing explorer widget")
+        return False
+
+def refresh_project_structure():
+    """
+    Refresh the project structure data from the database.
+    This function should be called after adding new files.
+    
+    Returns:
+        dict: Updated project structure, or None if there was an error
+    """
+    return get_project_structure(refresh=True)

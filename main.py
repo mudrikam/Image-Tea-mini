@@ -10,10 +10,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # instead of having to use full absolute paths
 sys.path.insert(0, BASE_DIR)
 
+# Now we can safely import our modules after the path is set
+from PySide6.QtWidgets import QApplication
+
 try:
     # Import our main controller class
     # This class handles the application's core logic and UI management
     from core.main_controller import MainController
+    from database.db_explorer_widget import initialize_explorer
 except ImportError:
     # If the import fails, provide helpful debugging information
     # This makes it much easier to diagnose path or installation problems
@@ -31,6 +35,12 @@ def main():
     3. Runs the main event loop
     4. Performs cleanup on exit
     """
+    # Initialize the application
+    app = QApplication(sys.argv)
+    
+    # Run year color update at startup
+    initialize_explorer()
+    
     # Create our main controller and pass it our base directory
     # This way the controller doesn't need to recalculate the path
     controller = MainController(base_dir=BASE_DIR)
@@ -46,6 +56,9 @@ def main():
     # Shutdown cleans up resources before exiting
     # This ensures we don't leave files open or connections active
     controller.shutdown()
+    
+    # Start the event loop
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     # This conditional checks if this file is being run directly (not imported)
