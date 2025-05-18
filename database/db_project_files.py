@@ -28,8 +28,8 @@ def generate_random_color(max_value=170):
     channel_assignment = random.randint(0, 5)
     
     if channel_assignment == 0:
-        # Red is max, Blue is 0, Green is random
-        return [max_value, random.randint(0, max_value), 0]
+        # Red is max, Blue is 0, Green is at least 50
+        return [max_value, random.randint(50, max_value), 0]
     elif channel_assignment == 1:
         # Green is max, Red is 0, Blue is random
         return [0, max_value, random.randint(0, max_value)]
