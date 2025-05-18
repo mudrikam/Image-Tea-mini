@@ -12,6 +12,7 @@ sys.path.insert(0, BASE_DIR)
 
 # Now we can safely import our modules after the path is set
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import Qt
 
 try:
     # Import our main controller class
@@ -35,8 +36,15 @@ def main():
     3. Runs the main event loop
     4. Performs cleanup on exit
     """
+    # Set the attribute to ensure application quits when last window is closed
+    QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
+    QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+    
     # Initialize the application
     app = QApplication(sys.argv)
+    
+    # Ensure application exits when all windows are closed
+    app.setQuitOnLastWindowClosed(True)
     
     # Run year color update at startup
     initialize_explorer()
@@ -44,6 +52,9 @@ def main():
     # Create our main controller and pass it our base directory
     # This way the controller doesn't need to recalculate the path
     controller = MainController(base_dir=BASE_DIR)
+    
+    # Register a clean shutdown function to be called when app is about to quit
+    app.aboutToQuit.connect(controller.shutdown)
     
     # Initialize sets everything up before showing the UI
     # This is where connections to databases or other resources would happen
@@ -53,15 +64,12 @@ def main():
     # The app will stay in this function until the user closes it
     controller.run()
     
-    # Shutdown cleans up resources before exiting
-    # This ensures we don't leave files open or connections active
-    controller.shutdown()
+    # Force the process to exit with a success code after the event loop finishes
+    # This ensures the terminal/cmd will close as well
+    os._exit(0)  # Use os._exit to forcibly terminate the process
     
-    # Start the event loop
-    sys.exit(app.exec())
+    # This line will never be reached due to os._exit, but keeping it for clarity
+    return 0
 
 if __name__ == "__main__":
-    # This conditional checks if this file is being run directly (not imported)
-    # It's a standard Python pattern that allows a file to be both
-    # a runnable script and an importable module
-    main()
+    main()  # Using os._exit() directly
