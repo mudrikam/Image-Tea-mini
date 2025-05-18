@@ -41,8 +41,10 @@ def get_project_structure(base_dir=None, refresh=False):
             return None
             
         # Query all project data rows with DISTINCT item_id to avoid duplicates
+        # Include created_at and updated_at fields for proper sorting
         cursor.execute("""
-            SELECT DISTINCT year, month, day, item_id, status, year_color, month_color, day_color 
+            SELECT DISTINCT year, month, day, item_id, status, year_color, month_color, day_color,
+                     created_at, updated_at
             FROM project_data
             WHERE deleted_at IS NULL
         """)
@@ -63,7 +65,7 @@ def get_project_structure(base_dir=None, refresh=False):
         item_ids_added = set()  # Track which item_ids have been added
         
         for row in rows:
-            year, month, day, item_id, status, year_color_str, month_color_str, day_color_str = row
+            year, month, day, item_id, status, year_color_str, month_color_str, day_color_str, created_at, updated_at = row
             
             # Skip if this item_id has already been added
             if item_id in item_ids_added:
@@ -113,10 +115,12 @@ def get_project_structure(base_dir=None, refresh=False):
             
             day_obj = month_obj['days'][day]
             
-            # Add item to day
+            # Add item to day with timestamp information
             day_obj['items'].append({
                 'id': item_id,
-                'status': status
+                'status': status,
+                'created_at': created_at,
+                'updated_at': updated_at
             })
         
         # Convert the structured dictionaries to arrays as expected by explorer_widget

@@ -7,6 +7,7 @@ from database import db_explorer_widget
 from core.utils.logger import log, debug, warning, error, exception
 from core.utils.event_system import EventSystem
 import time
+import datetime
 
 class ExplorerWidget:
     def __init__(self, base_dir=None):
@@ -481,10 +482,32 @@ class ExplorerWidget:
                     self.ids[year_str][month_name][day_str] = {}
                     
                     # Process each item (ID) for this day
-                    # Sort items by status priority: "process", "draft", "finished"
                     item_list = day_data.get('items', [])
-                    status_priority = {"process": 0, "draft": 1, "finished": 2}
-                    sorted_items = sorted(item_list, key=lambda x: status_priority.get(x.get('status', ''), 999))
+                    
+                    # Debug the items before sorting
+                    for item in item_list:
+                        debug(f"Before sort - Item ID: {item.get('id')}, Created at: {item.get('created_at')}")
+                    
+                    # Sort items by created_at timestamp in descending order (newest first)
+                    # Use special function to properly handle datetime strings
+                    def get_created_timestamp(item):
+                        try:
+                            timestamp = item.get('created_at', '')
+                            # Return the timestamp as is, string comparison works for ISO format dates
+                            return timestamp
+                        except:
+                            return ''
+                    
+                    # Sort using our timestamp extraction function
+                    sorted_items = sorted(
+                        item_list,
+                        key=get_created_timestamp,
+                        reverse=False  # Sort in descending order
+                    )
+                    
+                    # Debug the sorted items
+                    for item in sorted_items:
+                        debug(f"Sorted - Item ID: {item.get('id')}, Created at: {item.get('created_at')}")
                     
                     for item_data in sorted_items:
                         id_value = item_data.get('id')

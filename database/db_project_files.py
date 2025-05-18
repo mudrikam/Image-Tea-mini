@@ -249,7 +249,14 @@ class ProjectFilesModel:
         processed_count = 0
         
         try:
-            from core.global_operations.file_operations import get_image_extensions, get_video_extensions, get_file_details
+            from core.global_operations.file_operations import (
+                get_image_extensions, get_video_extensions, 
+                get_file_details, get_new_operation_id
+            )
+            
+            # Generate a new operation ID for all files in this folder
+            # This ensures all files from this folder share the same ID
+            operation_id = get_new_operation_id()
             
             # Get supported extensions
             image_extensions = get_image_extensions()
@@ -265,8 +272,8 @@ class ProjectFilesModel:
                     # Only process files with supported extensions
                     if ext in supported_extensions:
                         try:
-                            # Reuse the get_file_details function to get consistent file details
-                            file_details = get_file_details(file_path)
+                            # Reuse the get_file_details function with our operation ID
+                            file_details = get_file_details(file_path, operation_id)
                             if file_details:
                                 # Add file individually using add_file
                                 file_id = self.add_file(file_details)
@@ -279,7 +286,7 @@ class ProjectFilesModel:
             exception(e, f"Error processing folder {folder_path}")
         
         return folder_id, processed_count
-    
+        
     def process_multiple_folders(self, folder_paths):
         """
         Process multiple folders and add their files to the database.
@@ -299,22 +306,59 @@ class ProjectFilesModel:
         if not folder_paths:
             return results
             
+        # For multiple folders, we still generate just one operation ID
+        # to group all files from this multi-folder operation
+        from core.global_operations.file_operations import get_new_operation_id
+        multi_folder_operation_id = get_new_operation_id()
+        
         for folder_path in folder_paths:
             if not folder_path or not os.path.isdir(folder_path):
                 continue
                 
-            # Process the folder without folder details
-            _, processed_count = self.process_folder(folder_path)
-            
-            # Add to results
-            results['total_folders'] += 1
-            results['total_files'] += processed_count
-            results['processed_folders'].append({
-                'folder_path': folder_path,
-                'processed_files': processed_count
-            })
-            
-            # Log each folder processing
-            log(f"Processed folder: {os.path.basename(folder_path)} - Added {processed_count} files")
+            try:
+                from core.global_operations.file_operations import (
+                    get_image_extensions, get_video_extensions,
+                    get_file_details
+                )
+                
+                # Get supported extensions
+                image_extensions = get_image_extensions()
+                video_extensions = get_video_extensions()
+                supported_extensions = image_extensions + video_extensions
+                
+                folder_processed_count = 0
+                
+                # Walk through the folder and its subfolders
+                for root, dirs, files in os.walk(folder_path):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        ext = os.path.splitext(file)[1].lower()
+                        
+                        # Only process files with supported extensions
+                        if ext in supported_extensions:
+                            try:
+                                # Use the multi-folder operation ID for all files
+                                file_details = get_file_details(file_path, multi_folder_operation_id)
+                                if file_details:
+                                    # Add file individually using add_file
+                                    file_id = self.add_file(file_details)
+                                    if file_id:
+                                        folder_processed_count += 1
+                            except Exception as e:
+                                warning(f"Error processing file {file_path}: {str(e)}")
+                
+                # Add to results
+                results['total_folders'] += 1
+                results['total_files'] += folder_processed_count
+                results['processed_folders'].append({
+                    'folder_path': folder_path,
+                    'processed_files': folder_processed_count
+                })
+                
+                # Log each folder processing
+                log(f"Processed folder: {os.path.basename(folder_path)} - Added {folder_processed_count} files")
+                
+            except Exception as e:
+                exception(e, f"Error processing folder {folder_path}")
         
         return results
