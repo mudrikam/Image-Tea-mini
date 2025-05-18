@@ -28,6 +28,9 @@ def apply_icons(window):
     
     # Apply icons to Help menu actions
     _apply_help_menu_icons(window)
+    
+    # Apply icons to View menu actions
+    _apply_view_menu_icons(window)
 
 def _apply_file_menu_icons(window):
     """Apply icons to File menu actions."""
@@ -58,6 +61,19 @@ def _apply_edit_menu_icons(window):
     window.actionClear.setIcon(qta.icon('fa6s.broom'))
     window.actionRename.setIcon(qta.icon('fa6s.pen-to-square'))
     window.actionRename_All.setIcon(qta.icon('fa6s.pen-clip'))
+
+def _apply_view_menu_icons(window):
+    """Apply icons to View menu actions."""
+    # Appearance submenu
+    window.actionFull_Screen.setIcon(qta.icon('fa6s.expand'))
+    window.actionWindowed.setIcon(qta.icon('fa6s.compress'))
+    window.actionCenter.setIcon(qta.icon('fa6s.crosshairs'))
+    
+    # Layout submenu
+    window.actionDefault.setIcon(qta.icon('fa6s.table-cells'))
+    window.actionBatch_Processing.setIcon(qta.icon('fa6s.table-list'))
+    window.actionMetadata_Editing.setIcon(qta.icon('fa6s.file-pen'))
+    window.actionMetadata_Analysis.setIcon(qta.icon('fa6s.chart-column'))
 
 def _apply_settings_menu_icons(window):
     """Apply icons to Settings menu actions."""

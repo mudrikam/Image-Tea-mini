@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OutputLogs</class>
- <widget class="QDockWidget" name="OutputLogs">
+ <class>ImagePreview</class>
+ <widget class="QDockWidget" name="ImagePreview">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>200</height>
+    <width>300</width>
+    <height>300</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="styleSheet">
    <string notr="true">QDockWidget {
@@ -31,7 +25,7 @@ QDockWidget::contents {
 }</string>
   </property>
   <property name="windowTitle">
-   <string>Output</string>
+   <string>Inspector</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="styleSheet">
@@ -55,6 +49,16 @@ QDockWidget::contents {
     <property name="bottomMargin">
      <number>0</number>
     </property>
+    <item>
+     <widget class="QLabel" name="previewLabel">
+      <property name="text">
+       <string>Preview Image</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
