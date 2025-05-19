@@ -13,6 +13,8 @@ class WorkspaceController:
         
         # References to UI elements
         self.tab_widget = None
+        self.inner_tab_widget = None  # Add reference to the nested tab widget
+        self.inner_table_widget = None  # Add reference to the table inside nested tabs
         self.table_widgets = {}  # Dictionary to store table widgets for each tab: {item_id: table_widget}
         self.tab_ids = {}  # Dictionary to map tab indices to item IDs: {tab_index: item_id}
         
@@ -63,9 +65,20 @@ class WorkspaceController:
                 self.tab_widget = workspace_widget.findChild(QtWidgets.QTabWidget, "tabWidget")
                 
                 if self.tab_widget:
+                    # Find the nested tab widget and table
+                    self.inner_tab_widget = self.tab_widget.findChild(QtWidgets.QTabWidget, "tabWidget_2")
+                    
+                    if self.inner_tab_widget:
+                        # Find the table widget inside the inner tab
+                        self.inner_table_widget = self.inner_tab_widget.findChild(QtWidgets.QTableWidget, "tableWidget")
+                    
                     # Enable close buttons on tabs
                     self.tab_widget.setTabsClosable(True)
                     
+                    # Store the first tab as a template
+                    if self.tab_widget.count() > 0:
+                        self.template_tab = self.tab_widget.widget(0)
+                        
                     # Clear any existing tabs
                     while self.tab_widget.count() > 0:
                         self.tab_widget.removeTab(0)
@@ -152,28 +165,66 @@ class WorkspaceController:
                 self.current_item_id = item_id
                 return
         
-        # Create a new tab for this item
+        # Create a new tab with the structure from the UI file
         tab_content = QtWidgets.QWidget()
         tab_layout = QtWidgets.QVBoxLayout(tab_content)
-        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.setContentsMargins(0, 5, 0, 0)
         
-        # Create a table widget for this tab
-        table_widget = QtWidgets.QTableWidget()
-        table_widget.setAlternatingRowColors(True)
-        table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        # Create a nested tab widget like in the UI
+        inner_tab_widget = QtWidgets.QTabWidget()
+        tab_layout.addWidget(inner_tab_widget)
         
-        # Set up columns
-        table_widget.setColumnCount(2)
-        table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
-        table_widget.horizontalHeader().setStretchLastSection(True)
+        # Create table view tab with the same structure as in the UI
+        table_tab = QtWidgets.QWidget()
+        table_layout = QtWidgets.QVBoxLayout(table_tab)
+        table_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Create a new table widget based on the properties from the UI file
+        if self.inner_table_widget:
+            # Use the properties from the original table widget
+            table_widget = QtWidgets.QTableWidget()
+            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+            
+            # Copy horizontal header settings
+            table_widget.setColumnCount(2)
+            table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
+            table_widget.horizontalHeader().setStretchLastSection(True)
+            
+            # Ensure vertical header (row numbers) is visible
+            table_widget.verticalHeader().setVisible(True)
+            
+            # No need for duplicate stylesheet here - styling comes from the UI file
+            # Set sort indicator settings from the UI file
+            table_widget.horizontalHeader().setSortIndicatorShown(True)
+            table_widget.verticalHeader().setSortIndicatorShown(True)
+        else:
+            # Fallback if original table not found
+            table_widget = QtWidgets.QTableWidget()
+            table_widget.setColumnCount(2)
+            table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
+            table_widget.horizontalHeader().setStretchLastSection(True)
+            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+            
+            # Ensure vertical header (row numbers) is visible
+            table_widget.verticalHeader().setVisible(True)
         
         # Add table to layout
-        tab_layout.addWidget(table_widget)
+        table_layout.addWidget(table_widget)
+        
+        # Add table tab to nested tab widget
+        inner_tab_widget.addTab(table_tab, "Table")
+        
+        # Add grid view and details view tabs (empty for now)
+        grid_tab = QtWidgets.QWidget()
+        inner_tab_widget.addTab(grid_tab, "Grid")
+        
+        details_tab = QtWidgets.QWidget()
+        inner_tab_widget.addTab(details_tab, "Details")
         
         # Extract a shorter name for the tab
         tab_name = self._get_tab_name_from_item_id(item_id)
         
-        # Add the tab
+        # Add the main tab
         new_tab_idx = self.tab_widget.addTab(tab_content, tab_name)
         
         # Set custom close button icon using QtAwesome
@@ -205,15 +256,14 @@ class WorkspaceController:
         """Extract a shorter name for the tab from the item_id."""
         # Format: YYYY-MM-DD_ID_STATUS
         parts = item_id.split('_')
-        if len(parts) >= 3:
-            # Return "ID - STATUS"
-            return f"{parts[1]} - {parts[2]}"
-        elif len(parts) >= 2:
-            # Return just the ID
-            return parts[1]
+        if len(parts) >= 2:
+            # Get the ID part
+            id_part = parts[1]
+            # We'll add the file count later when data is loaded
+            return f"{id_part} (0)"  # Default to 0 files initially
         else:
             # Return the full ID if we can't parse it
-            return item_id
+            return f"{item_id} (0)"
     
     def close_tab(self, tab_index):
         """Close the tab at the specified index."""
@@ -272,8 +322,21 @@ class WorkspaceController:
                 exception(e, "Error getting data from database")
                 files_data = []
             
+            # Make sure vertical header (row numbers) is visible
+            table_widget.verticalHeader().setVisible(True)
+            
             # Clear existing table data
             table_widget.setRowCount(0)
+            
+            # Get the number of files
+            file_count = len(files_data) if files_data else 0
+            
+            # Update the tab text with file count
+            for idx, tab_item_id in self.tab_ids.items():
+                if tab_item_id == item_id:
+                    tab_text = f"{actual_id} ({file_count})"
+                    self.tab_widget.setTabText(idx, tab_text)
+                    break
             
             # Add data to the table
             if files_data and len(files_data) > 0:

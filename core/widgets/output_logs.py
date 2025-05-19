@@ -84,109 +84,22 @@ class OutputLogsWidget:
         self.widget = loader.load(ui_file)
         ui_file.close()
         
-        # Access the dock widget content
-        content_widget = self.widget.findChild(QWidget, "dockWidgetContents")
-        
-        # Create a vertical layout if not already present
-        if content_widget.layout() is None:
-            layout = QVBoxLayout(content_widget)
-        else:
-            layout = content_widget.layout()
+        # Find the QTextEdit widget from the UI file
+        self.log_text = self.widget.findChild(QTextEdit, "logTextEdit")
+        if not self.log_text:
+            # Fallback if the widget is not found (shouldn't happen if UI file is correct)
+            content_widget = self.widget.findChild(QWidget, "dockWidgetContents")
+            self.log_text = QTextEdit(content_widget)
+            self.log_text.setReadOnly(True)
+            self.log_text.setLineWrapMode(QTextEdit.WidgetWidth)
+            content_widget.layout().addWidget(self.log_text)
             
-        # Remove all margins to make the text area fill the entire dock
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        
-        # Clear the layout (remove any existing widgets)
-        while layout.count():
-            item = layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        
-        # Create the text edit for logs
-        self.log_text = QTextEdit(content_widget)
-        self.log_text.setReadOnly(True)
-        # Change from NoWrap to WidgetWidth to enable word wrapping
-        self.log_text.setLineWrapMode(QTextEdit.WidgetWidth)
-        self.log_text.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # Use native scrollbar when needed
-        
-        # Set monospace font and dark theme style with modern scrollbars
-        self.log_text.setStyleSheet("""
-            QTextEdit {
-                background-color: rgba(129, 154, 165, 0.06);
-                font-family: Consolas, monospace;
-                font-size: 10pt;
-                border: none;
-            }
-            
-            /* Subtle scrollbar styling with lower opacity */
-            QScrollBar:vertical {
-                border: none;
-                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
-                width: 8px;  /* Slightly narrower */
-                margin: 0px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:vertical {
-                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
-                min-height: 20px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:vertical:hover {
-                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
-            }
-            
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                height: 0px;
-            }
-            
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;
-            }
-            
-            QScrollBar:horizontal {
-                border: none;
-                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
-                height: 8px;  /* Slightly narrower */
-                margin: 0px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:horizontal {
-                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
-                min-width: 20px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:horizontal:hover {
-                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
-            }
-            
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-                width: 0px;
-            }
-            
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
-                background: none;
-            }
-        """)
-        
-        # Add initial welcome content using the same format as append_log
-        os_name = platform.system()[:3]  # Shorten OS name (e.g., "Win", "Mac", "Lin")
-        date = datetime.now().strftime("%b/%d/%Y")  # Format: "May/18/2025"
-        time = datetime.now().strftime("%H:%M:%S")  # Format: "10:55:20"
-        
-        # Add welcome header
-        self._add_welcome_header()
-        
-        # Add the text edit to the layout
-        layout.addWidget(self.log_text)
-        
         # Add context menu for the log text area
         self.log_text.setContextMenuPolicy(Qt.CustomContextMenu)
         self.log_text.customContextMenuRequested.connect(self.show_context_menu)
+        
+        # Add initial welcome content
+        self._add_welcome_header()
         
         return self.widget
     

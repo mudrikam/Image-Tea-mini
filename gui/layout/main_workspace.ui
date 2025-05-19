@@ -54,7 +54,73 @@ QTabBar::close-button {
 QTabBar::close-button:hover {
     background-color: rgba(255, 100, 100, 0.3);
     border-radius: 2px;
-}</string>
+}
+
+/* Fix for row hover effect */
+QTableWidget {
+    selection-background-color: rgba(88, 165, 0, 0.5); /* Selected rows */
+    border: none;
+}
+QTableWidget::item {
+    border: none;
+}
+QTableWidget::item:hover {
+    background-color: rgba(88, 165, 0, 0.31);
+}
+
+/* Subtle scrollbar styling with lower opacity */
+QScrollBar:vertical {
+    border: none;
+    background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+    width: 8px;  /* Slightly narrower */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+    height: 8px;  /* Slightly narrower */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+    min-width: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
+</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -70,7 +136,7 @@ QTabBar::close-button:hover {
     <number>0</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget_2">
+    <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -78,7 +144,7 @@ QTabBar::close-button:hover {
       <attribute name="title">
        <string>Table</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -92,15 +158,15 @@ QTabBar::close-button:hover {
         <number>0</number>
        </property>
        <item>
-        <widget class="QTabWidget" name="tabWidget">
+        <widget class="QTabWidget" name="tabWidget_2">
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="table_tab">
+         <widget class="QWidget" name="table_view">
           <attribute name="title">
            <string>Table</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
            <property name="leftMargin">
             <number>0</number>
            </property>
@@ -135,19 +201,19 @@ QTabBar::close-button:hover {
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="grid_view">
+          <attribute name="title">
+           <string>Grid</string>
+          </attribute>
+         </widget>
+         <widget class="QWidget" name="details_view">
+          <attribute name="title">
+           <string>Details</string>
+          </attribute>
+         </widget>
         </widget>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="grid_tab">
-      <attribute name="title">
-       <string>Grid</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="details_tab">
-      <attribute name="title">
-       <string>Details</string>
-      </attribute>
      </widget>
     </widget>
    </item>
