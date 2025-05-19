@@ -97,6 +97,16 @@ class TabManager:
         # Select the new tab
         self.tab_widget.setCurrentIndex(new_tab_idx)
         
+        # Set up table click handler if controller has image preview
+        if hasattr(self.controller, 'on_table_item_clicked'):
+            # Connect the click handler using TableManager
+            from core.helper.workspace._table_manager import TableManager
+            table_manager = TableManager()
+            table_manager.setup_table_click_handler(
+                table_widget, 
+                self.controller.on_table_item_clicked
+            )
+        
         return table_widget
     
     def close_tab(self, tab_index):

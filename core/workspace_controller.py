@@ -205,6 +205,44 @@ class WorkspaceController:
             exception(e, "Error switching to drag-and-drop UI")
             return None
     
+    def connect_to_image_preview(self, image_preview):
+        """
+        Connect the workspace to the image preview widget so selected items can be previewed.
+        
+        Args:
+            image_preview: An instance of ImagePreviewWidget
+        """
+        self.image_preview = image_preview
+        
+    def on_table_item_clicked(self, row, column, data):
+        """
+        Handle when an item in a table is clicked.
+        Update the image preview if available.
+        
+        Args:
+            row: The row index
+            column: The column index
+            data: The data associated with the item (dict from table data)
+        """
+        if not hasattr(self, 'image_preview') or not self.image_preview:
+            debug("No image preview widget available")
+            return
+            
+        debug(f"Table item clicked: Row {row}, Column {column}")
+        
+        try:
+            if isinstance(data, dict):
+                # Try to get the file ID from the data
+                file_id = data.get('id')
+                
+                if file_id:
+                    debug(f"Updating image preview with file ID: {file_id}")
+                    self.image_preview.update_preview_from_database(id=file_id)
+                else:
+                    debug("No file ID found in table item data")
+        except Exception as e:
+            exception(e, "Error updating image preview from table selection")
+    
     def __del__(self):
         """Clean up resources when the controller is deleted."""
         try:

@@ -142,10 +142,14 @@ class LayoutController:
         
         # Load the main workspace using the workspace controller
         self.workspace_controller.load_workspace()
-        
         self.load_explorer_widget()
         self.load_image_preview_widget()
         self.load_file_properties_widget()  # Add file properties loading
+        
+        # Connect the image preview widget to the workspace controller
+        if self.image_preview:
+            debug("Connecting image preview to workspace controller")
+            self.workspace_controller.connect_to_image_preview(self.image_preview)
         
         # Restore previous layout if available
         if not self.restore_layout():

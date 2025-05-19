@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 from core.utils.logger import log, debug, warning, error, exception
 
 class TableManager:
@@ -50,6 +50,7 @@ class TableManager:
                     # Get data from file info
                     filename = str(file_info.get('filename', ''))
                     extension = str(file_info.get('extension', ''))
+                    file_id = file_info.get('id')
                     
                     # Truncate long filenames for display
                     MAX_FILENAME_LENGTH = 25
@@ -65,6 +66,10 @@ class TableManager:
                     
                     # Set tooltip to show full filename when hovering
                     filename_item.setToolTip(filename)
+                    
+                    # Store the full file_info in the user data of the filename item
+                    # This allows us to retrieve it later when an item is clicked
+                    filename_item.setData(QtCore.Qt.UserRole, file_info)
                     
                     # Set items in the table
                     table_widget.setItem(row_idx, 0, filename_item)
@@ -97,3 +102,57 @@ class TableManager:
             return f"{size/1024:.2f} KB"
         else:
             return f"{size} bytes"
+
+    def setup_table_click_handler(self, table_widget, callback_function):
+        """
+        Set up a click handler for a table widget.
+        
+        Args:
+            table_widget: The table widget to set up the click handler for
+            callback_function: The function to call when an item is clicked
+                               Should accept parameters: row, column, data_dict
+        """
+        if not table_widget:
+            warning("Table widget not provided, can't set up click handler")
+            return
+            
+        # Connect the itemClicked signal to our handler
+        table_widget.itemClicked.connect(
+            lambda item: self._handle_table_item_clicked(table_widget, item, callback_function)
+        )
+        
+    def _handle_table_item_clicked(self, table_widget, item, callback_function):
+        """
+        Handle a table item being clicked.
+        
+        Args:
+            table_widget: The table widget that was clicked
+            item: The item that was clicked
+            callback_function: The function to call with the data
+        """
+        if not item or not callback_function:
+            return
+            
+        # Get the row and column of the clicked item
+        row = item.row()
+        column = item.column()
+        
+        try:
+            # Get data from the row - assuming ID or numerical identifier in hidden data
+            id_item = table_widget.item(row, 0)  # Assuming ID is stored in first column or its data
+            if id_item:
+                # Get the item data (could be stored in Qt.UserRole)
+                data = id_item.data(QtCore.Qt.UserRole)
+                if not data:
+                    # If no specific data stored, create a dictionary with the visible data
+                    data = {
+                        'row': row,
+                        'filename': table_widget.item(row, 0).text() if table_widget.item(row, 0) else '',
+                        'extension': table_widget.item(row, 1).text() if table_widget.item(row, 1) else '',
+                        # Add more fields as needed
+                    }
+                
+                # Call the callback function with the row, column, and data
+                callback_function(row, column, data)
+        except Exception as e:
+            exception(e, "Error handling table item click")

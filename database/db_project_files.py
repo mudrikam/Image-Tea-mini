@@ -247,7 +247,6 @@ class ProjectFilesModel:
             EventSystem.publish('project_data_changed')
             
         return success_ids
-    
     def get_all_files(self, status=None):
         """
         Get all files from the database, optionally filtered by status.
@@ -297,51 +296,83 @@ class ProjectFilesModel:
     
     def get_files_by_item_id(self, item_id):
         """
-        Get files from database for a specific item_id.
+        Get all files for a specific item_id.
         
         Args:
-            item_id (str): The item ID to search for
+            item_id: The item_id to search for
             
         Returns:
-            list: List of dictionaries containing file data
+            list: List of dictionaries with file information
         """
         try:
             conn = connect_to_database()
             cursor = conn.cursor()
             
-            # Query for files with this item_id
+            # Query for files with the specified item_id
             query = """
-                SELECT id, filename, extension, filepath, filesize 
+                SELECT id, year, month, day, item_id, status, 
+                       filename, extension, filepath, filesize,
+                       created_at, updated_at
                 FROM project_data 
                 WHERE item_id = ? AND deleted_at IS NULL
+                ORDER BY filename
             """
             
             cursor.execute(query, (item_id,))
             
-            # Get column names from cursor description
-            columns = [desc[0] for desc in cursor.description]
-            
-            # Fetch data and convert to dictionaries
+            # Fetch all rows as dictionaries
+            columns = [col[0] for col in cursor.description]
             rows = cursor.fetchall()
+            
             result = []
-            
             for row in rows:
-                # Create a dictionary from the column names and row values
-                file_dict = {columns[i]: row[i] for i in range(len(columns))}
-                result.append(file_dict)
-            
+                result.append(dict(zip(columns, row)))
+                
             close_database_connection(conn)
             return result
             
-        except sqlite3.Error as e:
-            error(f"Database error: {e}")
-            if conn:
-                close_database_connection(conn)
-            return []
         except Exception as e:
-            exception(e, f"Error fetching files for item_id {item_id}")
-            if conn:
-                close_database_connection(conn)
+            exception(e, f"Error getting files by item_id: {item_id}")
+            return []
+    
+    def get_files_by_id(self, id):
+        """
+        Get file information for a specific id.
+        
+        Args:
+            id: The primary key id to search for
+            
+        Returns:
+            list: List containing a dictionary with file information if found
+        """
+        try:
+            conn = connect_to_database()
+            cursor = conn.cursor()
+            
+            # Query for the file with the specified id
+            query = """
+                SELECT id, year, month, day, item_id, status, 
+                       filename, extension, filepath, filesize,
+                       created_at, updated_at
+                FROM project_data 
+                WHERE id = ? AND deleted_at IS NULL
+            """
+            
+            cursor.execute(query, (id,))
+            
+            # Fetch the row as a dictionary
+            columns = [col[0] for col in cursor.description]
+            row = cursor.fetchone()
+            
+            close_database_connection(conn)
+            
+            if row:
+                return [dict(zip(columns, row))]
+            else:
+                return []
+                
+        except Exception as e:
+            exception(e, f"Error getting file by id: {id}")
             return []
     
     def update_file(self, file_id, update_data):
