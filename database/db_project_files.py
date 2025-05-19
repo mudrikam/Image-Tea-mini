@@ -218,6 +218,55 @@ class ProjectFilesModel:
                 close_database_connection(conn)
             return []
     
+    def get_files_by_item_id(self, item_id):
+        """
+        Get files from database for a specific item_id.
+        
+        Args:
+            item_id (str): The item ID to search for
+            
+        Returns:
+            list: List of dictionaries containing file data
+        """
+        try:
+            conn = connect_to_database()
+            cursor = conn.cursor()
+            
+            # Query for files with this item_id
+            query = """
+                SELECT id, filename, extension, filepath, filesize 
+                FROM project_data 
+                WHERE item_id = ? AND deleted_at IS NULL
+            """
+            
+            cursor.execute(query, (item_id,))
+            
+            # Get column names from cursor description
+            columns = [desc[0] for desc in cursor.description]
+            
+            # Fetch data and convert to dictionaries
+            rows = cursor.fetchall()
+            result = []
+            
+            for row in rows:
+                # Create a dictionary from the column names and row values
+                file_dict = {columns[i]: row[i] for i in range(len(columns))}
+                result.append(file_dict)
+            
+            close_database_connection(conn)
+            return result
+            
+        except sqlite3.Error as e:
+            error(f"Database error: {e}")
+            if conn:
+                close_database_connection(conn)
+            return []
+        except Exception as e:
+            exception(e, f"Error fetching files for item_id {item_id}")
+            if conn:
+                close_database_connection(conn)
+            return []
+    
     def update_file(self, file_id, update_data):
         """
         Update file information in the database.

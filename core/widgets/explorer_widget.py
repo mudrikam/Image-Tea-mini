@@ -332,9 +332,16 @@ class ExplorerWidget:
                     # Log the selection using the proper logger
                     log(f"Selected ID: {id_value} (Status: {status}) - Path: {path_str}")
                     
-                    # Force process events to update UI immediately
-                    from PySide6.QtWidgets import QApplication
-                    QApplication.processEvents()
+                    # Add extra debugging for event publishing
+                    debug(f">>> EXPLORER: Publishing explorer_item_selected event with item_id: {item_text}")
+                    
+                    # Notify the layout controller to update the workspace
+                    from core.utils.event_system import EventSystem
+                    EventSystem.publish('explorer_item_selected', item_text)
+                    
+                    # Add verification that event was published
+                    debug(f">>> EXPLORER: Event published for item_id: {item_text}")
+                    
             except Exception as e:
                 debug(f"Error parsing ID item: {e}")
         else:
@@ -344,9 +351,12 @@ class ExplorerWidget:
             # Log with the proper logger
             log(f"Selected {level_name}: {item.text(0)} - Path: {path_str}")
             
-            # Force process events to update UI immediately
-            from PySide6.QtWidgets import QApplication
-            QApplication.processEvents()
+            # Publish deselection event
+            EventSystem.publish('explorer_item_deselected')
+        
+        # Force process events to update UI immediately
+        from PySide6.QtWidgets import QApplication
+        QApplication.processEvents()
 
     def load_project_data(self, project_data=None, expanded_states=None):
         """

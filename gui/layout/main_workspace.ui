@@ -6,17 +6,57 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>700</width>
     <height>400</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>400</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Main Workspace</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QTabWidget {
+    background: transparent;
+    border: none;
+}
+QTabWidget::pane {
+    border: 1px solid rgba(114, 114, 114, 0.2);
+    background: transparent;
+}
+QTabBar::tab {
+    background-color: rgba(114, 114, 114, 0.2);
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-right: 2px;
+}
+QTabBar::tab:selected {
+    background-color: rgba(114, 114, 114, 0.35);
+}
+QTabBar::tab:hover:!selected {
+    background-color: rgba(114, 114, 114, 0.15);
+}
+QTabBar::close-button {
+    /* No image specified here - will be set in code */
+    subcontrol-position: right;
+}
+QTabBar::close-button:hover {
+    background-color: rgba(255, 100, 100, 0.3);
+    border-radius: 2px;
+}</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -30,25 +70,31 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="lblHelloWorld">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>24</pointsize>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Hello World!</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
+     <widget class="QWidget" name="table_tab">
+      <attribute name="title">
+       <string>Table</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QTableWidget" name="tableWidget">
+         <column>
+          <property name="text">
+           <string>Filename</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Extension</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

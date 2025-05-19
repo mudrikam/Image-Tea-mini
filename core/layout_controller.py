@@ -4,6 +4,7 @@ from core.widgets.explorer_widget import ExplorerWidget
 from core.widgets.output_logs import OutputLogsWidget
 from core.widgets._default_layout import reset_widget_to_default
 from core.utils.logger import log, debug, warning, error, exception, set_output_logs
+from core.workspace_controller import WorkspaceController
 
 class LayoutController:
     def __init__(self, parent_window, base_dir):
@@ -15,6 +16,9 @@ class LayoutController:
         self.image_preview = None  # Add image preview reference
         self.file_properties = None  # Add file properties reference
         self.settings = QtCore.QSettings("ImageTeaMini", "Layout")
+        
+        # Create workspace controller
+        self.workspace_controller = WorkspaceController(parent_window, base_dir)
     
     def load_explorer_widget(self):
         """Load the explorer dock widget and add it to the main window."""
@@ -121,50 +125,24 @@ class LayoutController:
             exception(e, "Failed to load file properties")
             return None
 
-    def load_main_workspace(self):
-        """Load the main workspace into the central widget."""
-        try:
-            # Load UI file
-            ui_path = f"{self.BASE_DIR}/gui/layout/main_workspace.ui"
-            loader = QtUiTools.QUiLoader()
-            ui_file = QtCore.QFile(ui_path)
-            
-            if not ui_file.exists():
-                error(f"Main workspace UI file not found")
-                # Create a fallback widget
-                workspace_widget = QtWidgets.QWidget()
-                layout = QtWidgets.QVBoxLayout(workspace_widget)
-                label = QtWidgets.QLabel("No workspace template found. Please check your installation.")
-                label.setAlignment(QtCore.Qt.AlignCenter)
-                layout.addWidget(label)
-                self.parent.setCentralWidget(workspace_widget)
-                return workspace_widget
-                
-            ui_file.open(QtCore.QFile.ReadOnly)
-            workspace_widget = loader.load(ui_file)
-            ui_file.close()
-            
-            # Set the workspace as the central widget
-            self.parent.setCentralWidget(workspace_widget)
-            return workspace_widget
-        except Exception as e:
-            exception(e, "Error loading main workspace")
-            
-            # Create a fallback widget
-            workspace_widget = QtWidgets.QWidget()
-            layout = QtWidgets.QVBoxLayout(workspace_widget)
-            label = QtWidgets.QLabel(f"Workspace loading error: {str(e)}")
-            label.setAlignment(QtCore.Qt.AlignCenter)
-            layout.addWidget(label)
-            self.parent.setCentralWidget(workspace_widget)
-            return workspace_widget
-    
+    def load_main_workspace(self, item_id=None):
+        """
+        Load the main workspace into the central widget.
+        This now delegates to the workspace controller.
+        
+        Args:
+            item_id (str, optional): The ID of the selected item in the explorer
+        """
+        return self.workspace_controller.load_workspace(item_id)
+
     def setup_ui(self):
         """Set up all UI components."""
         # This message is useful to show that the app is starting up
         self.load_output_logs_widget()
         
-        self.load_main_workspace()
+        # Load the main workspace using the workspace controller
+        self.workspace_controller.load_workspace()
+        
         self.load_explorer_widget()
         self.load_image_preview_widget()
         self.load_file_properties_widget()  # Add file properties loading
@@ -184,7 +162,7 @@ class LayoutController:
         # This message is useful to confirm the app is ready for use
         log("Ready")
         return self
-    
+
     def ensure_widgets_visible(self):
         """Make sure all dock widgets are visible."""
         # Make sure all dock widgets are visible
@@ -325,8 +303,8 @@ class LayoutController:
             self.widgets['image_preview'].setVisible(True)
             self.widgets['file_properties'].setVisible(True)
         
-        # Refresh the main workspace
-        self.load_main_workspace()
+        # Refresh the main workspace using the workspace controller
+        self.workspace_controller.refresh_current_workspace()
         
         # Process events to ensure all UI changes are applied
         QtWidgets.QApplication.processEvents()
