@@ -27,7 +27,7 @@ class WorkspaceController:
         # Set thread timeout to minimize thread issues
         QtCore.QThreadPool.globalInstance().setExpiryTimeout(1000)  # 1 second thread expiry
         
-        debug("WorkspaceController initialized and subscribed to events")
+        # debug("WorkspaceController initialized and subscribed to events")
     
     def load_workspace(self, item_id=None):
         """

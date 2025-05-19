@@ -68,7 +68,7 @@ class MainController:
             # Create database if needed and set up tables
             db_config.main(self.BASE_DIR)
             
-            log(f"Database initialized at {db_path}")
+            # log(f"Database initialized at {db_path}")
         except Exception as e:
             exception(e, "Failed to initialize database")
     
@@ -79,7 +79,7 @@ class MainController:
         try:
             with open(config_path, 'r') as config_file:
                 config = json.load(config_file)
-                debug(f"{config.get('app_name')} {config.get('app_version')}")
+                log(f"{config.get('app_name')} {config.get('app_version')}")
                 return config
         except FileNotFoundError:
             error(f"Configuration file missing: {config_path}")

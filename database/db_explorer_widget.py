@@ -456,8 +456,14 @@ def check_and_update_year_colors():
         # Get current year
         current_year = str(datetime.datetime.now().year)
         
+        # Make sure database directory is initialized
+        database_dir = db_config.get_database_dir()
+        if database_dir is None:
+            # warning("Database directory not initialized yet, skipping color update")
+            return False
+        
         # Use the expired_year.txt file for checking
-        expired_year_path = os.path.join(db_config.get_database_dir(), "expired_year.txt")
+        expired_year_path = os.path.join(database_dir, "expired_year.txt")
         last_processed_year = None
         
         # Read last processed year if file exists
@@ -496,7 +502,7 @@ def initialize_explorer():
     try:
         # Update colors for previous years' records
         check_and_update_year_colors()
-        log("Explorer widget initialized")
+        # log("Explorer widget initialized")
         return True
     except Exception as e:
         exception(e, "Error initializing explorer widget")

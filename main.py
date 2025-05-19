@@ -36,9 +36,13 @@ def main():
     3. Runs the main event loop
     4. Performs cleanup on exit
     """
-    # Set the attribute to ensure application quits when last window is closed
-    QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
-    QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
+    # Update High DPI settings using the non-deprecated API
+    # Qt6 automatically handles high DPI scaling by default, so we can remove the deprecated attributes
+    # and use the modern approach instead
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"  # Enable high DPI scaling
+    QApplication.setHighDpiScaleFactorRoundingPolicy(
+        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+    )
     
     # Initialize the application
     app = QApplication(sys.argv)

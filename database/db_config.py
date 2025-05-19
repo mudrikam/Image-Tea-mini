@@ -3,7 +3,13 @@ import sqlite3
 import json
 from core.utils.logger import log, debug, warning, error, exception
 
-# BASE_DIR will be provided by main.py
+# Define global variables to be initialized later
+BASE_DIR = None
+DATABASE_DIR = None
+DATABASE_PATH = None
+TABLES_CONFIG_FILE = None
+
+# Constants
 DATABASE_TYPE = "sqlite3"
 DATABASE_NAME = "database.db"
 
@@ -16,7 +22,7 @@ def initialize(base_dir):
     DATABASE_PATH = os.path.join(DATABASE_DIR, DATABASE_NAME)
     TABLES_CONFIG_FILE = os.path.join(DATABASE_DIR, "db_tables_to_create.json")
     
-    debug(f"Database initialized: {DATABASE_PATH}")
+    # debug(f"Database initialized: {DATABASE_PATH}")
     return DATABASE_PATH
 
 def check_and_create_database():
@@ -40,7 +46,7 @@ def load_tables_config():
         try:
             with open(TABLES_CONFIG_FILE, 'r') as file:
                 tables_config = json.load(file)
-            debug(f"Loaded tables configuration from: {TABLES_CONFIG_FILE}")
+            # debug(f"Loaded tables configuration from: {TABLES_CONFIG_FILE}")
             return tables_config
         except json.JSONDecodeError as e:
             error(f"Invalid JSON in tables configuration: {e}")
@@ -70,7 +76,7 @@ def create_tables(conn, tables_config):
         columns_sql = ", ".join(columns)
         create_table_query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_sql})"
         cursor.execute(create_table_query)
-        debug(f"Created or confirmed table: {table_name}")
+        # debug(f"Created or confirmed table: {table_name}")
         
         # Insert initial data if available
         initial_data = table_info.get('initial_data', [])
@@ -99,16 +105,24 @@ def create_tables(conn, tables_config):
                 
                 # Extract values for non-autoincrement columns
                 for row in initial_data:
-                    values = [row[i] for i in non_auto_indices]
-                    cursor.execute(insert_query, values)
+                    # Add a safety check to make sure the row has enough values
+                    if len(row) >= max(non_auto_indices or [0]):
+                        values = [row[i] for i in non_auto_indices]
+                        cursor.execute(insert_query, values)
+
             else:
                 # Standard insert for tables without autoincrement
                 placeholders = ", ".join(["?" for _ in column_names])
                 insert_query = f"INSERT OR IGNORE INTO {table_name} ({', '.join(column_names)}) VALUES ({placeholders})"
+                
+                # Add a safety check for each row
                 for row in initial_data:
-                    cursor.execute(insert_query, row)
+                    if len(row) == len(column_names):
+                        cursor.execute(insert_query, row)
+                    else:
+                        warning(f"Skipping row with incorrect number of values in {table_name}: {row} (expected {len(column_names)} values)")
                     
-            debug(f"Inserted {len(initial_data)} rows of initial data into {table_name}")
+            # debug(f"Inserted {len(initial_data)} rows of initial data into {table_name}")
     
     conn.commit()
 
@@ -142,7 +156,7 @@ def main(base_dir=None):
             
             # Close the connection
             conn.close()
-            log(f"Database setup complete: {DATABASE_PATH}")
+            # log(f"Database setup complete: {DATABASE_PATH}")
         except sqlite3.Error as e:
             error(f"SQLite error: {e}")
         except Exception as e:
@@ -162,10 +176,10 @@ def get_database_dir():
     """Return the directory where the database is located.""" 
     return DATABASE_DIR
 def get_tables_config_file():
-    """Return the path to the tables configuration file."""
+    """Return the path to the tables configuration file.""" 
     return TABLES_CONFIG_FILE
 def get_tables_config():
-    """Return the loaded tables configuration."""
+    """Return the loaded tables configuration.""" 
     return load_tables_config()
 def connect_to_database():
     """Connect to the database and return the connection object with WAL mode enabled."""
