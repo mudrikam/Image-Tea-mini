@@ -160,7 +160,7 @@ class LayoutController:
             self.parent.setCorner(QtCore.Qt.BottomRightCorner, QtCore.Qt.RightDockWidgetArea)
         
         # This message is useful to confirm the app is ready for use
-        log("Ready")
+        # log("Ready")
         return self
 
     def ensure_widgets_visible(self):

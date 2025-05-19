@@ -26,7 +26,54 @@ class OutputLogsWidget:
         # Set this instance as the global one for easy access
         global _global_output_logs
         _global_output_logs = self
+
+    def _load_app_details(self):
+        """Load application details from config.json."""
+        import json
+        config_path = f"{self.BASE_DIR}/config.json"
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            
+            app_name = config.get('app_name', 'Image Tea Mini')
+            app_version = config.get('app_version', '1.0.0')
+            app_copyright = config.get('app_copyright', '2025 Desainia Stduio')
+            app_commit_hash = config.get('app_commit_hash', '')
+            short_hash = app_commit_hash[:7] if app_commit_hash else ''
+        except Exception as e:
+            app_name = "Image Tea Mini"
+            app_version = "1.0.0"
+            app_copyright = "2025 Desainia Stduio"  # Fixed: changed variable name to app_copyright
+            short_hash = ""
+            
+        return app_name, app_version, app_copyright, short_hash  # Fixed: return app_copyright instead of copyright
         
+    def _add_welcome_header(self):
+        """Add the welcome header to the log text."""
+        # Get application details
+        app_name, app_version, app_copyright, short_hash = self._load_app_details()  # Fixed: variable name to app_copyright
+        
+        # Create welcome messages with consistent formatting
+        header_line = "=" * 70
+        welcome_msg1 = f"{header_line}"
+        welcome_msg2 = f"{app_name} v{app_version} - {short_hash} - © {app_copyright}"  # Fixed: use app_copyright
+        welcome_msg3 = f"{header_line}"
+        welcome_msg4 = f"MIT License - Do whatever you want. Zero liability."
+        welcome_msg5 = f"Copy, modify, sell it - I don't care. Just keep the license."
+        welcome_msg6 = f"Use entirely at your own risk."
+        welcome_msg7 = f"{header_line}"
+        
+        # Apply consistent formatting with HTML color - header in green
+        self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg1}</span>")
+        self.log_text.append(f"<span style='color:#88cc88; font-size:14px'>{welcome_msg2}</span>")
+        self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg3}</span>")
+        
+        # License info in blue, with each line separate for cleaner appearance
+        self.log_text.append(f"<span style='color:#036ffc;'>{welcome_msg4}</span>")
+        self.log_text.append(f"<span style='color:#036ffc;'>{welcome_msg5}</span>")
+        self.log_text.append(f"<span style='color:#036ffc;'>{welcome_msg6}</span>")
+        self.log_text.append(f"<span style='color:#036ffc;'>{welcome_msg7}</span>")
+
     def load_ui(self):
         """Load the dock widget from UI file and set up the text area."""
         # Load UI file
@@ -131,13 +178,8 @@ class OutputLogsWidget:
         date = datetime.now().strftime("%b/%d/%Y")  # Format: "May/18/2025"
         time = datetime.now().strftime("%H:%M:%S")  # Format: "10:55:20"
         
-        # Create welcome messages with consistent formatting
-        welcome_msg1 = f"[{os_name}] [INFO] {date} {time} - System - === Image Tea Mini - Output Logs ==="
-        welcome_msg2 = f"[{os_name}] [INFO] {date} {time} - System - Application started successfully"
-        
-        # Apply consistent formatting with HTML color - first message is green
-        self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg1}</span>")
-        self.log_text.append(f"<span style='color:#f0f0f0;'>{welcome_msg2}</span>")
+        # Add welcome header
+        self._add_welcome_header()
         
         # Add the text edit to the layout
         layout.addWidget(self.log_text)
@@ -147,7 +189,6 @@ class OutputLogsWidget:
         self.log_text.customContextMenuRequested.connect(self.show_context_menu)
         
         return self.widget
-    
     
     def connect_to_main_menu(self, main_window):
         """Connect log text operations to main window edit menu.
@@ -254,18 +295,14 @@ class OutputLogsWidget:
         if self.log_text:
             self.log_text.clear()
             
-            # Add the header back using the same formatting as load_ui
+            # Add welcome header
+            self._add_welcome_header()
+            
+            # Add a log cleared message
             os_name = platform.system()[:3]
             date = datetime.now().strftime("%b/%d/%Y")
             time = datetime.now().strftime("%H:%M:%S")
-            
-            # Create welcome messages with consistent formatting
-            welcome_msg1 = f"[{os_name}] [INFO] {date} {time} - System - === Image Tea Mini - Output Logs ==="
-            welcome_msg2 = f"[{os_name}] [INFO] {date} {time} - System - Logs cleared"
-            
-            # Apply consistent formatting with HTML color - first message is green
-            self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg1}</span>")
-            self.log_text.append(f"<span style='color:#f0f0f0;'>{welcome_msg2}</span>")
+            self.log_text.append(f"<span style='color:#f0f0f0;'>[{os_name}] [INFO] {date} {time} - System - Logs cleared</span>")
     
     def save_logs(self):
         """Save the logs to a file."""

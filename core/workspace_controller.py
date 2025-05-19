@@ -299,7 +299,7 @@ class WorkspaceController:
                     extension_item = QtWidgets.QTableWidgetItem(extension)
                     
                     # Set tooltip to show full filename when hovering
-                    filename_item.setToolTip(filename + extension)
+                    filename_item.setToolTip(filename)
                     
                     # Set items in the table
                     table_widget.setItem(row_idx, 0, filename_item)
