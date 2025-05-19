@@ -10,10 +10,10 @@ from PySide6.QtWidgets import QPushButton, QLabel, QHBoxLayout, QWidget
 from PySide6.QtCore import Qt
 import qtawesome as qta
 from core.helper._url_handler import open_url
-from core.helper._about_dialog import show_about_dialog
-from core.helper._license_dialog import show_license_dialog
+from core.helper.dialogs._about_dialog import show_about_dialog
+from core.helper.dialogs._license_dialog import show_license_dialog
 # Update import to use the new function
-from core.helper._donation_dialog import show_donation_dialog
+from core.helper.dialogs._donation_dialog import show_donation_dialog
 from PySide6 import QtUiTools, QtCore
 from core.helper._window_utils import center_window
 

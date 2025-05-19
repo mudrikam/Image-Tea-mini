@@ -9,7 +9,7 @@ from PySide6.QtGui import QIcon
 import os
 
 # Import the license dialog helper and URL opener
-from core.helper._license_dialog import show_license_dialog
+from core.helper.dialogs._license_dialog import show_license_dialog
 from core.helper._url_handler import open_url
 from core.helper._window_utils import center_window
 

@@ -12,12 +12,12 @@ import sys
 import os
 
 # Import necessary helper modules
-from core.helper._about_dialog import show_about_dialog
-from core.helper._license_dialog import show_license_dialog
-from core.helper._contributors_dialog import show_contributors_dialog
-from core.helper._updater_dialog import show_updater_dialog
+from core.helper.dialogs._about_dialog import show_about_dialog
+from core.helper.dialogs._license_dialog import show_license_dialog
+from core.helper.dialogs._contributors_dialog import show_contributors_dialog
+from core.helper.dialogs._updater_dialog import show_updater_dialog
 from core.helper._url_handler import open_url
-from core.helper._donation_dialog import show_donation_dialog
+from core.helper.dialogs._donation_dialog import show_donation_dialog
 from core.helper._window_utils import center_window
 from core.utils.logger import log, debug, warning, error, exception
 

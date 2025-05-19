@@ -287,4 +287,4 @@ class OutputLogsWidget:
                 
                 # Create a more informative log message with a preview of the copied text
                 preview = text[:30] + "..." if len(text) > 30 else text
-                self.append_log("Clipboard", f"Copied text: \"{preview}\"", "DEBUG")
+                self.append_log("Clipboard", f"Copied text: \"{preview}\"", "INFO")
