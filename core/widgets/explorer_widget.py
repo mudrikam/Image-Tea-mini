@@ -64,143 +64,32 @@ class ExplorerWidget:
         self.widget = loader.load(ui_file)
         ui_file.close()
         
-        # Access the dock widget content
-        content_widget = self.widget.findChild(QWidget, "dockWidgetContents")
+        # Find the tree widget from the UI file
+        self.tree = self.widget.findChild(QTreeWidget, "treeWidget")
         
-        # Create a vertical layout if not already present
-        if content_widget.layout() is None:
-            layout = QVBoxLayout(content_widget)
-        else:
-            layout = content_widget.layout()
+        # Find search components
+        self._search_field = self.widget.findChild(QLineEdit, "searchField")
+        search_icon = self.widget.findChild(QLabel, "searchIcon")
+        expand_all_btn = self.widget.findChild(QPushButton, "expandAllButton")
+        collapse_all_btn = self.widget.findChild(QPushButton, "collapseAllButton")
+        
+        # Set icons
+        if search_icon:
+            search_icon.setPixmap(qta.icon('fa5s.search').pixmap(16, 16))
+        
+        if expand_all_btn:
+            expand_all_btn.setIcon(qta.icon('fa5s.expand-arrows-alt'))
+            expand_all_btn.clicked.connect(lambda: self.tree.expandAll() if self.tree else None)
             
-        # Remove all margins to make the widget fill the entire dock
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        if collapse_all_btn:
+            collapse_all_btn.setIcon(qta.icon('fa5s.compress-arrows-alt'))
+            collapse_all_btn.clicked.connect(lambda: (self.tree.collapseAll(), 
+                                                     [self.tree.expandItem(year_item) for year_item in self.years.values()]) 
+                                             if self.tree else None)
         
-        # Clear the layout (remove any existing widgets)
-        while layout.count():
-            item = layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-        
-        # Add search bar at the top
-        search_layout = QHBoxLayout()
-        search_layout.setContentsMargins(5, 5, 5, 5)
-        search_layout.setSpacing(5)
-        
-        # Create search input field
-        self._search_field = QLineEdit()
-        self._search_field.setPlaceholderText("Search dates, IDs...")
-        self._search_field.setClearButtonEnabled(True)
-        self._search_field.textChanged.connect(self._debounced_search)
-        
-        # Add a search icon
-        search_icon = QLabel()
-        search_icon.setPixmap(qta.icon('fa5s.search').pixmap(16, 16))
-        search_icon.setFixedWidth(20)
-
-        # Add expand/collapse buttons
-        expand_all_btn = QPushButton()
-        expand_all_btn.setIcon(qta.icon('fa5s.expand-arrows-alt'))
-        expand_all_btn.setToolTip("Expand All")
-        expand_all_btn.setFixedWidth(28)
-        expand_all_btn.setStyleSheet("QPushButton { border: none; padding: 3px; } QPushButton:hover { background-color: rgba(200, 200, 200, 50); border-radius: 3px; }")
-        expand_all_btn.clicked.connect(lambda: self.tree.expandAll() if self.tree else None)
-        
-        collapse_all_btn = QPushButton()
-        collapse_all_btn.setIcon(qta.icon('fa5s.compress-arrows-alt'))
-        collapse_all_btn.setToolTip("Collapse All")
-        collapse_all_btn.setFixedWidth(28)
-        collapse_all_btn.setStyleSheet("QPushButton { border: none; padding: 3px; } QPushButton:hover { background-color: rgba(200, 200, 200, 50); border-radius: 3px; }")
-        collapse_all_btn.clicked.connect(lambda: (self.tree.collapseAll(), [self.tree.expandItem(year_item) for year_item in self.years.values()]) if self.tree else None)
-        
-        # Add widgets to search layout
-        search_layout.addWidget(search_icon)
-        search_layout.addWidget(self._search_field)
-        search_layout.addWidget(expand_all_btn)
-        search_layout.addWidget(collapse_all_btn)
-        
-        # Add search layout to main layout
-        layout.addLayout(search_layout)
-        
-        # Create the tree widget directly (no scroll area)
-        self.tree = QTreeWidget(content_widget)
-        self.tree.setHeaderHidden(True)  # Hide the header
-        
-        # Set size policy to allow the tree to expand
-        self.tree.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
-        # Show branch lines
-        self.tree.setRootIsDecorated(True)
-        
-        # Use standard scrollbar policies - built into QTreeWidget
-        self.tree.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.tree.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        
-        # Set modern scrollbar styling with more subtle appearance
-        self.tree.setStyleSheet("""
-            QTreeWidget {
-                border: none;
-                background-color: transparent;
-            }
-            
-            QTreeWidget::item {
-                padding: 3px 0px;
-            }
-            
-            /* Subtle scrollbar styling with lower opacity */
-            QScrollBar:vertical {
-                border: none;
-                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
-                width: 8px;  /* Slightly narrower */
-                margin: 0px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:vertical {
-                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
-                min-height: 20px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:vertical:hover {
-                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
-            }
-            
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                height: 0px;
-            }
-            
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-                background: none;
-            }
-            
-            QScrollBar:horizontal {
-                border: none;
-                background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
-                height: 8px;  /* Slightly narrower */
-                margin: 0px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:horizontal {
-                background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
-                min-width: 20px;
-                border-radius: 4px;
-            }
-            
-            QScrollBar::handle:horizontal:hover {
-                background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
-            }
-            
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-                width: 0px;
-            }
-            
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
-                background: none;
-            }
-        """)
+        # Connect search field
+        if self._search_field:
+            self._search_field.textChanged.connect(self._debounced_search)
         
         # Connect item click signal to handler
         try:
@@ -230,9 +119,6 @@ class ExplorerWidget:
         # Expand the top levels by default
         for year_item in self.years.values():
             self.tree.expandItem(year_item)
-        
-        # Add tree directly to the layout
-        layout.addWidget(self.tree)
         
         return self.widget
 

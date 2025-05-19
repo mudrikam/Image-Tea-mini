@@ -165,62 +165,55 @@ class WorkspaceController:
                 self.current_item_id = item_id
                 return
         
-        # Create a new tab with the structure from the UI file
-        tab_content = QtWidgets.QWidget()
-        tab_layout = QtWidgets.QVBoxLayout(tab_content)
-        tab_layout.setContentsMargins(0, 5, 0, 0)
-        
-        # Create a nested tab widget like in the UI
-        inner_tab_widget = QtWidgets.QTabWidget()
-        tab_layout.addWidget(inner_tab_widget)
-        
-        # Create table view tab with the same structure as in the UI
-        table_tab = QtWidgets.QWidget()
-        table_layout = QtWidgets.QVBoxLayout(table_tab)
-        table_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # Create a new table widget based on the properties from the UI file
-        if self.inner_table_widget:
-            # Use the properties from the original table widget
-            table_widget = QtWidgets.QTableWidget()
-            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-            
-            # Copy horizontal header settings
-            table_widget.setColumnCount(2)
-            table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
-            table_widget.horizontalHeader().setStretchLastSection(True)
-            
-            # Ensure vertical header (row numbers) is visible
-            table_widget.verticalHeader().setVisible(True)
-            
-            # No need for duplicate stylesheet here - styling comes from the UI file
-            # Set sort indicator settings from the UI file
-            table_widget.horizontalHeader().setSortIndicatorShown(True)
-            table_widget.verticalHeader().setSortIndicatorShown(True)
+        # We'll use the UI template to create new tabs instead of building them from scratch
+        if hasattr(self, 'template_tab') and self.template_tab:
+            # Clone the template tab structure
+            tab_content = self._clone_template_tab()
         else:
-            # Fallback if original table not found
+            # Fallback if no template is available
+            tab_content = QtWidgets.QWidget()
+            tab_layout = QtWidgets.QVBoxLayout(tab_content)
+            tab_layout.setContentsMargins(0, 5, 0, 0)
+            
+            # Create nested tab widget
+            inner_tab_widget = QtWidgets.QTabWidget()
+            tab_layout.addWidget(inner_tab_widget)
+            
+            # Create table view tab
+            table_tab = QtWidgets.QWidget()
+            table_layout = QtWidgets.QVBoxLayout(table_tab)
+            table_layout.setContentsMargins(0, 0, 0, 0)
+            
+            # Create table
             table_widget = QtWidgets.QTableWidget()
+            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
             table_widget.setColumnCount(2)
             table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
             table_widget.horizontalHeader().setStretchLastSection(True)
-            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-            
-            # Ensure vertical header (row numbers) is visible
             table_widget.verticalHeader().setVisible(True)
+            
+            # Add table to layout
+            table_layout.addWidget(table_widget)
+            
+            # Add inner tabs
+            inner_tab_widget.addTab(table_tab, "Table")
+            inner_tab_widget.addTab(QtWidgets.QWidget(), "Grid")
+            inner_tab_widget.addTab(QtWidgets.QWidget(), "Details")
         
-        # Add table to layout
-        table_layout.addWidget(table_widget)
+        # Find the table widget in the new tab content
+        inner_tab_widget = tab_content.findChild(QtWidgets.QTabWidget)
+        table_tab = inner_tab_widget.widget(0) if inner_tab_widget else None
+        table_widget = table_tab.findChild(QtWidgets.QTableWidget) if table_tab else None
         
-        # Add table tab to nested tab widget
-        inner_tab_widget.addTab(table_tab, "Table")
-        
-        # Add grid view and details view tabs (empty for now)
-        grid_tab = QtWidgets.QWidget()
-        inner_tab_widget.addTab(grid_tab, "Grid")
-        
-        details_tab = QtWidgets.QWidget()
-        inner_tab_widget.addTab(details_tab, "Details")
-        
+        if not table_widget:
+            # Fallback if we couldn't find the table widget in the cloned template
+            table_widget = QtWidgets.QTableWidget()
+            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+            table_widget.setColumnCount(2)
+            table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
+            table_widget.horizontalHeader().setStretchLastSection(True)
+            table_widget.verticalHeader().setVisible(True)
+            
         # Extract a shorter name for the tab
         tab_name = self._get_tab_name_from_item_id(item_id)
         
@@ -252,6 +245,61 @@ class WorkspaceController:
         # Populate the tab with data
         self._update_table_data(item_id)
     
+    def _clone_template_tab(self):
+        """Clone the template tab structure to create a new tab with the same layout."""
+        # Create a new widget as the base for our cloned tab
+        cloned_widget = QtWidgets.QWidget()
+        cloned_layout = QtWidgets.QVBoxLayout(cloned_widget)
+        cloned_layout.setContentsMargins(0, 5, 0, 0)
+        
+        # Find the inner tab widget in the template
+        template_inner_tab = self.template_tab.findChild(QtWidgets.QTabWidget)
+        
+        if template_inner_tab:
+            # Create a new tab widget for our clone
+            new_inner_tab = QtWidgets.QTabWidget()
+            cloned_layout.addWidget(new_inner_tab)
+            
+            # Clone each tab from the template
+            for i in range(template_inner_tab.count()):
+                tab_name = template_inner_tab.tabText(i)
+                template_tab_page = template_inner_tab.widget(i)
+                
+                # Create a new widget for this inner tab
+                new_tab_page = QtWidgets.QWidget()
+                new_tab_layout = QtWidgets.QVBoxLayout(new_tab_page)
+                new_tab_layout.setContentsMargins(0, 0, 0, 0)
+                
+                # If this is the table tab, create a table widget
+                if i == 0:  # Assuming first tab is always the table tab
+                    template_table = template_tab_page.findChild(QtWidgets.QTableWidget)
+                    if template_table:
+                        new_table = QtWidgets.QTableWidget()
+                        
+                        # Copy properties from the template table
+                        new_table.setSelectionBehavior(template_table.selectionBehavior())
+                        new_table.setColumnCount(template_table.columnCount())
+                        
+                        # Set header labels
+                        headers = []
+                        for col in range(template_table.columnCount()):
+                            headers.append(template_table.horizontalHeaderItem(col).text())
+                        new_table.setHorizontalHeaderLabels(headers)
+                        
+                        # Copy more properties
+                        new_table.horizontalHeader().setStretchLastSection(
+                            template_table.horizontalHeader().stretchLastSection())
+                        new_table.verticalHeader().setVisible(
+                            template_table.verticalHeader().isVisible())
+                        
+                        # Add the table to the tab layout
+                        new_tab_layout.addWidget(new_table)
+                
+                # Add the new tab page to the inner tab widget
+                new_inner_tab.addTab(new_tab_page, tab_name)
+        
+        return cloned_widget
+
     def _get_tab_name_from_item_id(self, item_id):
         """Extract a shorter name for the tab from the item_id."""
         # Format: YYYY-MM-DD_ID_STATUS
@@ -436,7 +484,7 @@ class WorkspaceController:
         Handle explorer item selection event.
         Add a new tab or switch to existing tab for the selected item.
         """
-        debug(f"Explorer item selected: {item_id}")
+        # debug(f"Explorer item selected: {item_id}")
         
         # Ensure main workspace UI is loaded
         if self.workspace_widget is None or self.tab_widget is None:

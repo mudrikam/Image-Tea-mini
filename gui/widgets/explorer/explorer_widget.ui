@@ -40,6 +40,68 @@ QDockWidget::title {
 }
 QDockWidget::contents {
     border: 1px solid rgba(114, 114, 114, 0.2);
+}
+
+QTreeWidget {
+    border: none;
+    background-color: transparent;
+}
+
+QTreeWidget::item {
+    padding: 3px 0px;
+}
+
+/* Subtle scrollbar styling with lower opacity */
+QScrollBar:vertical {
+    border: none;
+    background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+    width: 8px;  /* Slightly narrower */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+    height: 8px;  /* Slightly narrower */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+    min-width: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
 }</string>
   </property>
   <property name="windowTitle">
@@ -68,6 +130,133 @@ QDockWidget::contents {
     <property name="bottomMargin">
      <number>0</number>
     </property>
+    <item>
+     <layout class="QHBoxLayout" name="searchLayout">
+      <property name="leftMargin">
+       <number>5</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>5</number>
+      </property>
+      <property name="bottomMargin">
+       <number>5</number>
+      </property>
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="searchIcon">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="searchField">
+        <property name="placeholderText">
+         <string>Search dates, IDs...</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="expandAllButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Expand All</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton { 
+    border: none; 
+    padding: 3px; 
+} 
+QPushButton:hover { 
+    background-color: rgba(200, 200, 200, 50); 
+    border-radius: 3px; 
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="collapseAllButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Collapse All</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton { 
+    border: none; 
+    padding: 3px; 
+} 
+QPushButton:hover { 
+    background-color: rgba(200, 200, 200, 50); 
+    border-radius: 3px; 
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTreeWidget" name="treeWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>true</bool>
+      </property>
+      <property name="headerHidden">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string>Items</string>
+       </property>
+      </column>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
