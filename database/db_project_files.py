@@ -88,6 +88,70 @@ class ProjectFilesModel:
         """Initialize the model."""
         self.table_name = "project_data"
     
+    def get_last_item_id(self):
+        """
+        Get the last used item_id from the database and convert to int.
+        
+        Returns:
+            int: The last used item_id as an integer, or 0 if no items found
+        """
+        try:
+            conn = connect_to_database()
+            cursor = conn.cursor()
+            
+            # Query for the maximum numeric item_id from the database
+            query = """
+                SELECT item_id FROM project_data 
+                WHERE deleted_at IS NULL
+            """
+            
+            cursor.execute(query)
+            
+            # Fetch all item_ids
+            rows = cursor.fetchall()
+            close_database_connection(conn)
+            
+            # If no records found, start with 0
+            if not rows:
+                return 0
+            
+            # Extract numeric value from each item_id
+            # Expected format: four digits like "0001", "0023", etc.
+            max_id = 0
+            for row in rows:
+                item_id = row[0]
+                if item_id and isinstance(item_id, str):
+                    try:
+                        # Try to convert the string to an integer
+                        id_value = int(item_id)
+                        if id_value > max_id:
+                            max_id = id_value
+                    except ValueError:
+                        # If conversion fails, ignore this item_id
+                        continue
+            
+            return max_id
+            
+        except sqlite3.Error as e:
+            error(f"Database error when retrieving last item_id: {e}")
+            return 0
+        except Exception as e:
+            exception(e, "Error retrieving last item_id")
+            return 0
+            
+    def get_next_item_id(self):
+        """
+        Get the next available item_id as a zero-padded 4-digit string.
+        
+        Returns:
+            str: The next available item_id (e.g., "0001", "0002", etc.)
+        """
+        last_id = self.get_last_item_id()
+        next_id = last_id + 1
+        
+        # Format as 4-digit string with leading zeros
+        return f"{next_id:04d}"
+
     def add_file(self, file_details, publish_event=True):
         """
         Add a file to the project database.
@@ -111,6 +175,10 @@ class ProjectFilesModel:
             if 'day_color' not in file_details:
                 # Completely independent from month color
                 file_details['day_color'] = str(generate_day_color())
+            
+            # Generate the next item_id if not provided
+            if 'item_id' not in file_details:
+                file_details['item_id'] = self.get_next_item_id()
             
             conn = connect_to_database()
             cursor = conn.cursor()

@@ -1,46 +1,42 @@
 import os
 import datetime
-import random
 from PySide6.QtWidgets import QFileDialog
 from core.utils.logger import log, debug, warning, error, exception
+from database.db_project_files import ProjectFilesModel
 
 # Global operation ID - will be regenerated for each new file operation
 # This ensures all files opened in one operation get the same ID
 _current_operation_id = None
 
-def _generate_operation_id():
-    """
-    Generate a unique 4-digit operation ID.
-    Called once per file operation (single file, multiple files, folder, etc.)
-    
-    Returns:
-        str: A 4-digit random operation ID
-    """
-    # Generate a random 4-digit number as a string with leading zeros
-    return f"{random.randint(1, 9999):04d}"
-
 def get_new_operation_id():
     """
-    Reset and return a new operation ID.
-    To be called at the start of any file/folder operation.
+    Generate a sequential 4-digit operation ID from the database.
     
     Returns:
-        str: A 4-digit operation ID
+        str: A 4-digit sequential operation ID
     """
     global _current_operation_id
-    _current_operation_id = _generate_operation_id()
-    return _current_operation_id
+    try:
+        # Get the next available ID from the database
+        project_model = ProjectFilesModel()
+        _current_operation_id = project_model.get_next_item_id()
+        return _current_operation_id
+    except Exception as e:
+        # Fallback to simple incrementing if database fails
+        warning(f"Failed to get sequential ID from database: {str(e)}")
+        _current_operation_id = "0001"  # Default to "0001" if no previous ID exists
+        return _current_operation_id
 
 def get_current_operation_id():
     """
-    Get the current operation ID or generate one if none exists.
+    Get the current operation ID or generate a new sequential one if none exists.
     
     Returns:
         str: The current 4-digit operation ID
     """
     global _current_operation_id
     if _current_operation_id is None:
-        _current_operation_id = _generate_operation_id()
+        return get_new_operation_id()
     return _current_operation_id
 
 def get_file_details(filepath, operation_id=None):
