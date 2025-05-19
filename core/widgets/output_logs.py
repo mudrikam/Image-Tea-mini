@@ -64,9 +64,9 @@ class OutputLogsWidget:
         welcome_msg7 = f"{header_line}"
         
         # Apply consistent formatting with HTML color - header in green
-        self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg1}</span>")
-        self.log_text.append(f"<span style='color:#88cc88; font-size:14px'>{welcome_msg2}</span>")
-        self.log_text.append(f"<span style='color:#88cc88;'>{welcome_msg3}</span>")
+        self.log_text.append(f"<span style='color:#53a100;'>{welcome_msg1}</span>")
+        self.log_text.append(f"<span style='color:#53a100; font-size:14px'>{welcome_msg2}</span>")
+        self.log_text.append(f"<span style='color:#53a100;'>{welcome_msg3}</span>")
         
         # License info in blue, with each line separate for cleaner appearance
         self.log_text.append(f"<span style='color:#036ffc;'>{welcome_msg4}</span>")

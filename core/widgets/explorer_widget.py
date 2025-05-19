@@ -98,10 +98,27 @@ class ExplorerWidget:
         search_icon = QLabel()
         search_icon.setPixmap(qta.icon('fa5s.search').pixmap(16, 16))
         search_icon.setFixedWidth(20)
+
+        # Add expand/collapse buttons
+        expand_all_btn = QPushButton()
+        expand_all_btn.setIcon(qta.icon('fa5s.expand-arrows-alt'))
+        expand_all_btn.setToolTip("Expand All")
+        expand_all_btn.setFixedWidth(28)
+        expand_all_btn.setStyleSheet("QPushButton { border: none; padding: 3px; } QPushButton:hover { background-color: rgba(200, 200, 200, 50); border-radius: 3px; }")
+        expand_all_btn.clicked.connect(lambda: self.tree.expandAll() if self.tree else None)
+        
+        collapse_all_btn = QPushButton()
+        collapse_all_btn.setIcon(qta.icon('fa5s.compress-arrows-alt'))
+        collapse_all_btn.setToolTip("Collapse All")
+        collapse_all_btn.setFixedWidth(28)
+        collapse_all_btn.setStyleSheet("QPushButton { border: none; padding: 3px; } QPushButton:hover { background-color: rgba(200, 200, 200, 50); border-radius: 3px; }")
+        collapse_all_btn.clicked.connect(lambda: (self.tree.collapseAll(), [self.tree.expandItem(year_item) for year_item in self.years.values()]) if self.tree else None)
         
         # Add widgets to search layout
         search_layout.addWidget(search_icon)
         search_layout.addWidget(self._search_field)
+        search_layout.addWidget(expand_all_btn)
+        search_layout.addWidget(collapse_all_btn)
         
         # Add search layout to main layout
         layout.addLayout(search_layout)
@@ -446,8 +463,6 @@ class ExplorerWidget:
             for i in range(item.childCount()):
                 child = item.child(i)
                 self._expand_item_recursive(child)
-
-    # ...existing code...
 
     def load_data_from_database(self):
         """Load project data from the database using db_explorer_widget."""
