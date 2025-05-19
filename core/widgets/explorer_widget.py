@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QSizePolicy, QPushButton, QHBoxLayout
 from PySide6 import QtUiTools, QtCore
 from PySide6.QtGui import QColor, QBrush, QFont
@@ -32,17 +32,21 @@ class ExplorerWidget:
         self.month_colors = {}   # {year_str: {month_str: QColor}}
         self.day_colors = {}     # {year_str: {month_str: {day_str: QColor}}
         
+        # For debounced refresh handling
+        self._debounced_refresh_timer = None
+        
         # Subscribe to the project_data_changed event
         EventSystem.subscribe('project_data_changed', self.on_project_data_changed)
         
     def on_project_data_changed(self):
         """Called when project data changes in the database."""
         if self.tree:
-            log("Project data changed. Refreshing explorer view.")
+            log("Project data changed. Scheduling explorer view refresh.")
             # Invalidate cache when data changes
             self._cache_valid = False
-            self.refresh_data()
-        
+            # Use debounced refresh instead of immediate refresh
+            self.debounced_refresh_data()
+
     def load_ui(self):
         """Load the dock widget from UI file."""
         # Load UI file
@@ -205,6 +209,23 @@ class ExplorerWidget:
         from PySide6.QtWidgets import QApplication
         QApplication.processEvents()
 
+    def debounced_refresh_data(self, delay=500):
+        """
+        Debounce refresh calls to prevent multiple rapid refreshes.
+        
+        Args:
+            delay (int): Delay in milliseconds before refresh happens
+        """
+        # Cancel any existing timer
+        if self._debounced_refresh_timer is not None:
+            self._debounced_refresh_timer.stop()
+            
+        # Create a new timer
+        self._debounced_refresh_timer = QTimer()
+        self._debounced_refresh_timer.setSingleShot(True)
+        self._debounced_refresh_timer.timeout.connect(self.refresh_data)
+        self._debounced_refresh_timer.start(delay)  # milliseconds
+
     def load_data_from_database(self):
         """Load project data from the database using db_explorer_widget."""
         try:
@@ -222,7 +243,7 @@ class ExplorerWidget:
                 start_time = time.time()
                 project_data = db_explorer_widget.get_project_structure(self.BASE_DIR)
                 query_time = time.time() - start_time
-                debug(f"Database query completed in {query_time:.3f} seconds")
+                # debug(f"Database query completed in {query_time:.3f} seconds")
                 
                 # Cache the data for future use
                 if project_data:
@@ -237,7 +258,7 @@ class ExplorerWidget:
             start_time = time.time()
             success = self.load_project_data(project_data, expanded_states)
             ui_update_time = time.time() - start_time
-            debug(f"UI tree update completed in {ui_update_time:.3f} seconds")
+            # debug(f"UI tree update completed in {ui_update_time:.3f} seconds")
             
             return success
                 
@@ -333,14 +354,14 @@ class ExplorerWidget:
                     log(f"Selected ID: {id_value} (Status: {status}) - Path: {path_str}")
                     
                     # Add extra debugging for event publishing
-                    debug(f">>> EXPLORER: Publishing explorer_item_selected event with item_id: {item_text}")
+                    # debug(f">>> EXPLORER: Publishing explorer_item_selected event with item_id: {item_text}")
                     
                     # Notify the layout controller to update the workspace
                     from core.utils.event_system import EventSystem
                     EventSystem.publish('explorer_item_selected', item_text)
                     
                     # Add verification that event was published
-                    debug(f">>> EXPLORER: Event published for item_id: {item_text}")
+                    # debug(f">>> EXPLORER: Event published for item_id: {item_text}")
                     
             except Exception as e:
                 debug(f"Error parsing ID item: {e}")
@@ -491,10 +512,6 @@ class ExplorerWidget:
                     # Process each item (ID) for this day
                     item_list = day_data.get('items', [])
                     
-                    # Debug the items before sorting
-                    for item in item_list:
-                        debug(f"Before sort - Database ID: {item.get('id')}, Item ID: {item.get('item_id')}")
-                    
                     # Sort items by database ID (primary key) in descending order
                     # Higher ID values were created more recently
                     def get_db_id_for_sort(item):
@@ -511,10 +528,6 @@ class ExplorerWidget:
                         key=get_db_id_for_sort,
                         reverse=True  # Descending order - newest items (with highest IDs) first
                     )
-                    
-                    # Debug the sorted items
-                    for item in sorted_items:
-                        debug(f"Sorted - Database ID: {item.get('id')}, Item ID: {item.get('item_id')}")
                     
                     for item_data in sorted_items:
                         id_value = item_data.get('item_id')  # Use item_id for display

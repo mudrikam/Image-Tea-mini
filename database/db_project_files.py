@@ -88,12 +88,13 @@ class ProjectFilesModel:
         """Initialize the model."""
         self.table_name = "project_data"
     
-    def add_file(self, file_details):
+    def add_file(self, file_details, publish_event=False):
         """
         Add a file to the project database.
         
         Args:
             file_details (dict): Dictionary containing file details
+            publish_event (bool): Whether to publish a data changed event (default: False)
             
         Returns:
             bool or int: Record ID if successful, False otherwise
@@ -136,8 +137,10 @@ class ProjectFilesModel:
             log(f"Added file to database: {file_details.get('filename', 'Unknown')} with ID {last_id}")
             close_database_connection(conn)
             
-            # Publish event to notify listeners that data has changed
-            EventSystem.publish('project_data_changed')
+            # Only publish event if explicitly requested
+            # This allows batch operations to control when to refresh the UI
+            if publish_event:
+                EventSystem.publish('project_data_changed')
             
             return last_id
             
@@ -164,11 +167,17 @@ class ProjectFilesModel:
         """
         success_ids = []
         for file_details in file_details_list:
-            result = self.add_file(file_details)
+            # Don't publish event for individual file additions - only at the end
+            result = self.add_file(file_details, publish_event=False)
             if result:  # If add_file returns the ID (not False)
                 success_ids.append(result)
         
         log(f"Added {len(success_ids)}/{len(file_details_list)} files to database")
+        
+        # Publish event only after all files have been added
+        if success_ids:
+            EventSystem.publish('project_data_changed')
+            
         return success_ids
     
     def get_all_files(self, status=None):
@@ -420,12 +429,16 @@ class ProjectFilesModel:
                                 file_details['month_color'] = str(month_color)
                                 file_details['day_color'] = str(day_color)
                                 
-                                # Add file individually using add_file
-                                file_id = self.add_file(file_details)
+                                # Add file individually using add_file but don't publish events for each one
+                                file_id = self.add_file(file_details, publish_event=False)
                                 if file_id:
                                     processed_count += 1
                         except Exception as e:
                             warning(f"Error processing file {file_path}: {str(e)}")
+            
+            # Publish event only after processing all files in the folder
+            if processed_count > 0:
+                EventSystem.publish('project_data_changed')
         
         except Exception as e:
             exception(e, f"Error processing folder {folder_path}")
@@ -461,6 +474,8 @@ class ProjectFilesModel:
         month_color = generate_month_color()  # Not based on year_color
         day_color = generate_day_color()      # Not based on month_color
         
+        total_processed_files = 0
+        
         for folder_path in folder_paths:
             if not folder_path or not os.path.isdir(folder_path):
                 continue
@@ -495,10 +510,11 @@ class ProjectFilesModel:
                                     file_details['month_color'] = str(month_color)
                                     file_details['day_color'] = str(day_color)
                                     
-                                    # Add file individually using add_file
-                                    file_id = self.add_file(file_details)
+                                    # Add file individually using add_file but don't publish events for each one
+                                    file_id = self.add_file(file_details, publish_event=False)
                                     if file_id:
                                         folder_processed_count += 1
+                                        total_processed_files += 1
                             except Exception as e:
                                 warning(f"Error processing file {file_path}: {str(e)}")
                 
@@ -516,4 +532,8 @@ class ProjectFilesModel:
             except Exception as e:
                 exception(e, f"Error processing folder {folder_path}")
         
+        # Publish event only once after all folders have been processed
+        if total_processed_files > 0:
+            EventSystem.publish('project_data_changed')
+            
         return results

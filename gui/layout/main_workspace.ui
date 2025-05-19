@@ -70,7 +70,7 @@ QTabBar::close-button:hover {
     <number>0</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tabWidget_2">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -78,22 +78,46 @@ QTabBar::close-button:hover {
       <attribute name="title">
        <string>Table</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QTableWidget" name="tableWidget">
-         <column>
-          <property name="text">
-           <string>Filename</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Extension</string>
-          </property>
-         </column>
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="table_tab">
+          <attribute name="title">
+           <string>Table</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QTableWidget" name="tableWidget">
+             <column>
+              <property name="text">
+               <string>Filename</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Extension</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QWidget" name="grid_tab">
+      <attribute name="title">
+       <string>Grid</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="details_tab">
+      <attribute name="title">
+       <string>Details</string>
+      </attribute>
      </widget>
     </widget>
    </item>

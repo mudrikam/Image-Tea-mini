@@ -16,10 +16,16 @@ class WorkspaceController:
         self.table_widgets = {}  # Dictionary to store table widgets for each tab: {item_id: table_widget}
         self.tab_ids = {}  # Dictionary to map tab indices to item IDs: {tab_index: item_id}
         
-        # Subscribe to the explorer selection events
+        # Keep track of QtCore.QObject objects that need to be explicitly deleted
+        self._qt_objects = []
+        
+        # Subscribe to the explorer selection events using weak references
         from core.utils.event_system import EventSystem
-        EventSystem.subscribe('explorer_item_selected', self.on_explorer_item_selected)
-        EventSystem.subscribe('explorer_item_deselected', self.on_explorer_item_deselected)
+        EventSystem.subscribe('explorer_item_selected', self.on_explorer_item_selected, weak=True)
+        EventSystem.subscribe('explorer_item_deselected', self.on_explorer_item_deselected, weak=True)
+        
+        # Set thread timeout to minimize thread issues
+        QtCore.QThreadPool.globalInstance().setExpiryTimeout(1000)  # 1 second thread expiry
         
         debug("WorkspaceController initialized and subscribed to events")
     
@@ -35,7 +41,7 @@ class WorkspaceController:
                 ui_filename = "main_workspace.ui"
                 ui_path = f"{self.BASE_DIR}/gui/layout/{ui_filename}"
                 
-                debug(f"Loading main workspace UI: {ui_path}")
+                # debug(f"Loading main workspace UI: {ui_path}")
                 loader = QtUiTools.QUiLoader()
                 ui_file = QtCore.QFile(ui_path)
                 
@@ -98,7 +104,7 @@ class WorkspaceController:
             # Load the drag-and-drop UI file
             ui_path = f"{self.BASE_DIR}/gui/layout/main_workspace_dnd.ui"
             
-            debug(f"Loading drag-and-drop UI: {ui_path}")
+            # debug(f"Loading drag-and-drop UI: {ui_path}")
             loader = QtUiTools.QUiLoader()
             ui_file = QtCore.QFile(ui_path)
             
@@ -329,19 +335,26 @@ class WorkspaceController:
         button.setCursor(QtCore.Qt.ArrowCursor)
         button.setStyleSheet("QToolButton { border: none; padding: 0px; background: transparent; }")
         
-        # Connect button click to close tab, but use a lambda to capture the button
-        button.clicked.connect(lambda: self._handle_tab_close_button_clicked(button))
+        # Store the button in our tracked objects list
+        self._qt_objects.append(button)
+        
+        # Use a direct connection approach with a simple lambda that captures the button
+        # This avoids the QMetaObject.invokeMethod complexity that's causing issues
+        button.clicked.connect(lambda: self._close_tab_for_button(button))
         return button
 
-    def _handle_tab_close_button_clicked(self, button):
-        """Handle clicks on the custom tab close button."""
-        # Find which tab this button belongs to
-        tab_bar = self.tab_widget.tabBar()
-        for i in range(tab_bar.count()):
-            if tab_bar.tabButton(i, QtWidgets.QTabBar.RightSide) == button:
-                # Close this tab
-                self.close_tab(i)
-                break
+    def _close_tab_for_button(self, button):
+        """Find and close the tab associated with this button."""
+        try:
+            if self.tab_widget:
+                tab_bar = self.tab_widget.tabBar()
+                for i in range(tab_bar.count()):
+                    if tab_bar.tabButton(i, QtWidgets.QTabBar.RightSide) == button:
+                        # Close this tab
+                        self.close_tab(i)
+                        break
+        except Exception as e:
+            warning(f"Error closing tab: {e}")  # Use warning instead of print
     
     def _format_size(self, size):
         """Format file size to human readable format."""
@@ -386,3 +399,53 @@ class WorkspaceController:
         if self.current_item_id:
             self._update_table_data(self.current_item_id)
         return self.workspace_widget
+    
+    def __del__(self):
+        """Clean up resources when the controller is deleted."""
+        try:
+            # Unsubscribe from events
+            from core.utils.event_system import EventSystem
+            EventSystem.unsubscribe('explorer_item_selected', self.on_explorer_item_selected)
+            EventSystem.unsubscribe('explorer_item_deselected', self.on_explorer_item_deselected)
+            
+            # Explicitly clean up Qt objects to avoid thread storage issues
+            for obj in self._qt_objects:
+                try:
+                    # Disconnect all signals from this object
+                    if hasattr(obj, 'disconnect'):
+                        obj.disconnect()
+                    
+                    # Delete the object
+                    obj.deleteLater()
+                except:
+                    pass
+            
+            # Clear references
+            self._qt_objects.clear()
+            
+            # Clear table widgets
+            for item_id in list(self.table_widgets.keys()):
+                try:
+                    table = self.table_widgets[item_id]
+                    if table:
+                        table.setModel(None)
+                        table.deleteLater()
+                except:
+                    pass
+            
+            # Clear dictionaries
+            self.table_widgets.clear()
+            self.tab_ids.clear()
+            
+            # Clear other references
+            self.tab_widget = None
+            self.workspace_widget = None
+            self.current_item_id = None
+            
+            # Force garbage collection
+            import gc
+            gc.collect()
+        
+        except Exception as e:
+            # Use logger instead of print
+            log(f"Error during WorkspaceController cleanup: {e}")
