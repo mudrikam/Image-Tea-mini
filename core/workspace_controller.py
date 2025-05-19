@@ -15,6 +15,9 @@ class WorkspaceController:
         self.BASE_DIR = base_dir
         self.current_item_id = None
         self.workspace_widget = None
+        self.dnd_widget = None
+        self.layout = None
+        self.container = None
         
         # Initialize helper modules
         self.ui_loader = UILoader(base_dir)
@@ -36,23 +39,23 @@ class WorkspaceController:
     
     def load_workspace(self, item_id=None):
         """
-        Load the workspace using the main_workspace.ui file with tabs.
-        If no tabs are open or item_id is None, load the drag-and-drop UI.
+        Load both workspace UIs (tabbed and drag-and-drop) and switch between them as needed.
         """
         try:
-            # If we're loading the main workspace UI for the first time or switching from DnD to tabbed
-            if self.workspace_widget is None or self.tab_widget is None:
-                # Load the appropriate UI file
+            # Create a container widget and QStackedLayout if not already done
+            if self.container is None:
+                debug("Creating new QStackedLayout container")
+                self.container = QtWidgets.QWidget()
+                self.layout = QtWidgets.QStackedLayout(self.container)
+                self.parent.setCentralWidget(self.container)
+            
+            # Initialize the workspace UI if not already done
+            if self.workspace_widget is None:
+                debug("Loading main workspace UI")
                 workspace_widget, error_msg = self.ui_loader.load_workspace_ui("main_workspace.ui")
-                
                 if not workspace_widget:
-                    # Use fallback widget if UI loading failed
                     workspace_widget = self.ui_loader.create_fallback_widget(error_msg)
-                    self.parent.setCentralWidget(workspace_widget)
-                    self.workspace_widget = workspace_widget
-                    return workspace_widget
                 
-                # Store reference to the workspace widget
                 self.workspace_widget = workspace_widget
                 
                 # Find UI components
@@ -66,9 +69,25 @@ class WorkspaceController:
                     self.tab_manager.initialize_tabs(self.tab_widget)
                 else:
                     warning("Could not find tabWidget in main_workspace.ui")
+                
+                # Add to QStackedLayout
+                self.layout.addWidget(self.workspace_widget)
+            
+            # Initialize the drag-and-drop UI if not already done
+            if self.dnd_widget is None:
+                debug("Loading drag-and-drop UI")
+                dnd_widget, error_msg = self.ui_loader.load_workspace_ui("main_workspace_dnd.ui")
+                if not dnd_widget:
+                    dnd_widget = self.ui_loader.create_fallback_widget(error_msg)
+                
+                self.dnd_widget = dnd_widget
+                
+                # Add to QStackedLayout
+                self.layout.addWidget(self.dnd_widget)
             
             # If an item is specified, add or select a tab for it
             if item_id:
+                debug(f"Adding or selecting tab for item: {item_id}")
                 table_widget = self.tab_manager.add_or_select_tab(item_id)
                 if table_widget:
                     # Update the table data
@@ -76,61 +95,34 @@ class WorkspaceController:
                     self.tab_manager.update_tab_title(item_id, file_count)
                     self.current_item_id = item_id
             
-            # If there are no tabs and no item_id, show the drag-and-drop UI
-            if self.tab_widget and self.tab_widget.count() == 0:
-                # Close the current workspace and switch to DnD UI
-                return self._switch_to_dnd_ui()
-            
-            # Set as central widget if not already
-            if self.parent.centralWidget() != self.workspace_widget:
-                self.parent.setCentralWidget(self.workspace_widget)
+            # Show the appropriate UI based on whether there are tabs
+            if self.tab_widget and self.tab_widget.count() > 0:
+                debug(f"Showing workspace UI with {self.tab_widget.count()} tabs")
+                self.layout.setCurrentWidget(self.workspace_widget)
+            else:
+                debug("Showing drag-and-drop UI because no tabs are open")
+                self.layout.setCurrentWidget(self.dnd_widget)
             
             return self.workspace_widget
             
         except Exception as e:
             exception(e, "Error loading workspace")
-            workspace_widget = self.ui_loader.create_fallback_widget(f"Error: {str(e)}")
-            self.parent.setCentralWidget(workspace_widget)
-            self.workspace_widget = workspace_widget
-            return workspace_widget
-    
-    def _switch_to_dnd_ui(self):
-        """Switch to the drag-and-drop UI when no tabs are open."""
-        try:
-            # Load the drag-and-drop UI file
-            workspace_widget, error_msg = self.ui_loader.load_workspace_ui("main_workspace_dnd.ui")
-            
-            if not workspace_widget:
-                # Use fallback widget if UI loading failed
-                workspace_widget = self.ui_loader.create_fallback_widget(error_msg)
-                self.parent.setCentralWidget(workspace_widget)
-                self.workspace_widget = workspace_widget
-                return workspace_widget
-            
-            # Clear tab references since we're switching to DnD view
-            self.tab_widget = None
-            
-            # Set the DnD widget as the central widget
-            self.parent.setCentralWidget(workspace_widget)
-            self.workspace_widget = workspace_widget
-            self.current_item_id = None
-            
-            return workspace_widget
-            
-        except Exception as e:
-            exception(e, "Error switching to drag-and-drop UI")
-            workspace_widget = self.ui_loader.create_fallback_widget(f"Error: {str(e)}")
-            self.parent.setCentralWidget(workspace_widget)
-            self.workspace_widget = workspace_widget
-            return workspace_widget
+            fallback_widget = self.ui_loader.create_fallback_widget(f"Error: {str(e)}")
+            if self.layout:
+                self.layout.addWidget(fallback_widget)
+                self.layout.setCurrentWidget(fallback_widget)
+            else:
+                self.parent.setCentralWidget(fallback_widget)
+            return fallback_widget
     
     def on_explorer_item_selected(self, item_id):
         """
         Handle explorer item selection event.
         Add a new tab or switch to existing tab for the selected item.
         """
-        # Ensure main workspace UI is loaded
-        if self.workspace_widget is None or self.tab_widget is None:
+        # Ensure both workspace UIs are loaded
+        if self.workspace_widget is None or self.dnd_widget is None:
+            debug("Loading workspace UIs on first item selection")
             self.load_workspace(item_id)
         else:
             # Add or select tab for this item
@@ -140,6 +132,11 @@ class WorkspaceController:
                 file_count = self.table_manager.update_table_data(table_widget, item_id)
                 self.tab_manager.update_tab_title(item_id, file_count)
                 self.current_item_id = item_id
+            
+            # Show the workspace UI with tabs
+            if self.layout:
+                debug("Showing workspace UI after item selection")
+                self.layout.setCurrentWidget(self.workspace_widget)
         
         return self.workspace_widget
     
@@ -161,6 +158,52 @@ class WorkspaceController:
                 file_count = self.table_manager.update_table_data(table_widget, self.current_item_id)
                 self.tab_manager.update_tab_title(self.current_item_id, file_count)
         return self.workspace_widget
+    
+    def on_last_tab_closed(self):
+        """
+        Handle the event when last tab is closed.
+        Show the drag-and-drop UI.
+        """
+        debug("Last tab closed, showing drag-and-drop UI")
+        
+        # Make sure both UIs are loaded
+        if self.dnd_widget is None:
+            debug("Loading workspace UIs because DnD widget is not initialized")
+            self.load_workspace()
+            return self.workspace_widget
+        
+        # Show the drag-and-drop UI
+        if self.layout:
+            debug("Setting current widget to DnD UI")
+            self.layout.setCurrentWidget(self.dnd_widget)
+        else:
+            warning("QStackedLayout is not initialized when trying to show DnD UI")
+            
+        return self.dnd_widget
+    
+    def _switch_to_dnd_ui(self):
+        """Show the drag-and-drop UI by using QStackedLayout."""
+        try:
+            debug("Switching to drag-and-drop UI")
+            # Just change the current widget in the stacked layout
+            if self.layout and self.dnd_widget:
+                self.layout.setCurrentWidget(self.dnd_widget)
+                self.current_item_id = None
+                return self.dnd_widget
+            else:
+                # If for some reason we don't have the layout or dnd_widget yet, load it
+                debug("DnD UI not initialized yet, loading it")
+                self.load_workspace()
+                if self.layout and self.dnd_widget:
+                    self.layout.setCurrentWidget(self.dnd_widget)
+                    return self.dnd_widget
+                else:
+                    error("Failed to initialize drag-and-drop UI")
+                    return None
+                
+        except Exception as e:
+            exception(e, "Error switching to drag-and-drop UI")
+            return None
     
     def __del__(self):
         """Clean up resources when the controller is deleted."""

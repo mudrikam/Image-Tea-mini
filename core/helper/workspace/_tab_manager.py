@@ -127,6 +127,15 @@ class TabManager:
         current_idx = self.tab_widget.currentIndex()
         current_item_id = self.tab_ids.get(current_idx)
         
+        # Check if there are no tabs left and update controller
+        if self.tab_widget.count() == 0:
+            # If last tab was closed, notify controller to show dnd UI
+            if hasattr(self.controller, 'on_last_tab_closed') and callable(self.controller.on_last_tab_closed):
+                self.controller.on_last_tab_closed()
+            elif hasattr(self.controller, 'layout') and hasattr(self.controller, 'dnd_widget'):
+                # Direct access as fallback
+                self.controller.layout.setCurrentWidget(self.controller.dnd_widget)
+        
         # Return whether tabs remain and the current item ID
         return self.tab_widget.count() > 0, current_item_id
     
