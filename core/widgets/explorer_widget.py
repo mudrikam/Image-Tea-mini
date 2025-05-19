@@ -42,8 +42,9 @@ class ExplorerWidget:
         """Called when project data changes in the database."""
         if self.tree:
             log("Project data changed. Scheduling explorer view refresh.")
-            # Invalidate cache when data changes
+            # Completely invalidate cache when data changes
             self._cache_valid = False
+            self._data_cache = None
             # Use debounced refresh instead of immediate refresh
             self.debounced_refresh_data()
 
@@ -171,12 +172,14 @@ class ExplorerWidget:
         except Exception as e:
             error(f"Failed to connect click handler: {str(e)}")
         
+        # Track empty item for proper cleanup during refresh
+        self.empty_item = None
+        
         # Load data from the database
         if not self.load_data_from_database():
-            # warning("Failed to load project data from database")
-            # Instead of loading sample data, just show an empty tree
-            empty_item = QTreeWidgetItem(self.tree, ["No data available"])
-            empty_item.setForeground(0, QBrush(QColor(150, 150, 150)))
+            # Create an empty item that we can track and remove later
+            self.empty_item = QTreeWidgetItem(self.tree, ["No data available"])
+            self.empty_item.setForeground(0, QBrush(QColor(150, 150, 150)))
         
         # Expand the top levels by default
         for year_item in self.years.values():
@@ -233,6 +236,13 @@ class ExplorerWidget:
             expanded_states = {}
             if self.tree and self.tree.topLevelItemCount() > 0:
                 self._save_expanded_states(expanded_states)
+            
+            # Remove the empty item if it exists
+            if hasattr(self, 'empty_item') and self.empty_item:
+                index = self.tree.indexOfTopLevelItem(self.empty_item)
+                if index >= 0:
+                    self.tree.takeTopLevelItem(index)
+                self.empty_item = None
             
             # Use cached data if valid and available
             if self._cache_valid and self._data_cache is not None:
