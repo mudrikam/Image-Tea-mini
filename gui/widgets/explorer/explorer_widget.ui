@@ -177,6 +177,32 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="clearSearchButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Clear Search</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton { 
+    border: none; 
+    padding: 3px; 
+} 
+QPushButton:hover { 
+    background-color: rgba(200, 200, 200, 50); 
+    border-radius: 3px; 
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="expandAllButton">
         <property name="maximumSize">
          <size>
