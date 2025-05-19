@@ -88,13 +88,13 @@ class ProjectFilesModel:
         """Initialize the model."""
         self.table_name = "project_data"
     
-    def add_file(self, file_details, publish_event=False):
+    def add_file(self, file_details, publish_event=True):
         """
         Add a file to the project database.
         
         Args:
             file_details (dict): Dictionary containing file details
-            publish_event (bool): Whether to publish a data changed event (default: False)
+            publish_event (bool): Whether to publish a data changed event (default: True)
             
         Returns:
             bool or int: Record ID if successful, False otherwise

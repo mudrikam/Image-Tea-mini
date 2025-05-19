@@ -176,6 +176,10 @@ class MenuActionHandler(QObject):
             if result:  # result will be the record ID if successful
                 self.show_status_message(f"Opened image: {file_details['filename']} (ID: {result})")
                 log(f"Added image file '{file_details['filename']}' to project with ID: {result}")
+                
+                # Manually trigger refresh on explorer widget
+                if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+                    self.window.explorer_widget.refresh_data()
             else:
                 self.show_status_message("Failed to add image to project")
         else:
@@ -197,6 +201,10 @@ class MenuActionHandler(QObject):
             success_ids = self.project_files_model.add_multiple_files(file_details_list)
             self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} images to project")
             log(f"Added {len(success_ids)} of {len(file_details_list)} image files to project")
+            
+            # Manually trigger refresh on explorer widget
+            if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+                self.window.explorer_widget.refresh_data()
         else:
             self.show_status_message("No images selected")
     
@@ -237,6 +245,10 @@ class MenuActionHandler(QObject):
             if processed_files > 0:
                 self.show_status_message(f"Processed folder: {os.path.basename(folder_path)} - Added {processed_files} files to project")
                 log(f"Added {processed_files} files from folder '{os.path.basename(folder_path)}' to project")
+                
+                # Manually trigger refresh on explorer widget
+                if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+                    self.window.explorer_widget.refresh_data()
             else:
                 self.show_status_message(f"No compatible files found in folder: {os.path.basename(folder_path)}")
         else:
@@ -260,6 +272,10 @@ class MenuActionHandler(QObject):
             if results['total_files'] > 0:
                 self.show_status_message(f"Processed {results['total_folders']} folders - Added {results['total_files']} files to project")
                 log(f"Added {results['total_files']} files from {results['total_folders']} folders to project")
+                
+                # Manually trigger refresh on explorer widget
+                if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+                    self.window.explorer_widget.refresh_data()
             else:
                 self.show_status_message(f"No compatible files found in selected folders")
         else:
@@ -282,6 +298,10 @@ class MenuActionHandler(QObject):
             if result:  # result will be the record ID if successful
                 self.show_status_message(f"Opened video: {file_details['filename']} (ID: {result})")
                 log(f"Added video file '{file_details['filename']}' to project with ID: {result}")
+                
+                # Manually trigger refresh on explorer widget
+                if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+                    self.window.explorer_widget.refresh_data()
             else:
                 self.show_status_message("Failed to add video to project")
         else:
@@ -303,6 +323,10 @@ class MenuActionHandler(QObject):
             success_ids = self.project_files_model.add_multiple_files(file_details_list)
             self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} videos to project")
             log(f"Added {len(success_ids)} of {len(file_details_list)} video files to project")
+            
+            # Manually trigger refresh on explorer widget
+            if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+                self.window.explorer_widget.refresh_data()
         else:
             self.show_status_message("No videos selected")
     
@@ -411,6 +435,10 @@ class MenuActionHandler(QObject):
         """Handle Refresh action."""
         log("Refreshing view")
         self.show_status_message("Refreshing view...")
+        
+        # Refresh explorer widget if it exists
+        if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
+            self.window.explorer_widget.refresh_data()
     
     def handle_clear(self):
         """Handle Clear action."""
