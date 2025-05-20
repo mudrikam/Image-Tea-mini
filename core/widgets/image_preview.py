@@ -190,7 +190,6 @@ class ImagePreviewWidget:
             self.clear_preview()
             self.preview_label.setText(f"Error: {str(e)}")
             return False
-    
     def clear_preview(self):
         """Clear the current preview image and display the default message."""
         if self.preview_label:
@@ -203,6 +202,9 @@ class ImagePreviewWidget:
             self.preview_label.setText("Preview Image")
             self.preview_label.setAlignment(Qt.AlignCenter)
             self.current_filepath = None
+            self.current_item_id = None
+            
+            debug("Image preview has been cleared")
             
     def get_current_filepath(self):
         """Get the filepath of the currently displayed image."""

@@ -126,11 +126,12 @@ class TabManager:
         
         # Rebuild tab_ids mapping as indices have changed
         new_tab_ids = {}
-        for i in range(self.tab_widget.count()):
+        for i in range(self.tab_widget.count()):            
             old_idx = next((idx for idx, tab_id in self.tab_ids.items() 
-                          if self.tab_widget.widget(i) == self.tab_widget.widget(idx)), None)
+            if self.tab_widget.widget(i) == self.tab_widget.widget(idx)), None)
             if old_idx is not None and old_idx in self.tab_ids:
                 new_tab_ids[i] = self.tab_ids[old_idx]
+        
         self.tab_ids = new_tab_ids
         
         # Get the new current item ID
@@ -145,6 +146,11 @@ class TabManager:
             elif hasattr(self.controller, 'layout') and hasattr(self.controller, 'dnd_widget'):
                 # Direct access as fallback
                 self.controller.layout.setCurrentWidget(self.controller.dnd_widget)
+                
+                # Clear image preview when all tabs are closed (fallback method)
+                if hasattr(self.controller, 'image_preview') and self.controller.image_preview:
+                    debug("Clearing image preview - all tabs closed (fallback)")
+                    self.controller.image_preview.clear_preview()
         
         # Return whether tabs remain and the current item ID
         return self.tab_widget.count() > 0, current_item_id

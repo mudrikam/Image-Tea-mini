@@ -139,13 +139,19 @@ class WorkspaceController:
                 self.layout.setCurrentWidget(self.workspace_widget)
         
         return self.workspace_widget
-    
     def on_explorer_item_deselected(self):
         """
         Handle explorer item deselection event.
         This no longer switches to the drag-drop UI immediately since we have tabs.
         """
         debug("Explorer item deselected")
+        
+        # If there are no tabs open, make sure to clear the image preview
+        if self.tab_widget and self.tab_widget.count() == 0:
+            if hasattr(self, 'image_preview') and self.image_preview:
+                debug("Clearing image preview on explorer item deselection (no tabs open)")
+                self.image_preview.clear_preview()
+        
         # No longer switching to drag-drop UI on deselection
         # We only switch when all tabs are closed
         return self.workspace_widget
@@ -158,11 +164,10 @@ class WorkspaceController:
                 file_count = self.table_manager.update_table_data(table_widget, self.current_item_id)
                 self.tab_manager.update_tab_title(self.current_item_id, file_count)
         return self.workspace_widget
-    
     def on_last_tab_closed(self):
         """
         Handle the event when last tab is closed.
-        Show the drag-and-drop UI.
+        Show the drag-and-drop UI and clear image preview.
         """
         debug("Last tab closed, showing drag-and-drop UI")
         
@@ -176,11 +181,15 @@ class WorkspaceController:
         if self.layout:
             debug("Setting current widget to DnD UI")
             self.layout.setCurrentWidget(self.dnd_widget)
+            
+            # Reset image preview when closing all tabs
+            if hasattr(self, 'image_preview') and self.image_preview:
+                debug("Clearing image preview when switching to DnD UI")
+                self.image_preview.clear_preview()
         else:
             warning("QStackedLayout is not initialized when trying to show DnD UI")
             
         return self.dnd_widget
-    
     def _switch_to_dnd_ui(self):
         """Show the drag-and-drop UI by using QStackedLayout."""
         try:
@@ -189,6 +198,12 @@ class WorkspaceController:
             if self.layout and self.dnd_widget:
                 self.layout.setCurrentWidget(self.dnd_widget)
                 self.current_item_id = None
+                
+                # Reset image preview when switching to drag-and-drop UI
+                if hasattr(self, 'image_preview') and self.image_preview:
+                    debug("Clearing image preview when switching to DnD UI")
+                    self.image_preview.clear_preview()
+                
                 return self.dnd_widget
             else:
                 # If for some reason we don't have the layout or dnd_widget yet, load it
@@ -196,6 +211,11 @@ class WorkspaceController:
                 self.load_workspace()
                 if self.layout and self.dnd_widget:
                     self.layout.setCurrentWidget(self.dnd_widget)
+                    
+                    # Reset image preview here too
+                    if hasattr(self, 'image_preview') and self.image_preview:
+                        self.image_preview.clear_preview()
+                    
                     return self.dnd_widget
                 else:
                     error("Failed to initialize drag-and-drop UI")
