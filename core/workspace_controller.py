@@ -44,14 +44,12 @@ class WorkspaceController:
         try:
             # Create a container widget and QStackedLayout if not already done
             if self.container is None:
-                debug("Creating new QStackedLayout container")
                 self.container = QtWidgets.QWidget()
                 self.layout = QtWidgets.QStackedLayout(self.container)
                 self.parent.setCentralWidget(self.container)
             
             # Initialize the workspace UI if not already done
             if self.workspace_widget is None:
-                debug("Loading main workspace UI")
                 workspace_widget, error_msg = self.ui_loader.load_workspace_ui("main_workspace.ui")
                 if not workspace_widget:
                     workspace_widget = self.ui_loader.create_fallback_widget(error_msg)
@@ -75,7 +73,6 @@ class WorkspaceController:
             
             # Initialize the drag-and-drop UI if not already done
             if self.dnd_widget is None:
-                debug("Loading drag-and-drop UI")
                 dnd_widget, error_msg = self.ui_loader.load_workspace_ui("main_workspace_dnd.ui")
                 if not dnd_widget:
                     dnd_widget = self.ui_loader.create_fallback_widget(error_msg)
@@ -100,7 +97,6 @@ class WorkspaceController:
                 debug(f"Showing workspace UI with {self.tab_widget.count()} tabs")
                 self.layout.setCurrentWidget(self.workspace_widget)
             else:
-                debug("Showing drag-and-drop UI because no tabs are open")
                 self.layout.setCurrentWidget(self.dnd_widget)
             
             return self.workspace_widget
@@ -135,7 +131,6 @@ class WorkspaceController:
             
             # Show the workspace UI with tabs
             if self.layout:
-                debug("Showing workspace UI after item selection")
                 self.layout.setCurrentWidget(self.workspace_widget)
         
         return self.workspace_widget
@@ -144,12 +139,10 @@ class WorkspaceController:
         Handle explorer item deselection event.
         This no longer switches to the drag-drop UI immediately since we have tabs.
         """
-        debug("Explorer item deselected")
         
         # If there are no tabs open, make sure to clear the image preview
         if self.tab_widget and self.tab_widget.count() == 0:
             if hasattr(self, 'image_preview') and self.image_preview:
-                debug("Clearing image preview on explorer item deselection (no tabs open)")
                 self.image_preview.clear_preview()
         
         # No longer switching to drag-drop UI on deselection
@@ -169,7 +162,6 @@ class WorkspaceController:
         Handle the event when last tab is closed.
         Show the drag-and-drop UI and clear image preview.
         """
-        debug("Last tab closed, showing drag-and-drop UI")
         
         # Make sure both UIs are loaded
         if self.dnd_widget is None:
@@ -179,11 +171,9 @@ class WorkspaceController:
         
         # Show the drag-and-drop UI
         if self.layout:
-            debug("Setting current widget to DnD UI")
             self.layout.setCurrentWidget(self.dnd_widget)
               # Reset image preview when closing all tabs
             if hasattr(self, 'image_preview') and self.image_preview:
-                debug("Clearing image preview when switching to DnD UI")
                 self.image_preview.clear_preview()
                 
                 # Ensure the preview is truly reset by forcing a UI update
@@ -203,7 +193,6 @@ class WorkspaceController:
                 self.current_item_id = None
                   # Reset image preview when switching to drag-and-drop UI
                 if hasattr(self, 'image_preview') and self.image_preview:
-                    debug("Clearing image preview when switching to DnD UI")
                     self.image_preview.clear_preview()
                     
                     # Ensure the preview is truly reset by forcing a UI update
@@ -254,7 +243,6 @@ class WorkspaceController:
             debug("No image preview widget available")
             return
             
-        debug(f"Table item clicked: Row {row}, Column {column}")
         
         try:
             if isinstance(data, dict):
@@ -262,7 +250,6 @@ class WorkspaceController:
                 file_id = data.get('id')
                 
                 if file_id:
-                    debug(f"Updating image preview with file ID: {file_id}")
                     self.image_preview.update_preview_from_database(id=file_id)
                 else:
                     debug("No file ID found in table item data")

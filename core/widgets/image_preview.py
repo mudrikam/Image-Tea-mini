@@ -135,7 +135,6 @@ class ImagePreviewWidget:
                 self.preview_label.setPixmap(scaled_pixmap)
                 self.preview_label.setAlignment(Qt.AlignCenter)
             else:
-                debug(f"Using ScalableImageLabel for image: {image_path}")
                 self.preview_label.setImagePath(image_path)
                 self.current_filepath = image_path
             
@@ -176,7 +175,6 @@ class ImagePreviewWidget:
             if file_info and 'filepath' in file_info:
                 filepath = file_info.get('filepath')
                 if filepath:
-                    debug(f"Setting image preview from database: {filepath}")
                     return self.set_image(filepath)
               # If we got here, we couldn't find a valid image
             self.clear_preview()
@@ -201,7 +199,6 @@ class ImagePreviewWidget:
             self.current_filepath = None
             self.current_item_id = None
             
-            debug("Image preview has been cleared")
             
     def get_current_filepath(self):
         """Get the filepath of the currently displayed image."""

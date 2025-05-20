@@ -148,7 +148,6 @@ class LayoutController:
         
         # Connect the image preview widget to the workspace controller
         if self.image_preview:
-            debug("Connecting image preview to workspace controller")
             self.workspace_controller.connect_to_image_preview(self.image_preview)
         
         # Restore previous layout if available
