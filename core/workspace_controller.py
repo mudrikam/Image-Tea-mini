@@ -5,10 +5,10 @@ from core.utils.logger import log, debug, warning, error, exception
 from core.helper.workspace._ui_loader import UILoader
 from core.helper.workspace._tab_manager import TabManager
 from core.helper.workspace._table_manager import TableManager
+from core.helper.workspace._dnd_handler import DropAreaHandler
 
 class WorkspaceController:
     """Controller for managing the main workspace area of the application."""
-    
     def __init__(self, parent_window, base_dir):
         """Initialize the workspace controller."""
         self.parent = parent_window
@@ -23,6 +23,7 @@ class WorkspaceController:
         self.ui_loader = UILoader(base_dir)
         self.tab_manager = TabManager(self)
         self.table_manager = TableManager()
+        self.dnd_handler = DropAreaHandler(self)
         
         # References to UI elements
         self.tab_widget = None
@@ -71,13 +72,19 @@ class WorkspaceController:
                 # Add to QStackedLayout
                 self.layout.addWidget(self.workspace_widget)
             
-            # Initialize the drag-and-drop UI if not already done
-            if self.dnd_widget is None:
+            # Initialize the drag-and-drop UI if not already done            if self.dnd_widget is None:
                 dnd_widget, error_msg = self.ui_loader.load_workspace_ui("main_workspace_dnd.ui")
                 if not dnd_widget:
                     dnd_widget = self.ui_loader.create_fallback_widget(error_msg)
                 
                 self.dnd_widget = dnd_widget
+                
+                # Set up the drag and drop handler for the drop area
+                drop_area = self.dnd_widget.findChild(QtWidgets.QFrame, "dropArea")
+                if drop_area:
+                    self.dnd_handler.setup_drop_area(drop_area)
+                else:
+                    warning("Could not find dropArea in main_workspace_dnd.ui")
                 
                 # Add to QStackedLayout
                 self.layout.addWidget(self.dnd_widget)
