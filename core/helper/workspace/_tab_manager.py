@@ -1,5 +1,26 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 from core.utils.logger import log, debug, warning, error, exception
+
+class MiddleClickTabBar(QtWidgets.QTabBar):
+    """Custom QTabBar that allows closing tabs with middle-click."""
+    
+    def __init__(self, tab_manager):
+        super().__init__()
+        self.tab_manager = tab_manager
+    def mousePressEvent(self, event):
+        """Handle mouse press events, close tab on middle-click."""
+        if event.button() == QtCore.Qt.MiddleButton:
+            index = self.tabAt(event.pos())
+            if index >= 0:
+                # Log the middle-click tab closure
+                tab_text = self.tabText(index)
+                
+                # Call the tab manager's close_tab method
+                self.tab_manager.close_tab(index)
+                return  # Event has been handled
+        
+        # Pass other events to parent class
+        super().mousePressEvent(event)
 
 class TabManager:
     """Helper class for managing tabs in the workspace."""
@@ -11,7 +32,6 @@ class TabManager:
         self.table_widgets = {}  # Dictionary to store table widgets for each tab: {item_id: table_widget}
         self.tab_ids = {}  # Dictionary to map tab indices to item IDs: {tab_index: item_id}
         self._qt_objects = []  # Track Qt objects that need explicit deletion
-    
     def initialize_tabs(self, tab_widget):
         """Initialize with the tab widget from the UI."""
         self.tab_widget = tab_widget
@@ -31,6 +51,10 @@ class TabManager:
             # Reset tracking dictionaries
             self.table_widgets = {}
             self.tab_ids = {}
+            
+            # Set custom tab bar to support middle-click closing
+            custom_tab_bar = MiddleClickTabBar(self)
+            self.tab_widget.setTabBar(custom_tab_bar)
             
             # Connect tab close signal
             self.tab_widget.tabCloseRequested.connect(self.close_tab)
@@ -108,7 +132,6 @@ class TabManager:
             )
         
         return table_widget
-    
     def close_tab(self, tab_index):
         """Close the tab at the specified index."""
         if not self.tab_widget or tab_index < 0 or tab_index >= self.tab_widget.count():

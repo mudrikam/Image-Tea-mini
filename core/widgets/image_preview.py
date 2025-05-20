@@ -95,7 +95,7 @@ class ImagePreviewWidget:
             QLabel {
                 color: #f0f0f0;
                 font-size: 9pt;
-                background-color: rgba(40, 40, 40, 0.5);
+                background-color: rgba(40, 40, 40, 0.05);
                 border-radius: 5px;
                 padding: 10px;
             }
