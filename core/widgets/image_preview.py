@@ -84,18 +84,17 @@ class ImagePreviewWidget:
             layout = content_widget.layout()
             layout.removeWidget(old_label)
             old_label.deleteLater()
-        
-        # Create a new ScalableImageLabel
+          # Create a new ScalableImageLabel
         self.preview_label = ScalableImageLabel(content_widget)
         self.preview_label.setObjectName("previewLabel")
-        self.preview_label.setText("Preview Image")
+        self.preview_label.setText("Click on an item to view image")
         self.preview_label.setAlignment(Qt.AlignCenter)
         
         # Set some styling for the preview label
         self.preview_label.setStyleSheet("""
             QLabel {
                 color: #f0f0f0;
-                font-size: 14pt;
+                font-size: 9pt;
                 background-color: rgba(40, 40, 40, 0.5);
                 border-radius: 5px;
                 padding: 10px;
@@ -141,9 +140,9 @@ class ImagePreviewWidget:
                 self.current_filepath = image_path
             
             return True
-        except Exception as e:
+        except Exception as e:            
             error(f"Error setting image: {str(e)}")
-            self.preview_label.setText(f"Error: {str(e)}")
+            self.preview_label.setText("Unable to load image. Please try another item.")
             return False
     
     def update_preview_from_database(self, item_id=None, id=None):
@@ -179,10 +178,9 @@ class ImagePreviewWidget:
                 if filepath:
                     debug(f"Setting image preview from database: {filepath}")
                     return self.set_image(filepath)
-            
-            # If we got here, we couldn't find a valid image
+              # If we got here, we couldn't find a valid image
             self.clear_preview()
-            self.preview_label.setText("No image found")
+            self.preview_label.setText("No image found for this item. Try selecting another item.")
             return False
             
         except Exception as e:
@@ -197,9 +195,8 @@ class ImagePreviewWidget:
                 self.preview_label.setPixmap(QPixmap())  # Clear the pixmap
                 self.preview_label.original_pixmap = None
                 self.preview_label.image_path = None
-            
             self.preview_label.clear()
-            self.preview_label.setText("Preview Image")
+            self.preview_label.setText("Click on an item to view image")
             self.preview_label.setAlignment(Qt.AlignCenter)
             self.current_filepath = None
             self.current_item_id = None

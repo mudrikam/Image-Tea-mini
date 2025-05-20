@@ -52,10 +52,13 @@ QDockWidget::contents {
     <item>
      <widget class="QLabel" name="previewLabel">
       <property name="text">
-       <string>Preview Image</string>
+       <string>Click on an item to view image</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
