@@ -72,11 +72,15 @@ class ExplorerWidget:
         collapse_all_btn = components.get('collapse_all_btn')
         if collapse_all_btn:
             collapse_all_btn.clicked.connect(self.tree_loader.collapse_all_except_years)
-        
         # Connect clear search button
         clear_search_btn = components.get('clear_search_btn')
         if clear_search_btn:
             clear_search_btn.clicked.connect(self.clear_search)
+        
+        # Connect refresh button
+        refresh_btn = components.get('refresh_btn')
+        if refresh_btn:
+            refresh_btn.clicked.connect(self.refresh_data)
         
         # Connect item click handler
         self.ui_helper.connect_tree_signals(

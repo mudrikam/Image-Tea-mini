@@ -1,11 +1,11 @@
 from PySide6.QtWidgets import QTreeWidgetItem
-from PySide6.QtGui import QColor, QBrush
+from PySide6.QtGui import QColor, QBrush, QCursor
+from PySide6.QtCore import Qt
 from core.utils.logger import log, debug, warning, error, exception
 import qtawesome as qta
 
 class TreeLoader:
-    """Helper class for loading and managing tree structure."""
-    
+    """Helper class for loading and managing tree structure."""    
     def __init__(self, tree_widget):
         """Initialize the tree loader."""
         self.tree = tree_widget
@@ -16,6 +16,13 @@ class TreeLoader:
         self.days = {}       # Nested dict: {year_str: {month_str: {day_str: day_item}}}
         self.ids = {}        # For storing ID items: {year: {month: {day: {id: id_item}}}}
         
+        # Setup hover cursor for tree items
+        if self.tree:
+            self.setup_item_hover_cursor()
+        
+        # Set up item hover cursor
+        if self.tree:
+            self.setup_item_hover_cursor()
         # Color palettes for individual items
         self.year_colors = {}    # {year_str: QColor}
         self.month_colors = {}   # {year_str: {month_str: QColor}}
@@ -23,7 +30,6 @@ class TreeLoader:
         
         # Track empty item for proper cleanup during refresh
         self.empty_item = None
-    
     def clear_tree(self):
         """Clear the tree and internal tracking dictionaries."""
         if self.tree:
@@ -37,15 +43,25 @@ class TreeLoader:
         self.year_colors = {}
         self.month_colors = {}
         self.day_colors = {}
-        self.empty_item = None
-    
+        self.empty_item = None      
+    def setup_item_hover_cursor(self):
+        """Set up the tree widget to show pointing hand cursor when hovering over items."""
+        if not self.tree:
+            return
+        
+        # We'll set cursor for individual items in their creation methods instead
+        # Enable hover tracking for the tree
+        from PySide6.QtCore import Qt
+        self.tree.setAttribute(Qt.WA_Hover, True)
+        self.tree.setMouseTracking(True)
     def create_empty_tree(self, message="No data available"):
         """Create an empty tree with a message."""
         self.clear_tree()
         self.empty_item = QTreeWidgetItem(self.tree, [message])
-        self.empty_item.setForeground(0, QBrush(QColor(150, 150, 150)))
+        self.empty_item.setForeground(0, QBrush(QColor(150, 150, 150)))        # Set pointing hand cursor data
+        self.empty_item.setData(0, Qt.UserRole, "pointing_hand_cursor")
         return self.empty_item
-    
+        
     def load_project_data(self, project_data, expanded_states=None):
         """
         Load project data into the explorer tree.
@@ -59,6 +75,9 @@ class TreeLoader:
         """
         # Clear existing tree first
         self.clear_tree()
+        
+        # Set up item hover cursor
+        self.setup_item_hover_cursor()
         
         if not project_data:
             self.create_empty_tree()
@@ -107,7 +126,6 @@ class TreeLoader:
                 self.tree.expandItem(year_item)
         
         return True
-    
     def _create_year_item(self, year_data):
         """Create and style a year item in the tree."""
         year_str = year_data.get('year')
@@ -126,7 +144,8 @@ class TreeLoader:
         
         # Set colors
         year_item.setBackground(0, QBrush(year_color_bg))
-        year_item.setForeground(0, QBrush(year_color_fg))
+        year_item.setForeground(0, QBrush(year_color_fg))        # Set pointing hand cursor data
+        year_item.setData(0, Qt.UserRole, "pointing_hand_cursor")
         
         # Store references
         self.years[year_str] = year_item
@@ -138,7 +157,6 @@ class TreeLoader:
         self.ids[year_str] = {}
         
         return year_item
-    
     def _create_month_item(self, month_data, year_item, year_str):
         """Create and style a month item in the tree."""
         month_name = month_data.get('name')
@@ -159,6 +177,9 @@ class TreeLoader:
         month_item.setBackground(0, QBrush(month_color_bg))
         month_item.setForeground(0, QBrush(month_color_fg))
         
+        # Set pointing hand cursor data
+        month_item.setData(0, Qt.UserRole, "pointing_hand_cursor")
+        
         # Store references
         self.months[year_str][month_name] = month_item
         self.month_colors[year_str][month_name] = month_color_bg
@@ -167,7 +188,6 @@ class TreeLoader:
         self.ids[year_str][month_name] = {}
         
         return month_item
-    
     def _create_day_item(self, day_data, month_item, year_str, month_name):
         """Create and style a day item in the tree."""
         day_str = day_data.get('day')
@@ -188,13 +208,15 @@ class TreeLoader:
         day_item.setBackground(0, QBrush(day_color_bg))
         day_item.setForeground(0, QBrush(day_color_fg))
         
+        # Set pointing hand cursor data
+        day_item.setData(0, Qt.UserRole, "pointing_hand_cursor")
+        
         # Store references
         self.days[year_str][month_name][day_str] = day_item
         self.day_colors[year_str][month_name][day_str] = day_color_bg
         self.ids[year_str][month_name][day_str] = {}
         
         return day_item
-    
     def _create_id_item(self, item_data, day_item, year_str, month_name, day_str):
         """Create and style an ID item in the tree."""
         id_value = item_data.get('item_id')
@@ -217,6 +239,9 @@ class TreeLoader:
         
         # Set text color (inherit from parent day)
         id_item.setForeground(0, QBrush(day_color_fg))
+        
+        # Set pointing hand cursor data
+        id_item.setData(0, Qt.UserRole, "pointing_hand_cursor")
         
         # Store reference
         self.ids[year_str][month_name][day_str][id_value] = id_item

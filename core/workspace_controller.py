@@ -181,11 +181,14 @@ class WorkspaceController:
         if self.layout:
             debug("Setting current widget to DnD UI")
             self.layout.setCurrentWidget(self.dnd_widget)
-            
-            # Reset image preview when closing all tabs
+              # Reset image preview when closing all tabs
             if hasattr(self, 'image_preview') and self.image_preview:
                 debug("Clearing image preview when switching to DnD UI")
                 self.image_preview.clear_preview()
+                
+                # Ensure the preview is truly reset by forcing a UI update
+                from PySide6.QtWidgets import QApplication
+                QApplication.processEvents()
         else:
             warning("QStackedLayout is not initialized when trying to show DnD UI")
             
@@ -198,11 +201,14 @@ class WorkspaceController:
             if self.layout and self.dnd_widget:
                 self.layout.setCurrentWidget(self.dnd_widget)
                 self.current_item_id = None
-                
-                # Reset image preview when switching to drag-and-drop UI
+                  # Reset image preview when switching to drag-and-drop UI
                 if hasattr(self, 'image_preview') and self.image_preview:
                     debug("Clearing image preview when switching to DnD UI")
                     self.image_preview.clear_preview()
+                    
+                    # Ensure the preview is truly reset by forcing a UI update
+                    from PySide6.QtWidgets import QApplication
+                    QApplication.processEvents()
                 
                 return self.dnd_widget
             else:

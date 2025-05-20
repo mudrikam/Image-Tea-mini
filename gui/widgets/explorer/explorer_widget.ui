@@ -186,11 +186,11 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
         </property>
         <property name="toolTip">
          <string>Clear Search</string>
-        </property>
+        </property>        
         <property name="styleSheet">
          <string notr="true">QPushButton { 
     border: none; 
-    padding: 3px; 
+    padding: 3px;
 } 
 QPushButton:hover { 
     background-color: rgba(200, 200, 200, 50); 
@@ -212,11 +212,37 @@ QPushButton:hover {
         </property>
         <property name="toolTip">
          <string>Expand All</string>
-        </property>
+        </property>        
         <property name="styleSheet">
          <string notr="true">QPushButton { 
     border: none; 
-    padding: 3px; 
+    padding: 3px;
+} 
+QPushButton:hover { 
+    background-color: rgba(200, 200, 200, 50); 
+    border-radius: 3px; 
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>      
+      <item>
+       <widget class="QPushButton" name="collapseAllButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Collapse All</string>
+        </property>        
+        <property name="styleSheet">
+         <string notr="true">QPushButton { 
+    border: none; 
+    padding: 3px;
 } 
 QPushButton:hover { 
     background-color: rgba(200, 200, 200, 50); 
@@ -229,7 +255,7 @@ QPushButton:hover {
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="collapseAllButton">
+       <widget class="QPushButton" name="refreshButton">
         <property name="maximumSize">
          <size>
           <width>28</width>
@@ -237,12 +263,11 @@ QPushButton:hover {
          </size>
         </property>
         <property name="toolTip">
-         <string>Collapse All</string>
-        </property>
-        <property name="styleSheet">
+         <string>Refresh Explorer</string>
+        </property>        <property name="styleSheet">
          <string notr="true">QPushButton { 
     border: none; 
-    padding: 3px; 
+    padding: 3px;
 } 
 QPushButton:hover { 
     background-color: rgba(200, 200, 200, 50); 
