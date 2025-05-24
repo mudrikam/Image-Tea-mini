@@ -293,7 +293,6 @@ class ProjectFilesModel:
             if conn:
                 close_database_connection(conn)
             return []
-    
     def get_files_by_item_id(self, item_id):
         """
         Get all files for a specific item_id.
@@ -304,6 +303,8 @@ class ProjectFilesModel:
         Returns:
             list: List of dictionaries with file information
         """
+        debug(f"ProjectFilesModel get_files_by_item_id called with item_id: {item_id}")
+        
         try:
             conn = connect_to_database()
             cursor = conn.cursor()
@@ -318,11 +319,13 @@ class ProjectFilesModel:
                 ORDER BY filename
             """
             
+            debug(f"Executing SQL query with item_id: {item_id}")
             cursor.execute(query, (item_id,))
             
             # Fetch all rows as dictionaries
             columns = [col[0] for col in cursor.description]
             rows = cursor.fetchall()
+            debug(f"Found {len(rows)} rows in database for item_id: {item_id}")
             
             result = []
             for row in rows:
@@ -474,8 +477,7 @@ class ProjectFilesModel:
             exception(e, f"Error deleting file with ID {file_id}")
             if conn:
                 close_database_connection(conn)
-            return False
-
+            return False    
     def process_folder(self, folder_path, folder_details=None):
         """
         Process a folder and add all supported files to the database.
@@ -485,10 +487,10 @@ class ProjectFilesModel:
             folder_details (dict, optional): Dictionary with folder metadata (not used)
             
         Returns:
-            tuple: (None, processed_count) - ID is always None, and count of processed files
+            tuple: (dict, processed_count) - dict contains folder metadata including item_id, and count of processed files
         """
         # We're not adding the folder itself to the database, just processing its contents
-        folder_id = None
+        folder_data = {}
         processed_count = 0
         
         try:
@@ -538,11 +540,12 @@ class ProjectFilesModel:
             # Publish event only after processing all files in the folder
             if processed_count > 0:
                 EventSystem.publish('project_data_changed')
-        
         except Exception as e:
             exception(e, f"Error processing folder {folder_path}")
         
-        return folder_id, processed_count
+        # Return folder data including the operation_id
+        folder_data = {'item_id': operation_id} if processed_count > 0 else {}
+        return folder_data, processed_count
         
     def process_multiple_folders(self, folder_paths):
         """
@@ -553,11 +556,12 @@ class ProjectFilesModel:
             
         Returns:
             dict: Summary of processed folders with counts
-        """
+        """        
         results = {
             'total_folders': 0,
             'total_files': 0,
-            'processed_folders': []
+            'processed_folders': [],
+            'item_ids': []
         }
         
         if not folder_paths:
@@ -616,14 +620,17 @@ class ProjectFilesModel:
                                         total_processed_files += 1
                             except Exception as e:
                                 warning(f"Error processing file {file_path}: {str(e)}")
-                
-                # Add to results
+                  # Add to results
                 results['total_folders'] += 1
                 results['total_files'] += folder_processed_count
                 results['processed_folders'].append({
                     'folder_path': folder_path,
                     'processed_files': folder_processed_count
                 })
+                
+                # Add operation ID to results if files were processed
+                if folder_processed_count > 0 and multi_folder_operation_id not in results['item_ids']:
+                    results['item_ids'].append(multi_folder_operation_id)
                 
                 # Log each folder processing
                 log(f"Processed folder: {os.path.basename(folder_path)} - Added {folder_processed_count} files")

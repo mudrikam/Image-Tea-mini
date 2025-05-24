@@ -117,28 +117,38 @@ class WorkspaceController:
             else:
                 self.parent.setCentralWidget(fallback_widget)
             return fallback_widget
-    
     def on_explorer_item_selected(self, item_id):
         """
         Handle explorer item selection event.
         Add a new tab or switch to existing tab for the selected item.
         """
+        debug(f"WorkspaceController on_explorer_item_selected called with item_id: {item_id}")
+        
         # Ensure both workspace UIs are loaded
         if self.workspace_widget is None or self.dnd_widget is None:
             debug("Loading workspace UIs on first item selection")
             self.load_workspace(item_id)
         else:
             # Add or select tab for this item
+            debug(f"Calling tab_manager.add_or_select_tab with item_id: {item_id}")
             table_widget = self.tab_manager.add_or_select_tab(item_id)
+            
             if table_widget:
+                debug(f"Got table_widget, updating data for item_id: {item_id}")
                 # Update the table data
                 file_count = self.table_manager.update_table_data(table_widget, item_id)
                 self.tab_manager.update_tab_title(item_id, file_count)
                 self.current_item_id = item_id
+                debug(f"Updated tab title with file count: {file_count}")
+            else:
+                warning(f"Failed to get table_widget for item_id: {item_id}")
             
             # Show the workspace UI with tabs
             if self.layout:
+                debug("Setting workspace widget as current in layout")
                 self.layout.setCurrentWidget(self.workspace_widget)
+            else:
+                warning("Layout is not available to set workspace widget as current")
         
         return self.workspace_widget
     def on_explorer_item_deselected(self):

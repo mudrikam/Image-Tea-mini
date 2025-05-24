@@ -158,7 +158,6 @@ class MenuActionHandler(QObject):
         log("Creating new project")
         # Implement specific New functionality
         self.show_status_message("Creating new project...")
-    
     def handle_open_image(self):
         """Handle Open Image action."""
         log("Opening image file dialog")
@@ -171,6 +170,9 @@ class MenuActionHandler(QObject):
         file_details = select_image_file(self.window, start_dir)
         
         if file_details:
+            # Get the operation ID that was assigned to this file
+            operation_id = file_details.get('item_id')
+            
             # Add the file to the database
             result = self.project_files_model.add_file(file_details)
             if result:  # result will be the record ID if successful
@@ -180,6 +182,9 @@ class MenuActionHandler(QObject):
                 # Manually trigger refresh on explorer widget
                 if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
                     self.window.explorer_widget.refresh_data()
+                    
+                # Open a tab for this operation, like the drag and drop behavior
+                self._open_tab_for_operation(operation_id)
             else:
                 self.show_status_message("Failed to add image to project")
         else:
@@ -197,6 +202,9 @@ class MenuActionHandler(QObject):
         file_details_list = select_multiple_image_files(self.window, start_dir)
         
         if file_details_list:
+            # Get the operation ID from the first file (all files in this operation share the same ID)
+            operation_id = file_details_list[0].get('item_id') if file_details_list else None
+            
             # Add the files to the database
             success_ids = self.project_files_model.add_multiple_files(file_details_list)
             self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} images to project")
@@ -205,6 +213,10 @@ class MenuActionHandler(QObject):
             # Manually trigger refresh on explorer widget
             if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
                 self.window.explorer_widget.refresh_data()
+                
+            # Open a tab for this operation, like the drag and drop behavior
+            if operation_id:
+                self._open_tab_for_operation(operation_id)
         else:
             self.show_status_message("No images selected")
     
@@ -237,10 +249,9 @@ class MenuActionHandler(QObject):
         
         # Open dialog to select a folder
         folder_path = select_folder(self.window, start_dir)
-        
         if folder_path and os.path.isdir(folder_path):
             # Process the folder using the database model (no folder details needed)
-            _, processed_files = self.project_files_model.process_folder(folder_path)
+            result, processed_files = self.project_files_model.process_folder(folder_path)
             
             if processed_files > 0:
                 self.show_status_message(f"Processed folder: {os.path.basename(folder_path)} - Added {processed_files} files to project")
@@ -249,6 +260,10 @@ class MenuActionHandler(QObject):
                 # Manually trigger refresh on explorer widget
                 if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
                     self.window.explorer_widget.refresh_data()
+                    
+                # Open a tab for this operation if we have a valid result with item_id
+                if result and isinstance(result, dict) and 'item_id' in result:
+                    self._open_tab_for_operation(result['item_id'])
             else:
                 self.show_status_message(f"No compatible files found in folder: {os.path.basename(folder_path)}")
         else:
@@ -264,7 +279,6 @@ class MenuActionHandler(QObject):
         
         # Open dialog to select multiple folders
         folder_paths = select_multiple_folders(self.window, start_dir)
-        
         if folder_paths:
             # Process all folders using the database model
             results = self.project_files_model.process_multiple_folders(folder_paths)
@@ -276,6 +290,13 @@ class MenuActionHandler(QObject):
                 # Manually trigger refresh on explorer widget
                 if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
                     self.window.explorer_widget.refresh_data()
+                    
+                # Open tabs for processed folders if we have item_ids
+                if 'item_ids' in results and results['item_ids']:
+                    # Just open the first one for simplicity
+                    first_item_id = results['item_ids'][0] if results['item_ids'] else None
+                    if first_item_id:
+                        self._open_tab_for_operation(first_item_id)
             else:
                 self.show_status_message(f"No compatible files found in selected folders")
         else:
@@ -291,8 +312,10 @@ class MenuActionHandler(QObject):
         
         # Open file dialog to select a video, starting from the home directory
         file_details = select_video_file(self.window, start_dir)
-        
         if file_details:
+            # Get the operation ID that was assigned to this file
+            operation_id = file_details.get('item_id')
+            
             # Add the file to the database
             result = self.project_files_model.add_file(file_details)
             if result:  # result will be the record ID if successful
@@ -302,6 +325,9 @@ class MenuActionHandler(QObject):
                 # Manually trigger refresh on explorer widget
                 if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
                     self.window.explorer_widget.refresh_data()
+                    
+                # Open a tab for this operation, like the drag and drop behavior
+                self._open_tab_for_operation(operation_id)
             else:
                 self.show_status_message("Failed to add video to project")
         else:
@@ -317,8 +343,10 @@ class MenuActionHandler(QObject):
         
         # Open file dialog to select multiple videos, starting from the home directory
         file_details_list = select_multiple_video_files(self.window, start_dir)
-        
         if file_details_list:
+            # Get the operation ID from the first file (all files in this operation share the same ID)
+            operation_id = file_details_list[0].get('item_id') if file_details_list else None
+            
             # Add the files to the database
             success_ids = self.project_files_model.add_multiple_files(file_details_list)
             self.show_status_message(f"Added {len(success_ids)} of {len(file_details_list)} videos to project")
@@ -327,6 +355,10 @@ class MenuActionHandler(QObject):
             # Manually trigger refresh on explorer widget
             if hasattr(self.window, 'explorer_widget') and self.window.explorer_widget:
                 self.window.explorer_widget.refresh_data()
+                
+            # Open a tab for this operation, like the drag and drop behavior
+            if operation_id:
+                self._open_tab_for_operation(operation_id)
         else:
             self.show_status_message("No videos selected")
     
@@ -605,3 +637,43 @@ class MenuActionHandler(QObject):
         status_bar = getattr(self.window, 'statusBar', None)
         if status_bar and callable(status_bar):
             status_bar().showMessage(message, timeout)
+    def _open_tab_for_operation(self, operation_id):
+        """Open a new tab for an operation ID, similar to drag and drop behavior.
+        
+        Args:
+            operation_id: The operation ID (unformatted)
+            
+        Returns:
+            bool: Whether the tab was successfully opened
+        """
+        # Make sure we have a valid operation ID        
+        if not operation_id:
+            warning("No operation ID provided to open tab")
+            return False
+            
+        debug(f"Opening tab for operation ID: {operation_id}")
+        # Format the ID properly for the explorer (like in DnD handler)
+        formatted_item_id = f"ID_{operation_id}"
+        debug(f"Formatted item ID: {formatted_item_id}")
+        
+        # Access workspace controller if available
+        workspace_controller = getattr(self.window, 'workspace_controller', None)
+        if workspace_controller:
+            debug(f"Got workspace controller: {workspace_controller}")
+            if hasattr(workspace_controller, 'on_explorer_item_selected'):
+                debug(f"Calling on_explorer_item_selected with ID: {formatted_item_id}")
+                # This will create a new tab or switch to an existing one
+                workspace_controller.on_explorer_item_selected(formatted_item_id)
+                
+                # Check if tab was actually added
+                if hasattr(workspace_controller, 'tab_manager'):
+                    tabs = workspace_controller.tab_manager.tab_ids
+                    debug(f"Current tabs after adding: {tabs}")
+                    
+                return True
+            else:
+                warning(f"workspace_controller has no on_explorer_item_selected method")
+        else:
+            warning(f"No workspace_controller found on window")
+            
+        return False

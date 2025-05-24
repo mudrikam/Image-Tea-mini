@@ -131,10 +131,9 @@ class LayoutController:
         This now delegates to the workspace controller.
         
         Args:
-            item_id (str, optional): The ID of the selected item in the explorer
-        """
+            item_id (str, optional): The ID of the selected item in the explorer        """
         return self.workspace_controller.load_workspace(item_id)
-
+        
     def setup_ui(self):
         """Set up all UI components."""
         # This message is useful to show that the app is starting up
@@ -145,10 +144,15 @@ class LayoutController:
         self.load_explorer_widget()
         self.load_image_preview_widget()
         self.load_file_properties_widget()  # Add file properties loading
-        
-        # Connect the image preview widget to the workspace controller
+          # Connect the image preview widget to the workspace controller
         if self.image_preview:
             self.workspace_controller.connect_to_image_preview(self.image_preview)
+            
+        # Assign the workspace controller to the parent window for global access
+        self.parent.workspace_controller = self.workspace_controller
+            
+        # Assign the workspace controller to the parent window for global access
+        self.parent.workspace_controller = self.workspace_controller
         
         # Restore previous layout if available
         if not self.restore_layout():

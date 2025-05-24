@@ -58,16 +58,19 @@ class TabManager:
             
             # Connect tab close signal
             self.tab_widget.tabCloseRequested.connect(self.close_tab)
-    
     def add_or_select_tab(self, item_id):
         """Add a new tab for the item if it doesn't exist, or select it if it does."""
+        debug(f"Tab manager add_or_select_tab called with item_id: {item_id}")
+        
         if not self.tab_widget:
             warning("Tab widget not found, can't add tab")
             return None
         
         # Check if a tab already exists for this item
+        debug(f"Current tab_ids: {self.tab_ids}")
         for idx, tab_item_id in self.tab_ids.items():
             if tab_item_id == item_id:
+                debug(f"Found existing tab for {item_id} at index {idx}")
                 # Select the existing tab
                 self.tab_widget.setCurrentIndex(idx)
                 return self.table_widgets.get(item_id)
@@ -189,19 +192,30 @@ class TabManager:
                 tab_text = f"{actual_id} ({file_count})"
                 self.tab_widget.setTabText(idx, tab_text)
                 break
-    
     def _get_tab_name_from_item_id(self, item_id):
         """Extract a shorter name for the tab from the item_id."""
-        # Format: YYYY-MM-DD_ID_STATUS
+        debug(f"Getting tab name from item_id: {item_id}")
+        
+        # Handle both potential formats:
+        # Format 1: YYYY-MM-DD_ID_STATUS
+        # Format 2: ID_XXXX
         parts = item_id.split('_')
-        if len(parts) >= 2:
-            # Get the ID part
+        
+        if item_id.startswith('ID_') and len(parts) == 2:
+            # Format: ID_XXXX
             id_part = parts[1]
-            # We'll add the file count later when data is loaded
-            return f"{id_part} (0)"  # Default to 0 files initially
+            debug(f"Extracted ID part from ID_XXXX format: {id_part}")
+        elif len(parts) >= 2:
+            # Format: YYYY-MM-DD_ID_STATUS
+            id_part = parts[1]
+            debug(f"Extracted ID part from YYYY-MM-DD_ID_STATUS format: {id_part}")
         else:
             # Return the full ID if we can't parse it
-            return f"{item_id} (0)"
+            id_part = item_id
+            debug(f"Could not parse item_id, using as is: {item_id}")
+            
+        # We'll add the file count later when data is loaded
+        return f"{id_part} (0)"  # Default to 0 files initially
     
     def _clone_template_tab(self):
         """Clone the template tab structure to create a new tab with the same layout."""

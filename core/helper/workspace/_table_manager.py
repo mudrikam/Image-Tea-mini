@@ -7,9 +7,10 @@ class TableManager:
     def __init__(self):
         """Initialize the table manager."""
         pass
-    
     def update_table_data(self, table_widget, item_id):
         """Update the table data for a specific item tab."""
+        debug(f"TableManager update_table_data called for item_id: {item_id}")
+        
         if not table_widget:
             warning(f"Table widget not provided for item {item_id}")
             return 0
@@ -17,16 +18,20 @@ class TableManager:
         try:
             # Get the actual ID part from the item_id
             parts = item_id.split('_')
+            debug(f"Item ID parts: {parts}")
+            
             if len(parts) < 2:
                 warning(f"Invalid item ID format: {item_id}")
                 return 0
                 
             actual_id = parts[1]
-            
-            # Get data from the database
+            debug(f"Using actual_id: {actual_id} for database lookup")
+              # Get data from the database
             try:
                 from database.db_project_files import ProjectFilesModel
+                debug(f"Fetching files from database for item_id: {actual_id}")
                 files_data = ProjectFilesModel().get_files_by_item_id(actual_id)
+                debug(f"Found {len(files_data) if files_data else 0} files from database")
             except Exception as e:
                 exception(e, "Error getting data from database")
                 files_data = []
