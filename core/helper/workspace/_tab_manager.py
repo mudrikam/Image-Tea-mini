@@ -1,14 +1,19 @@
 from PySide6 import QtWidgets, QtCore, QtGui
+import os
+import subprocess
+import platform
 from core.utils.logger import log, debug, warning, error, exception
+from database.db_project_files import ProjectFilesModel
 
-class MiddleClickTabBar(QtWidgets.QTabBar):
-    """Custom QTabBar that allows closing tabs with middle-click."""
+class CustomTabBar(QtWidgets.QTabBar):
+    """Custom QTabBar that allows closing tabs with middle-click and right-click menu."""
     
     def __init__(self, tab_manager):
         super().__init__()
         self.tab_manager = tab_manager
+        
     def mousePressEvent(self, event):
-        """Handle mouse press events, close tab on middle-click."""
+        """Handle mouse press events, close tab on middle-click or show context menu on right-click."""
         if event.button() == QtCore.Qt.MiddleButton:
             index = self.tabAt(event.pos())
             if index >= 0:
@@ -18,9 +23,27 @@ class MiddleClickTabBar(QtWidgets.QTabBar):
                 # Call the tab manager's close_tab method
                 self.tab_manager.close_tab(index)
                 return  # Event has been handled
-        
+                
         # Pass other events to parent class
         super().mousePressEvent(event)
+    def contextMenuEvent(self, event):
+        """Show context menu on right-click on tab."""
+        index = self.tabAt(event.pos())
+        if index >= 0:
+            menu = QtWidgets.QMenu()
+            
+            # Add actions
+            close_action = menu.addAction("Close")
+            close_others_action = menu.addAction("Close Others")
+            close_all_action = menu.addAction("Close All")
+            
+            # Connect actions to functions
+            close_action.triggered.connect(lambda: self.tab_manager.close_tab(index))
+            close_others_action.triggered.connect(lambda: self.tab_manager.close_other_tabs(index))
+            close_all_action.triggered.connect(self.tab_manager.close_all_tabs)
+            
+            # Show menu
+            menu.exec_(event.globalPos())
 
 class TabManager:
     """Helper class for managing tabs in the workspace."""
@@ -47,13 +70,12 @@ class TabManager:
             # Clear any existing tabs
             while self.tab_widget.count() > 0:
                 self.tab_widget.removeTab(0)
-            
-            # Reset tracking dictionaries
+              # Reset tracking dictionaries
             self.table_widgets = {}
             self.tab_ids = {}
             
-            # Set custom tab bar to support middle-click closing
-            custom_tab_bar = MiddleClickTabBar(self)
+            # Set custom tab bar to support middle-click closing and context menu
+            custom_tab_bar = CustomTabBar(self)
             self.tab_widget.setTabBar(custom_tab_bar)
             
             # Connect tab close signal
@@ -333,7 +355,6 @@ class TabManager:
                         break
         except Exception as e:
             warning(f"Error closing tab: {e}")
-    
     def get_current_item_id(self):
         """Get the current selected item ID."""
         if not self.tab_widget:
@@ -342,6 +363,31 @@ class TabManager:
         current_index = self.tab_widget.currentIndex()
         return self.tab_ids.get(current_index)
     
+    def close_other_tabs(self, keep_index):
+        """Close all tabs except the one at keep_index."""
+        if not self.tab_widget or keep_index < 0 or keep_index >= self.tab_widget.count():
+            return
+            
+        # Get the tab we want to keep
+        keep_widget = self.tab_widget.widget(keep_index)
+        keep_id = self.tab_ids.get(keep_index)
+        
+        # Remove all other tabs in reverse order to avoid index issues
+        for i in range(self.tab_widget.count() - 1, -1, -1):
+            if i != keep_index:
+                # Close the tab
+                self.close_tab(i)
+                
+        # Make sure our indices are correct after closing tabs
+        self.tab_ids = {0: keep_id}
+          # Select the remaining tab
+        self.tab_widget.setCurrentIndex(0)
+        
+    def close_all_tabs(self):
+        """Close all tabs."""
+        # Remove all tabs in reverse order to avoid index issues
+        for i in range(self.tab_widget.count() - 1, -1, -1):
+            self.close_tab(i)    # Reveal in Explorer functionality has been removed
     def cleanup(self):
         """Clean up resources when the manager is no longer needed."""
         # Explicitly clean up Qt objects to avoid thread storage issues
