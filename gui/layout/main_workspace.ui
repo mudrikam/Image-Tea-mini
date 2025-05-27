@@ -160,7 +160,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
        <item>
         <widget class="QTabWidget" name="tabWidget_2">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="table_view">
           <attribute name="title">
@@ -186,7 +186,8 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
              </attribute>
              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
               <bool>true</bool>
-             </attribute>             <column>
+             </attribute>
+             <column>
               <property name="text">
                <string>Filename</string>
               </property>
@@ -219,6 +220,11 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
           <attribute name="title">
            <string>Grid</string>
           </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayoutGrid"/>
+           </item>
+          </layout>
          </widget>
          <widget class="QWidget" name="details_view">
           <attribute name="title">

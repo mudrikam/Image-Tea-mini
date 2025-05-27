@@ -47,12 +47,12 @@ class CustomTabBar(QtWidgets.QTabBar):
 
 class TabManager:
     """Helper class for managing tabs in the workspace."""
-    
     def __init__(self, parent_controller):
         """Initialize the tab manager."""
         self.controller = parent_controller
         self.tab_widget = None
         self.table_widgets = {}  # Dictionary to store table widgets for each tab: {item_id: table_widget}
+        self.grid_widgets = {}   # Dictionary to store grid widgets for each tab: {item_id: grid_widget}
         self.tab_ids = {}  # Dictionary to map tab indices to item IDs: {tab_index: item_id}
         self._qt_objects = []  # Track Qt objects that need explicit deletion
     def initialize_tabs(self, tab_widget):
@@ -141,9 +141,32 @@ class TabManager:
         # Store references
         self.table_widgets[item_id] = table_widget
         self.tab_ids[new_tab_idx] = item_id
-        
-        # Select the new tab
+          # Select the new tab
         self.tab_widget.setCurrentIndex(new_tab_idx)
+        
+        # Set up the grid view if available
+        if inner_tab_widget and inner_tab_widget.count() > 1:
+            grid_tab = inner_tab_widget.widget(1)  # Grid view is the second tab (index 1)
+            
+            # Check if this is a valid grid tab
+            if grid_tab:
+                # Load the main_workspace_grid.ui file into the grid tab
+                from core.helper.workspace._ui_loader import UILoader
+                ui_loader = UILoader(self.controller.BASE_DIR)
+                
+                # Load the grid UI file to the grid tab
+                ui_loader.load_ui_to_widget("main_workspace_grid.ui", grid_tab)
+                
+                # Store the grid widget reference
+                self.grid_widgets[item_id] = grid_tab
+                
+                # Set up grid click handler if controller has image preview
+                if hasattr(self.controller, 'on_table_item_clicked'):
+                    from core.helper.workspace._grid_manager import GridManager
+                    grid_manager = GridManager()
+                    # Setup is done in the update_grid_data method
+                else:
+                    warning(f"Could not find verticalLayoutGrid in grid_tab")
         
         # Set up table click handler if controller has image preview
         if hasattr(self.controller, 'on_table_item_clicked'):
@@ -402,8 +425,7 @@ class TabManager:
         
         # Clear references
         self._qt_objects.clear()
-        
-        # Clean up table widgets
+          # Clean up table widgets
         for item_id in list(self.table_widgets.keys()):
             try:
                 table = self.table_widgets[item_id]
@@ -412,7 +434,17 @@ class TabManager:
                     table.deleteLater()
             except:
                 pass
+                
+        # Clean up grid widgets
+        for item_id in list(self.grid_widgets.keys()):
+            try:
+                grid = self.grid_widgets[item_id]
+                if grid:
+                    grid.deleteLater()
+            except:
+                pass
         
         # Clear dictionaries
         self.table_widgets.clear()
+        self.grid_widgets.clear()
         self.tab_ids.clear()

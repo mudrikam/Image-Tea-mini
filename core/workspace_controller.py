@@ -5,6 +5,7 @@ from core.utils.logger import log, debug, warning, error, exception
 from core.helper.workspace._ui_loader import UILoader
 from core.helper.workspace._tab_manager import TabManager
 from core.helper.workspace._table_manager import TableManager
+from core.helper.workspace._grid_manager import GridManager
 from core.helper.workspace._dnd_handler import DropAreaHandler
 
 class WorkspaceController:
@@ -23,12 +24,13 @@ class WorkspaceController:
         self.ui_loader = UILoader(base_dir)
         self.tab_manager = TabManager(self)
         self.table_manager = TableManager()
+        self.grid_manager = GridManager()
         self.dnd_handler = DropAreaHandler(self)
-        
-        # References to UI elements
+          # References to UI elements
         self.tab_widget = None
         self.inner_tab_widget = None
         self.inner_table_widget = None
+        self.inner_grid_widget = None
         
         # Subscribe to the explorer selection events using weak references
         from core.utils.event_system import EventSystem
@@ -91,13 +93,18 @@ class WorkspaceController:
             
             # If an item is specified, add or select a tab for it
             if item_id:
-                debug(f"Adding or selecting tab for item: {item_id}")
+                debug(f"Adding or selecting tab for item: {item_id}")                
                 table_widget = self.tab_manager.add_or_select_tab(item_id)
                 if table_widget:
                     # Update the table data
                     file_count = self.table_manager.update_table_data(table_widget, item_id)
                     self.tab_manager.update_tab_title(item_id, file_count)
                     self.current_item_id = item_id
+                    
+                    # Also update the grid view if available
+                    grid_widget = self.tab_manager.grid_widgets.get(item_id)
+                    if grid_widget:
+                        self.grid_manager.update_grid_data(grid_widget, item_id)
             
             # Show the appropriate UI based on whether there are tabs
             if self.tab_widget and self.tab_widget.count() > 0:
@@ -132,13 +139,19 @@ class WorkspaceController:
             # Add or select tab for this item
             debug(f"Calling tab_manager.add_or_select_tab with item_id: {item_id}")
             table_widget = self.tab_manager.add_or_select_tab(item_id)
-            
             if table_widget:
                 debug(f"Got table_widget, updating data for item_id: {item_id}")
                 # Update the table data
                 file_count = self.table_manager.update_table_data(table_widget, item_id)
                 self.tab_manager.update_tab_title(item_id, file_count)
                 self.current_item_id = item_id
+                
+                # Also update the grid view if available
+                grid_widget = self.tab_manager.grid_widgets.get(item_id)
+                if grid_widget:
+                    debug(f"Updating grid view for item_id: {item_id}")
+                    self.grid_manager.update_grid_data(grid_widget, item_id)
+                
                 debug(f"Updated tab title with file count: {file_count}")
             else:
                 warning(f"Failed to get table_widget for item_id: {item_id}")
@@ -165,14 +178,20 @@ class WorkspaceController:
         # No longer switching to drag-drop UI on deselection
         # We only switch when all tabs are closed
         return self.workspace_widget
-    
     def refresh_current_workspace(self):
         """Refresh the data in the current tab."""
         if self.current_item_id:
+            # Update the table view
             table_widget = self.tab_manager.table_widgets.get(self.current_item_id)
             if table_widget:
                 file_count = self.table_manager.update_table_data(table_widget, self.current_item_id)
                 self.tab_manager.update_tab_title(self.current_item_id, file_count)
+            
+            # Update the grid view if available
+            grid_widget = self.tab_manager.grid_widgets.get(self.current_item_id)
+            if grid_widget:
+                self.grid_manager.update_grid_data(grid_widget, self.current_item_id)
+                
         return self.workspace_widget
     def on_last_tab_closed(self):
         """
