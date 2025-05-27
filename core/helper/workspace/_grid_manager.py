@@ -1,9 +1,9 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from core.utils.logger import log, debug, warning, error, exception
 
-# Define a FlowLayout class for dynamic grid layouts
+# Define a FlowLayout class for dynamic grid layouts - inspired by the example
 class FlowLayout(QtWidgets.QLayout):
-    """A flow layout that arranges items dynamically based on available space."""
+    """A flow layout that arranges items horizontally and wraps to the next line when needed."""
     
     def __init__(self, parent=None, margin=0, spacing=-1):
         super().__init__(parent)
@@ -63,16 +63,7 @@ class FlowLayout(QtWidgets.QLayout):
         return size
     
     def doLayout(self, rect, testOnly):
-        """
-        Layout all items in a flow layout (left-to-right, top-to-bottom)
-        
-        Args:
-            rect (QRect): Rectangle to lay out items in
-            testOnly (bool): If True, just calculate height, don't move widgets
-            
-        Returns:
-            int: Required height for layout
-        """
+        """Arrange items in a horizontal flow that wraps to next line when full."""
         x = rect.x()
         y = rect.y()
         lineHeight = 0
@@ -83,24 +74,22 @@ class FlowLayout(QtWidgets.QLayout):
             
             nextX = x + item.sizeHint().width() + spaceX
             
-            # If item would extend beyond right edge, move to next row
+            # If this item would extend beyond the right edge and we're not on the first item of a line,
+            # move to the next row
             if nextX - spaceX > rect.right() and lineHeight > 0:
                 x = rect.x()
                 y = y + lineHeight + spaceY
                 nextX = x + item.sizeHint().width() + spaceX
                 lineHeight = 0
-            
-            # Only set the actual geometry when not just testing
+                
             if not testOnly:
                 item.setGeometry(QtCore.QRect(QtCore.QPoint(x, y), item.sizeHint()))
-            
-            # Move x position to next item
+                
             x = nextX
-            # Update line height to tallest item in this row
             lineHeight = max(lineHeight, item.sizeHint().height())
-        
-        # Return total height needed
+            
         return y + lineHeight - rect.y()
+
 
 class GridManager:
     """Helper class for managing grid view display of images with names."""
@@ -156,207 +145,142 @@ class GridManager:
             # Get the number of files
             file_count = len(files_data) if files_data else 0
             
-            # Find the grid layout in our UI structure
-            grid_layout = None
+            # Create a new scroll area and flow layout from scratch
+            # This ensures we have a clean implementation like the example
             
-            # Find standard components from our main_workspace_grid.ui
-            # First check for the scroll area in verticalLayoutGrid
-            vertical_layout = grid_widget.findChild(QtWidgets.QVBoxLayout, "verticalLayoutGrid")
-            if vertical_layout:
-                debug("Found verticalLayoutGrid")
+            # First, clear any existing layouts
+            old_layout = grid_widget.layout()
+            if old_layout:
+                # Clear items from old layout
+                while old_layout.count():
+                    item = old_layout.takeAt(0)
+                    if item.widget():
+                        item.widget().deleteLater()
                 
-                # Look for scroll area in this layout or directly in the widget
-                scroll_area = grid_widget.findChild(QtWidgets.QScrollArea, "scrollArea")
-                if not scroll_area:
-                    # Try looking in verticalLayoutGrid
-                    for i in range(vertical_layout.count()):
-                        item = vertical_layout.itemAt(i)
-                        if item and item.widget() and isinstance(item.widget(), QtWidgets.QScrollArea):
-                            scroll_area = item.widget()
-                            break
-                
-                if scroll_area:
-                    debug("Found scrollArea")
-                    # Get the scroll area content widget
-                    scroll_content = scroll_area.widget()
-                    if scroll_content:
-                        # Find the grid container in the scroll content
-                        grid_container = scroll_content.findChild(QtWidgets.QWidget, "gridContainer")
-                        if grid_container and hasattr(grid_container, 'layout'):
-                            grid_layout = grid_container.layout()
-                            debug("Found grid layout in grid container")
+                # Need to use this approach to fully remove old layout
+                QtWidgets.QWidget().setLayout(old_layout)
             
-            # If still not found, look for any gridContainer in the widget hierarchy
-            if not grid_layout:
-                grid_container = grid_widget.findChild(QtWidgets.QWidget, "gridContainer") 
-                if grid_container and hasattr(grid_container, 'layout'):
-                    grid_layout = grid_container.layout()
-                    debug("Found grid layout through direct gridContainer search")
-                                    
-            # If we still don't have a grid layout, create one in a scroll area
-            if not grid_layout:
-                debug("Creating new grid layout as fallback")
-                # Find or create scroll area
-                scroll_area = grid_widget.findChild(QtWidgets.QScrollArea)
-                if not scroll_area:
-                    # Try to find the verticalLayoutGrid to place our scroll area
-                    vertical_layout = grid_widget.findChild(QtWidgets.QVBoxLayout, "verticalLayoutGrid")
-                      # Create scrollarea with proper styling for seamless integration
-                    scroll_area = QtWidgets.QScrollArea()
-                    scroll_area.setWidgetResizable(True)
-                    scroll_area.setObjectName("gridScrollArea")
-                    scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)  # Hide the frame
-                    scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-                    scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-                    
-                    # Style the scrollbars to match the application style
-                    scroll_area.setStyleSheet("""
-                        QScrollBar:vertical {
-                            background: #f0f0f0;
-                            width: 10px;
-                            margin: 0px;
-                        }
-                        QScrollBar::handle:vertical {
-                            background: #c0c0c0;
-                            border-radius: 4px;
-                            min-height: 20px;
-                        }
-                        QScrollBar::handle:vertical:hover {
-                            background: #a0a0a0;
-                        }
-                        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                            height: 0px;
-                        }
-                        QScrollBar:horizontal {
-                            background: #f0f0f0;
-                            height: 10px;
-                            margin: 0px;
-                        }
-                        QScrollBar::handle:horizontal {
-                            background: #c0c0c0;
-                            border-radius: 4px;
-                            min-width: 20px;
-                        }
-                        QScrollBar::handle:horizontal:hover {
-                            background: #a0a0a0;
-                        }
-                        QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-                            width: 0px;
-                        }
-                    """)
-                    
-                    # Add to layout if found
-                    if vertical_layout:
-                        vertical_layout.addWidget(scroll_area)
-                    else:
-                        # Create a layout for grid_widget if needed
-                        if not grid_widget.layout():
-                            layout = QtWidgets.QVBoxLayout(grid_widget)
-                        else:
-                            layout = grid_widget.layout()
-                        layout.addWidget(scroll_area)                
-                        # Create or get scroll content
-                scroll_content = scroll_area.widget()
-                if not scroll_content:
-                    scroll_content = QtWidgets.QWidget()
-                    scroll_area.setWidget(scroll_content)
-                
-                # Create content layout if needed
-                if not scroll_content.layout():
-                    scroll_content_layout = QtWidgets.QVBoxLayout(scroll_content)
-                    scroll_content_layout.setContentsMargins(10, 10, 10, 10)
-                else:
-                    scroll_content_layout = scroll_content.layout()
-                
-                # Create grid container
-                grid_container = QtWidgets.QWidget()
-                grid_container.setObjectName("gridContainer")
-                  # Add to layout
-                scroll_content_layout.addWidget(grid_container)
-                
-                # Create a flow layout instead of grid layout for better dynamic layout
-                # Use spacing for nicer look and margin to better utilize container space
-                flow_layout = FlowLayout(parent=grid_container, spacing=self.grid_spacing, margin=5)
-                grid_container.setLayout(flow_layout)
-                grid_layout = flow_layout
+            # Create new vertical layout for the grid widget
+            main_layout = QtWidgets.QVBoxLayout(grid_widget)
+            main_layout.setContentsMargins(0, 0, 0, 0)
             
-            # Add data to the grid
-            if files_data and len(files_data) > 0:                
-                # Add each file to the grid
+            # Create scroll area
+            scroll_area = QtWidgets.QScrollArea()
+            scroll_area.setWidgetResizable(True)
+            scroll_area.setObjectName("gridScrollArea") 
+            scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)  # Hide the frame
+            scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+            
+            # Style scrollbars - consistent with output logs
+            scroll_area.setStyleSheet("""
+                QScrollBar:vertical {
+                    border: none;
+                    background-color: rgba(0, 0, 0, 5);
+                    width: 8px;
+                    margin: 0px;
+                    border-radius: 4px;
+                }
+                
+                QScrollBar::handle:vertical {
+                    background-color: rgba(128, 128, 128, 60);
+                    min-height: 20px;
+                    border-radius: 4px;
+                }
+                
+                QScrollBar::handle:vertical:hover {
+                    background-color: rgba(128, 128, 128, 120);
+                }
+                
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                    height: 0px;
+                }
+                
+                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                    background: none;
+                }
+                
+                QScrollBar:horizontal {
+                    border: none;
+                    background-color: rgba(0, 0, 0, 5);
+                    height: 8px;
+                    margin: 0px;
+                    border-radius: 4px;
+                }
+                
+                QScrollBar::handle:horizontal {
+                    background-color: rgba(128, 128, 128, 60);
+                    min-width: 20px;
+                    border-radius: 4px;
+                }
+                
+                QScrollBar::handle:horizontal:hover {
+                    background-color: rgba(128, 128, 128, 120);
+                }
+                
+                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                    width: 0px;
+                }
+                
+                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+                    background: none;
+                }
+            """)
+            
+            # Add scroll area to main layout
+            main_layout.addWidget(scroll_area)
+            
+            # Create content widget for scroll area
+            scroll_content = QtWidgets.QWidget()
+            scroll_area.setWidget(scroll_content)
+            
+            # Create the flow layout for the image grid
+            flow_layout = FlowLayout(margin=10, spacing=self.grid_spacing)
+            scroll_content.setLayout(flow_layout)
+            
+            # Add data to the grid using the flow layout
+            if files_data and len(files_data) > 0:
+                # Add each file to the flow grid
                 for idx, file_info in enumerate(files_data):
                     try:
-                        # Get data from file info
-                        filename = str(file_info.get('filename', ''))
-                        extension = str(file_info.get('extension', ''))
-                        filepath = str(file_info.get('filepath', ''))
+                        # Create image widget and add to flow layout
+                        image_widget = self._create_image_widget(file_info)
+                        flow_layout.addWidget(image_widget)
                         
-                        # Create a truncated name for display
-                        MAX_NAME_LENGTH = 20
-                        if len(filename) > MAX_NAME_LENGTH:
-                            display_name = f"{filename[:MAX_NAME_LENGTH-3]}...{extension}"
-                        else:
-                            display_name = f"{filename}{extension}"
-                        
-                        # Create the image item widget
-                        item_widget = self._create_image_widget(file_info)
-                        
-                        # Add the widget to the flow layout
-                        grid_layout.addWidget(item_widget)
-                        
-                        # Store the widget reference
-                        self.image_items.append(item_widget)
-                    
+                        # Store for memory management
+                        self.image_items.append(image_widget)
                     except Exception as e:
                         exception(e, f"Error adding image {idx} to grid")
-                
             else:
-                # No data found - add a message
+                # No images found
                 no_data_label = QtWidgets.QLabel("No images found")
                 no_data_label.setAlignment(QtCore.Qt.AlignCenter)
-                grid_layout.addWidget(no_data_label)
+                flow_layout.addWidget(no_data_label)
                 self.image_items.append(no_data_label)
             
             return file_count
-            
+                
         except Exception as e:
             exception(e, f"Error updating grid data for item {item_id}")
             return 0
     
-    def _clear_grid(self, container):
-        """
-        Clear all items from the grid layout.
+    def _clear_grid(self, grid_widget):
+        """Clear all items from the grid and release memory."""
+        # Clear our tracked items first to help garbage collection
+        for item in self.image_items:
+            if item:
+                try:
+                    item.deleteLater()
+                except:
+                    pass
         
-        Args:
-            container: The container widget holding the grid
-        """        # Find the grid layout
-        grid_layout = None
-        for child in container.children():
-            if isinstance(child, QtWidgets.QWidget) and hasattr(child, 'layout'):
-                grid_container = child
-                layout_obj = grid_container.layout()
-                if hasattr(grid_container, 'layout') and layout_obj is not None and (
-                    isinstance(layout_obj, QtWidgets.QGridLayout) or 
-                    isinstance(layout_obj, FlowLayout)
-                ):
-                    grid_layout = layout_obj
-                    break
+        self.image_items.clear()
         
-        # If we couldn't find the grid layout, try to find a container named gridContainer
-        if not grid_layout:
-            grid_container = container.findChild(QtWidgets.QWidget, "gridContainer")
-            if grid_container and hasattr(grid_container, 'layout'):
-                grid_layout = grid_container.layout()
-        
-        # Clear the layout if found
-        if grid_layout:
-            while grid_layout.count():
-                item = grid_layout.takeAt(0)
-                if item.widget():
-                    item.widget().deleteLater()        # Clear our list of items        self.image_items.clear()
-        
+        # We'll recreate the layout from scratch, so we don't need complex clearing here
+    
     def _create_image_widget(self, file_info):
         """
-        Create a widget containing an image and its name.
+        Create a widget containing an image and its name like in the example image_grid.py.
         
         Args:
             file_info: Dictionary containing file information
@@ -368,34 +292,31 @@ class GridManager:
         filename = file_info.get('filename', '')
         extension = file_info.get('extension', '')
         
-        # Create a container widget for image and filename
+        # Create a container widget
         container = QtWidgets.QWidget()
         
-        # Set appropriate size for proper horizontal flow layout
-        # Use fixed width but flexible height to allow flow layout to work
-        item_width = self.image_size + 20
-        item_height = self.image_size + 40  # Image height + space for text + margins
-        container.setMinimumSize(item_width, item_height)
-        container.setFixedWidth(item_width)  # Fixed width ensures proper horizontal flow
+        # Set fixed width but flexible height
+        item_width = self.image_size + 10
+        container.setFixedWidth(item_width)
         
-        # Use a QVBoxLayout with center alignment to ensure the label is right below the image
+        # Use vertical layout like in the example
         layout = QtWidgets.QVBoxLayout(container)
         layout.setContentsMargins(2, 2, 2, 2)
         layout.setSpacing(2)
-        layout.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         
-        # Create the image label with hover effects
+        # Create image label with hover effects (like in the example)
         image_label = QtWidgets.QLabel()
         image_label.setAlignment(QtCore.Qt.AlignCenter)
         image_label.setFixedSize(self.image_size, self.image_size)
         
-        # Add hover effects with CSS styling
+        # Add hover effects similar to the example
         image_label.setStyleSheet("""
             QLabel {
-                background-color: #f0f0f0;
                 border: 2px solid rgba(0, 0, 0, 0);
+                background-color: #f0f0f0;
                 border-radius: 4px;
                 padding: 2px;
+                cursor: pointer;
             }
             QLabel:hover {
                 border: 2px solid rgba(88, 165, 0, 0.3);
@@ -403,17 +324,15 @@ class GridManager:
             }
         """)
         
-        # Make sure the label can use hover effects
+        # Enable hover events and pointer cursor
         image_label.setAttribute(QtCore.Qt.WA_Hover, True)
-        
-        # Change cursor to pointing hand when hovering over image
         image_label.setCursor(QtCore.Qt.PointingHandCursor)
         
         # Load the image
         self._load_image(image_label, filepath)
         
-        # Create the text label for the filename - centered below the image
-        MAX_NAME_LENGTH = 20
+        # Create text label for filename
+        MAX_NAME_LENGTH = 18
         if len(filename) > MAX_NAME_LENGTH:
             display_name = f"{filename[:MAX_NAME_LENGTH-3]}...{extension}"
         else:
@@ -421,31 +340,26 @@ class GridManager:
             
         text_label = QtWidgets.QLabel(display_name)
         text_label.setAlignment(QtCore.Qt.AlignCenter)
-        text_label.setWordWrap(False)  # No word wrap for image name
-        text_label.setFixedWidth(self.image_size)  # Match the image width
+        text_label.setWordWrap(False)
+        text_label.setFixedWidth(self.image_size)
         text_label.setStyleSheet("font-size: 9pt;")
         text_label.setToolTip(f"{filename}{extension}")
         
-        # Add the widgets to the layout
+        # Add widgets to layout
         layout.addWidget(image_label)
         layout.addWidget(text_label)
         
-        # Store the file info in the container's user data
+        # Store file info in widget
         container.setProperty("file_info", file_info)
         
-        # Add mouse event handling
+        # Add click handler - both container and image can be clicked
         container.mousePressEvent = lambda event: self._handle_image_click(container, event)
+        image_label.mousePressEvent = lambda event: self._handle_image_click(container, event)
         
         return container
     
     def _load_image(self, label, image_path):
-        """
-        Load an image from a path and display it in a label.
-        
-        Args:
-            label (QLabel): The label to set the image on
-            image_path (str): Path to the image file
-        """
+        """Load an image from a path and display it in a label."""
         try:
             pixmap = QtGui.QPixmap(image_path)
             
@@ -460,95 +374,120 @@ class GridManager:
                 label.setPixmap(pixmap)
             else:
                 # Use a placeholder for failed loads
-                label.setText(f"Cannot load image")
+                label.setText("Cannot load\nimage")
                 warning(f"Failed to load image: {image_path}")
                 
         except Exception as e:
             label.setText("Error")
             exception(e, f"Error loading image: {image_path}")
+    
     def _handle_image_click(self, widget, event):
         """
-        Handle click events on image items.
+        Handle click events on grid images to show in preview pane.
         
-        Args:
-            widget (QWidget): The widget that was clicked
-            event (QMouseEvent): The mouse event
+        This is a completely rewritten handler that tries multiple approaches
+        to ensure the image appears in the preview.
         """
         try:
-            # Get the file info from the widget's properties
+            # Get file info from the widget
             file_info = widget.property("file_info")
             
-            if file_info:
-                debug(f"Image clicked: {file_info.get('filename')} with path: {file_info.get('filepath')}")
+            if not file_info:
+                return
                 
-                # Direct way to access the main controller
-                from core.workspace_controller import WorkspaceController
+            debug(f"Grid image clicked: {file_info.get('filename')} ({file_info.get('filepath')})")
+            
+            # APPROACH 1: Find workspace controller in parent hierarchy
+            parent = widget
+            workspace_controller = None
+            
+            # Navigate up the widget hierarchy
+            while parent:
+                if hasattr(parent, 'controller') and parent.controller.__class__.__name__ == 'WorkspaceController':
+                    workspace_controller = parent.controller
+                    debug("Found workspace controller in parent hierarchy")
+                    break
+                parent = parent.parent()
+            
+            # If found, use the on_table_item_clicked method (works for both table and grid)
+            if workspace_controller and hasattr(workspace_controller, 'on_table_item_clicked'):
+                debug("Using workspace_controller.on_table_item_clicked")
+                workspace_controller.on_table_item_clicked(0, 0, file_info)
+                return
+            
+            # APPROACH 2: Find main window and search for controller
+            main_window = QtWidgets.QApplication.activeWindow()
+            if main_window:
+                # Look for any object with on_table_item_clicked method
+                for child in main_window.findChildren(QtWidgets.QWidget):
+                    if hasattr(child, 'on_table_item_clicked'):
+                        debug(f"Found widget with on_table_item_clicked method: {child.__class__.__name__}")
+                        child.on_table_item_clicked(0, 0, file_info)
+                        return
                 
-                # Find the main window
-                main_window = QtWidgets.QApplication.activeWindow()
-                
-                # First try: Look for WorkspaceController in the parent hierarchy
-                parent = widget
-                workspace_controller = None
-                
-                # Navigate up the widget hierarchy looking for workspace controller
-                while parent:
-                    if hasattr(parent, 'controller') and isinstance(parent.controller, WorkspaceController):
-                        workspace_controller = parent.controller
-                        debug("Found workspace controller in parent hierarchy")
-                        break
-                    parent = parent.parent()
-                
-                if workspace_controller and hasattr(workspace_controller, 'on_table_item_clicked'):
-                    # Pass the file info to the workspace controller's click handler
-                    debug(f"Calling on_table_item_clicked via found controller")
-                    workspace_controller.on_table_item_clicked(0, 0, file_info)
-                    return
-                
-                # Second try: Find any widget with on_table_item_clicked method
-                if main_window:
-                    for child in main_window.findChildren(QtWidgets.QWidget):
-                        if hasattr(child, 'on_table_item_clicked'):
-                            debug(f"Found widget with on_table_item_clicked method")
-                            child.on_table_item_clicked(0, 0, file_info)
-                            return
-                    
-                # Third try: Look directly for image preview widget
-                image_preview = main_window.findChild(QtWidgets.QWidget, "dockWidgetContents")
-                if image_preview:
-                    # Look for set_image method on children
-                    for child in image_preview.findChildren(QtWidgets.QWidget):
+                # APPROACH 3: Access image preview directly
+                # First try to find by dock widget contents
+                preview_container = main_window.findChild(QtWidgets.QWidget, "dockWidgetContents")
+                if preview_container:
+                    # Look for set_image method on any child
+                    for child in preview_container.findChildren(QtWidgets.QWidget):
                         if hasattr(child, 'set_image'):
                             image_path = file_info.get('filepath')
                             if image_path:
-                                debug(f"Setting image directly: {image_path}")
+                                debug(f"Setting image directly on preview widget: {image_path}")
                                 child.set_image(image_path)
                                 return
                 
-                # Fourth try: Look for image preview directly
+                # APPROACH 4: Look for image preview dock widget
                 for dock in main_window.findChildren(QtWidgets.QDockWidget):
+                    # Try to access preview widget
+                    preview_widget = None
+                    
+                    # If the dock has set_image method
                     if hasattr(dock, 'set_image'):
+                        preview_widget = dock
+                    
+                    # Check if the dock has preview_widget property
+                    elif hasattr(dock, 'widget') and dock.widget() and hasattr(dock.widget(), 'set_image'):
+                        preview_widget = dock.widget()
+                    
+                    # If we found a preview widget with set_image method
+                    if preview_widget:
                         image_path = file_info.get('filepath')
                         if image_path:
-                            debug(f"Setting image via dock widget: {image_path}")
-                            dock.set_image(image_path)
+                            debug(f"Setting image on dock widget: {image_path}")
+                            preview_widget.set_image(image_path)
                             return
+            
+            # APPROACH 5: Use the event system
+            try:
+                from core.utils.event_system import EventSystem
+                filepath = file_info.get('filepath', '')
+                if filepath:
+                    debug(f"Publishing image_selected event: {filepath}")
+                    EventSystem.publish('image_selected', filepath)
+                    return
+            except Exception as event_error:
+                warning(f"Could not publish image_selected event: {str(event_error)}")
                 
+            warning("Failed to find a way to show the image in preview")
+            
         except Exception as e:
-            exception(e, "Error handling image click")
+            exception(e, "Error handling grid image click")
     
     def setup_grid_click_handler(self, grid_widget, callback_function):
         """
         Set up a click handler for the grid widget items.
+        This stores the callback function for use by the grid items.
         
         Args:
             grid_widget: The grid widget to set up the click handler for
             callback_function: The function to call when an item is clicked
-                               Should accept parameters: row, column, data_dict
         """
         if not grid_widget:
             warning("Grid widget not provided, can't set up click handler")
             return
         
-        # Store the callback function to be used by _handle_image_click
+        # Store callback reference for use by items
         grid_widget._callback_function = callback_function
+        debug(f"Set up grid click handler with callback: {callback_function.__name__}")
