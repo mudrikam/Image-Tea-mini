@@ -59,20 +59,29 @@ class TableManager:
                     status = str(file_info.get('status', ''))
                     filepath = str(file_info.get('filepath', ''))
                     
-                    # Truncate long filenames for display
+                    # Truncate long filenames and filepaths for display
                     MAX_FILENAME_LENGTH = 25
+                    MAX_FILEPATH_LENGTH = 30
+                    
+                    # Truncate filename if needed
                     if len(filename) > MAX_FILENAME_LENGTH:
                         # Truncate and add ellipsis
                         truncated_filename = f"{filename[:MAX_FILENAME_LENGTH-3]}..."
                     else:
                         truncated_filename = filename
-                    
-                    # Create table items
+                        
+                    # Truncate filepath if needed
+                    if len(filepath) > MAX_FILEPATH_LENGTH:
+                        # Keep the first part and the last part with an ellipsis in between
+                        truncated_filepath = f"{filepath[:15]}...{filepath[-15:]}"
+                    else:
+                        truncated_filepath = filepath
+                      # Create table items
                     filename_item = QtWidgets.QTableWidgetItem(truncated_filename)
                     extension_item = QtWidgets.QTableWidgetItem(extension)
                     item_id_item = QtWidgets.QTableWidgetItem(item_id)
                     status_item = QtWidgets.QTableWidgetItem(status)
-                    filepath_item = QtWidgets.QTableWidgetItem(filepath)
+                    filepath_item = QtWidgets.QTableWidgetItem(truncated_filepath)
                     
                     # Set tooltip to show full filename and filepath when hovering
                     filename_item.setToolTip(filename)
