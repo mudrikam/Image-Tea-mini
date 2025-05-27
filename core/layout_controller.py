@@ -5,6 +5,7 @@ from core.widgets.output_logs import OutputLogsWidget
 from core.widgets._default_layout import reset_widget_to_default
 from core.utils.logger import log, debug, warning, error, exception, set_output_logs
 from core.workspace_controller import WorkspaceController
+from core.widgets.actions_widget import ActionsWidget
 
 class LayoutController:
     def __init__(self, parent_window, base_dir):
@@ -15,6 +16,7 @@ class LayoutController:
         self.output_logs = None
         self.image_preview = None  # Add image preview reference
         self.file_properties = None  # Add file properties reference
+        self.actions_widget = None  # Add actions widget reference
         self.settings = QtCore.QSettings("ImageTeaMini", "Layout")
         
         # Create workspace controller
@@ -125,6 +127,28 @@ class LayoutController:
             exception(e, "Failed to load file properties")
             return None
 
+    def load_actions_widget(self):
+        """Load the actions dock widget and add it to the main window."""
+        try:
+            # Create and load the actions widget
+            actions = ActionsWidget(self.BASE_DIR)
+            dock_widget = actions.load_ui()
+            self.widgets['actions'] = dock_widget
+            self.actions_widget = actions
+            
+            # Connect to the topLevelChanged signal to preserve styling when detached
+            dock_widget.topLevelChanged.connect(lambda floating: self._preserve_dock_styling(dock_widget, floating))
+            
+            # Add the dock widget to the main window at the top area
+            self.parent.addDockWidget(QtCore.Qt.TopDockWidgetArea, dock_widget)
+            dock_widget.setVisible(True)
+            dock_widget.show()
+            
+            return dock_widget
+        except Exception as e:
+            exception(e, "Failed to load actions panel")
+            return None
+
     def load_main_workspace(self, item_id=None):
         """
         Load the main workspace into the central widget.
@@ -138,6 +162,9 @@ class LayoutController:
         """Set up all UI components."""
         # This message is useful to show that the app is starting up
         self.load_output_logs_widget()
+        
+        # Load the actions widget (before workspace to position it above)
+        self.load_actions_widget()
         
         # Load the main workspace using the workspace controller
         self.workspace_controller.load_workspace()
@@ -227,7 +254,8 @@ class LayoutController:
             'explorer': f"{self.BASE_DIR}/gui/widgets/explorer/explorer_widget.ui",
             'output_logs': f"{self.BASE_DIR}/gui/widgets/logs/output_logs.ui",
             'image_preview': f"{self.BASE_DIR}/gui/widgets/preview/image_preview.ui",
-            'file_properties': f"{self.BASE_DIR}/gui/widgets/properties/file_properties.ui",  # Add file properties UI path
+            'file_properties': f"{self.BASE_DIR}/gui/widgets/properties/file_properties.ui",
+            'actions': f"{self.BASE_DIR}/gui/widgets/actions/actions_widget.ui",  # Add actions UI path
         }
         
         # Define widget positions
@@ -235,7 +263,8 @@ class LayoutController:
             'explorer': QtCore.Qt.LeftDockWidgetArea,
             'output_logs': QtCore.Qt.BottomDockWidgetArea,
             'image_preview': QtCore.Qt.RightDockWidgetArea,
-            'file_properties': QtCore.Qt.RightDockWidgetArea,  # Add file properties position
+            'file_properties': QtCore.Qt.RightDockWidgetArea,
+            'actions': QtCore.Qt.TopDockWidgetArea,  # Add actions position
         }
         
         # Find and collect all dock widgets, including those that might not be in self.widgets
