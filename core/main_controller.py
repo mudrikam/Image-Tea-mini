@@ -118,14 +118,17 @@ class MainController:
             # Load the UI file
             loader = QtUiTools.QUiLoader()
             ui_file = QtCore.QFile(ui_path)
-            
             if not ui_file.exists():
                 error(f"UI file not found: {ui_path}")
                 return self
-                
+            
+            # Open the UI file for reading
             ui_file.open(QtCore.QFile.ReadOnly)
             self.window = loader.load(ui_file)
             ui_file.close()
+            
+            # Attach the config to the window object for access by child widgets
+            self.window.config = self.config
             
             # Set window title from settings
             if self.config:

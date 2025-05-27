@@ -125,8 +125,7 @@ class LayoutController:
             return dock_widget
         except Exception as e:
             exception(e, "Failed to load file properties")
-            return None
-
+            return None    
     def load_actions_widget(self):
         """Load the actions dock widget and add it to the main window."""
         try:
@@ -135,6 +134,15 @@ class LayoutController:
             dock_widget = actions.load_ui()
             self.widgets['actions'] = dock_widget
             self.actions_widget = actions
+            
+            # Get the config from the main window
+            config = None
+            if hasattr(self.parent, 'config'):
+                config = self.parent.config
+            
+            # Pass main window and config to the actions widget
+            if actions:
+                actions.set_main_window_and_config(self.parent, config)
             
             # Connect to the topLevelChanged signal to preserve styling when detached
             dock_widget.topLevelChanged.connect(lambda floating: self._preserve_dock_styling(dock_widget, floating))
@@ -157,7 +165,6 @@ class LayoutController:
         Args:
             item_id (str, optional): The ID of the selected item in the explorer        """
         return self.workspace_controller.load_workspace(item_id)
-        
     def setup_ui(self):
         """Set up all UI components."""
         # This message is useful to show that the app is starting up
@@ -165,6 +172,10 @@ class LayoutController:
         
         # Load the actions widget (before workspace to position it above)
         self.load_actions_widget()
+        
+        # Check if the parent has config that might not have been available initially
+        if self.actions_widget and hasattr(self.parent, 'config'):
+            self.actions_widget.set_main_window_and_config(self.parent, self.parent.config)
         
         # Load the main workspace using the workspace controller
         self.workspace_controller.load_workspace()
@@ -174,9 +185,6 @@ class LayoutController:
           # Connect the image preview widget to the workspace controller
         if self.image_preview:
             self.workspace_controller.connect_to_image_preview(self.image_preview)
-            
-        # Assign the workspace controller to the parent window for global access
-        self.parent.workspace_controller = self.workspace_controller
             
         # Assign the workspace controller to the parent window for global access
         self.parent.workspace_controller = self.workspace_controller
