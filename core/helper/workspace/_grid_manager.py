@@ -311,8 +311,7 @@ class GridManager:
           # Add hover effects similar to the example
         image_label.setStyleSheet("""
             QLabel {
-                border: 2px solid rgba(0, 0, 0, 0);
-                background-color: #f0f0f0;
+                border: 2px solid rgba(0, 0, 0, 0.1);
                 border-radius: 4px;
                 padding: 2px;
             }
