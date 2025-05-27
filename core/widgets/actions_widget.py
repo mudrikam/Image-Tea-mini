@@ -107,17 +107,17 @@ class ActionsWidget:
                 # Style the stop button using the requested red color
                 stop_button.setStyleSheet("""
                     QPushButton {
-                        background-color: #993244;
+                        background-color: rgba(233, 29, 73, 0.32);
                         border-radius: 12px;
                         padding: 5px;
                         color: #eb314d;
                         font-weight: bold;
                     }
                     QPushButton:hover {
-                        background-color: #8a2d3d;
+                        background-color: rgba(233, 29, 73, 0.65);
                     }
                     QPushButton:pressed {
-                        background-color: #7a2836;
+                        background-color: rgba(233, 29, 73, 0.8);
                     }
                     QPushButton:disabled {
                         background-color: rgba(115, 119, 123, 0.18);
@@ -147,7 +147,6 @@ class ActionsWidget:
                         padding: 5px;
                         padding-left: 8px;
                         padding-right: 10px;
-                        font-weight: bold;
                     }
                     QPushButton:hover {
                         background-color: rgba(115, 119, 123, 0.1);
@@ -185,7 +184,6 @@ class ActionsWidget:
                         padding: 5px;
                         padding-left: 8px;
                         padding-right: 10px;
-                        font-weight: bold;
                     }
                     QPushButton:hover {
                         background-color: rgba(115, 119, 123, 0.1);
