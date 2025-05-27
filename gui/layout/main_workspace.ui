@@ -186,8 +186,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
              </attribute>
              <attribute name="verticalHeaderShowSortIndicator" stdset="0">
               <bool>true</bool>
-             </attribute>
-             <column>
+             </attribute>             <column>
               <property name="text">
                <string>Filename</string>
               </property>
@@ -195,6 +194,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
              <column>
               <property name="text">
                <string>Extension</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>ID</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Status</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Filepath</string>
               </property>
              </column>
             </widget>

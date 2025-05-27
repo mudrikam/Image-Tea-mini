@@ -51,11 +51,13 @@ class TableManager:
                 table_widget.setRowCount(len(files_data))
                 
                 # Add each row of data
-                for row_idx, file_info in enumerate(files_data):
-                    # Get data from file info
+                for row_idx, file_info in enumerate(files_data):                    # Get data from file info
                     filename = str(file_info.get('filename', ''))
                     extension = str(file_info.get('extension', ''))
                     file_id = file_info.get('id')
+                    item_id = str(file_info.get('item_id', ''))
+                    status = str(file_info.get('status', ''))
+                    filepath = str(file_info.get('filepath', ''))
                     
                     # Truncate long filenames for display
                     MAX_FILENAME_LENGTH = 25
@@ -68,9 +70,13 @@ class TableManager:
                     # Create table items
                     filename_item = QtWidgets.QTableWidgetItem(truncated_filename)
                     extension_item = QtWidgets.QTableWidgetItem(extension)
+                    item_id_item = QtWidgets.QTableWidgetItem(item_id)
+                    status_item = QtWidgets.QTableWidgetItem(status)
+                    filepath_item = QtWidgets.QTableWidgetItem(filepath)
                     
-                    # Set tooltip to show full filename when hovering
+                    # Set tooltip to show full filename and filepath when hovering
                     filename_item.setToolTip(filename)
+                    filepath_item.setToolTip(filepath)
                     
                     # Store the full file_info in the user data of the filename item
                     # This allows us to retrieve it later when an item is clicked
@@ -79,13 +85,18 @@ class TableManager:
                     # Set items in the table
                     table_widget.setItem(row_idx, 0, filename_item)
                     table_widget.setItem(row_idx, 1, extension_item)
+                    table_widget.setItem(row_idx, 2, item_id_item)
+                    table_widget.setItem(row_idx, 3, status_item)
+                    table_widget.setItem(row_idx, 4, filepath_item)
                 
-            else:
-                # No data found - add a single row with a message
+            else:                # No data found - add a single row with a message
                 table_widget.setRowCount(1)
                 no_data_item = QtWidgets.QTableWidgetItem("No files found")
                 table_widget.setItem(0, 0, no_data_item)
                 table_widget.setItem(0, 1, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 2, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 3, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 4, QtWidgets.QTableWidgetItem(""))
             
             # Resize columns to content
             table_widget.resizeColumnsToContents()
@@ -149,12 +160,14 @@ class TableManager:
                 # Get the item data (could be stored in Qt.UserRole)
                 data = id_item.data(QtCore.Qt.UserRole)
                 if not data:
-                    # If no specific data stored, create a dictionary with the visible data
+                    # If no specific data stored, create a dictionary with the visible data                    
                     data = {
                         'row': row,
                         'filename': table_widget.item(row, 0).text() if table_widget.item(row, 0) else '',
                         'extension': table_widget.item(row, 1).text() if table_widget.item(row, 1) else '',
-                        # Add more fields as needed
+                        'item_id': table_widget.item(row, 2).text() if table_widget.item(row, 2) else '',
+                        'status': table_widget.item(row, 3).text() if table_widget.item(row, 3) else '',
+                        'filepath': table_widget.item(row, 4).text() if table_widget.item(row, 4) else '',
                     }
                 
                 # Call the callback function with the row, column, and data

@@ -109,13 +109,12 @@ class TabManager:
         inner_tab_widget = tab_content.findChild(QtWidgets.QTabWidget)
         table_tab = inner_tab_widget.widget(0) if inner_tab_widget else None
         table_widget = table_tab.findChild(QtWidgets.QTableWidget) if table_tab else None
-        
         if not table_widget:
             # Fallback if we couldn't find the table widget in the cloned template
             table_widget = QtWidgets.QTableWidget()
             table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-            table_widget.setColumnCount(2)
-            table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
+            table_widget.setColumnCount(5)
+            table_widget.setHorizontalHeaderLabels(["Filename", "Extension", "ID", "Status", "Filepath"])
             table_widget.horizontalHeader().setStretchLastSection(True)
             table_widget.verticalHeader().setVisible(True)
             
@@ -309,12 +308,11 @@ class TabManager:
         table_tab = QtWidgets.QWidget()
         table_layout = QtWidgets.QVBoxLayout(table_tab)
         table_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # Create table
+          # Create table
         table_widget = QtWidgets.QTableWidget()
         table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        table_widget.setColumnCount(2)
-        table_widget.setHorizontalHeaderLabels(["Filename", "Extension"])
+        table_widget.setColumnCount(5)
+        table_widget.setHorizontalHeaderLabels(["Filename", "Extension", "ID", "Status", "Filepath"])
         table_widget.horizontalHeader().setStretchLastSection(True)
         table_widget.verticalHeader().setVisible(True)
         
