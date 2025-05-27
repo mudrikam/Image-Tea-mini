@@ -308,15 +308,13 @@ class GridManager:
         image_label = QtWidgets.QLabel()
         image_label.setAlignment(QtCore.Qt.AlignCenter)
         image_label.setFixedSize(self.image_size, self.image_size)
-        
-        # Add hover effects similar to the example
+          # Add hover effects similar to the example
         image_label.setStyleSheet("""
             QLabel {
                 border: 2px solid rgba(0, 0, 0, 0);
                 background-color: #f0f0f0;
                 border-radius: 4px;
                 padding: 2px;
-                cursor: pointer;
             }
             QLabel:hover {
                 border: 2px solid rgba(88, 165, 0, 0.3);
@@ -380,7 +378,6 @@ class GridManager:
         except Exception as e:
             label.setText("Error")
             exception(e, f"Error loading image: {image_path}")
-    
     def _handle_image_click(self, widget, event):
         """
         Handle click events on grid images to show in preview pane.
@@ -397,81 +394,24 @@ class GridManager:
                 
             debug(f"Grid image clicked: {file_info.get('filename')} ({file_info.get('filepath')})")
             
-            # APPROACH 1: Find workspace controller in parent hierarchy
-            parent = widget
-            workspace_controller = None
+            # Get the filepath and file id
+            filepath = file_info.get('filepath')
+            file_id = file_info.get('id')
             
-            # Navigate up the widget hierarchy
-            while parent:
-                if hasattr(parent, 'controller') and parent.controller.__class__.__name__ == 'WorkspaceController':
-                    workspace_controller = parent.controller
-                    debug("Found workspace controller in parent hierarchy")
-                    break
-                parent = parent.parent()
-            
-            # If found, use the on_table_item_clicked method (works for both table and grid)
-            if workspace_controller and hasattr(workspace_controller, 'on_table_item_clicked'):
-                debug("Using workspace_controller.on_table_item_clicked")
-                workspace_controller.on_table_item_clicked(0, 0, file_info)
+            if not filepath:
+                debug("No filepath in file_info")
                 return
-            
-            # APPROACH 2: Find main window and search for controller
             main_window = QtWidgets.QApplication.activeWindow()
             if main_window:
-                # Look for any object with on_table_item_clicked method
-                for child in main_window.findChildren(QtWidgets.QWidget):
-                    if hasattr(child, 'on_table_item_clicked'):
-                        debug(f"Found widget with on_table_item_clicked method: {child.__class__.__name__}")
-                        child.on_table_item_clicked(0, 0, file_info)
-                        return
-                
-                # APPROACH 3: Access image preview directly
-                # First try to find by dock widget contents
-                preview_container = main_window.findChild(QtWidgets.QWidget, "dockWidgetContents")
-                if preview_container:
-                    # Look for set_image method on any child
-                    for child in preview_container.findChildren(QtWidgets.QWidget):
-                        if hasattr(child, 'set_image'):
-                            image_path = file_info.get('filepath')
-                            if image_path:
-                                debug(f"Setting image directly on preview widget: {image_path}")
-                                child.set_image(image_path)
-                                return
-                
-                # APPROACH 4: Look for image preview dock widget
-                for dock in main_window.findChildren(QtWidgets.QDockWidget):
-                    # Try to access preview widget
-                    preview_widget = None
-                    
-                    # If the dock has set_image method
-                    if hasattr(dock, 'set_image'):
-                        preview_widget = dock
-                    
-                    # Check if the dock has preview_widget property
-                    elif hasattr(dock, 'widget') and dock.widget() and hasattr(dock.widget(), 'set_image'):
-                        preview_widget = dock.widget()
-                    
-                    # If we found a preview widget with set_image method
-                    if preview_widget:
-                        image_path = file_info.get('filepath')
-                        if image_path:
-                            debug(f"Setting image on dock widget: {image_path}")
-                            preview_widget.set_image(image_path)
-                            return
-            
-            # APPROACH 5: Use the event system
-            try:
-                from core.utils.event_system import EventSystem
-                filepath = file_info.get('filepath', '')
-                if filepath:
-                    debug(f"Publishing image_selected event: {filepath}")
-                    EventSystem.publish('image_selected', filepath)
-                    return
-            except Exception as event_error:
-                warning(f"Could not publish image_selected event: {str(event_error)}")
-                
-            warning("Failed to find a way to show the image in preview")
-            
+                # Look for the ImagePreview dock widget by name
+                image_preview_dock = main_window.findChild(QtWidgets.QDockWidget, "ImagePreview")
+                if image_preview_dock and hasattr(image_preview_dock, 'widget'):
+                    dock_widget = image_preview_dock.widget()
+                    preview_label = dock_widget.findChild(QtWidgets.QLabel, "previewLabel")
+                    if preview_label and hasattr(preview_label, 'setImagePath'):
+                        debug(f"Setting image directly on preview label: {filepath}")
+                        preview_label.setImagePath(filepath)
+                        return            
         except Exception as e:
             exception(e, "Error handling grid image click")
     
