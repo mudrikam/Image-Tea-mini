@@ -30,8 +30,6 @@ class DropAreaHandler(QtCore.QObject):
             
             # Install event filter to handle drop events
             self.drop_area.installEventFilter(self)
-            
-            debug("Drop area handler setup complete")
         else:
             warning("Failed to set up drop area handler: widget not found")
 

@@ -97,7 +97,7 @@ def populate_donation_dialog(dialog, config, base_dir):
     
     # Populate thank you tab with a simple message
     if hasattr(dialog, 'scrollAreaWidgetContents'):
-        _populate_thank_you_tab(dialog.scrollAreaWidgetContents)
+        _populate_thank_you_tab(dialog.scrollAreaWidgetContents, base_dir)
 
 def _copy_to_clipboard(text):
     """Copy text to clipboard and show a tooltip."""
@@ -367,7 +367,7 @@ def _populate_qris_tab(tab, qris_data, base_dir):
         # Set new layout if there isn't one
         tab.setLayout(layout)
 
-def _populate_thank_you_tab(content_widget):
+def _populate_thank_you_tab(content_widget, base_dir):
     """Populate the thank you tab with a message and supporters list."""
     layout = QVBoxLayout()
     
@@ -383,18 +383,17 @@ def _populate_thank_you_tab(content_widget):
     # Add supporters list from supporters.txt
     supporters_label = QLabel("<h3>Our Awesome Supporters:</h3>")
     layout.addWidget(supporters_label)
-    
-    # Get the application's base directory
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+      # Use the base_dir passed from the function parameters
     supporters_file = os.path.join(base_dir, "supporters.txt")
-    
-    supporters_text = ""
+    supporters_text = ""    
     if os.path.exists(supporters_file):
         try:
             with open(supporters_file, 'r', encoding='utf-8') as file:
                 supporters = file.read().strip().split('\n')
-                # Filter out empty lines and comments
-                supporters = [s for s in supporters if s and not s.startswith('//')]
+                
+                # Filter out empty lines and comments, properly trimming each line
+                supporters = [s.strip() for s in supporters if s.strip() and not s.strip().startswith('//')]
+                
                 if supporters:
                     supporters_text = "<ul>"
                     for supporter in supporters:
