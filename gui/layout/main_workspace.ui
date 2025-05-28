@@ -196,7 +196,7 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <property name="text">
                <string>Extension</string>
               </property>
-             </column>
+             </column>             
              <column>
               <property name="text">
                <string>ID</string>
@@ -204,7 +204,26 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
              </column>
              <column>
               <property name="text">
+               <string>Item ID</string>
+              </property>
+             </column>             <column>
+              <property name="text">
                <string>Status</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Title</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Description</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Tags</string>
               </property>
              </column>
              <column>

@@ -1,4 +1,4 @@
-{
+{  
   "project_data": {
     "field": [
       ["id", "INTEGER", "PRIMARY KEY AUTOINCREMENT"],
@@ -10,6 +10,9 @@
       ["year_color", "TEXT"],
       ["month_color", "TEXT"],
       ["day_color", "TEXT"],
+      ["title", "TEXT"],
+      ["description", "TEXT"],
+      ["tags", "TEXT"],
       ["filename", "TEXT"],
       ["extension", "TEXT"],
       ["filepath", "TEXT"],

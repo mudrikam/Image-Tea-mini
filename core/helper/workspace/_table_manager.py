@@ -7,6 +7,7 @@ class TableManager:
     def __init__(self):
         """Initialize the table manager."""
         pass
+        
     def update_table_data(self, table_widget, item_id):
         """Update the table data for a specific item tab."""
         debug(f"TableManager update_table_data called for item_id: {item_id}")
@@ -26,7 +27,8 @@ class TableManager:
                 
             actual_id = parts[1]
             debug(f"Using actual_id: {actual_id} for database lookup")
-              # Get data from the database
+            
+            # Get data from the database
             try:
                 from database.db_project_files import ProjectFilesModel
                 debug(f"Fetching files from database for item_id: {actual_id}")
@@ -51,41 +53,57 @@ class TableManager:
                 table_widget.setRowCount(len(files_data))
                 
                 # Add each row of data
-                for row_idx, file_info in enumerate(files_data):                    # Get data from file info
+                for row_idx, file_info in enumerate(files_data):
+                    # Get data from file info
                     filename = str(file_info.get('filename', ''))
                     extension = str(file_info.get('extension', ''))
                     file_id = file_info.get('id')
                     item_id = str(file_info.get('item_id', ''))
                     status = str(file_info.get('status', ''))
+                    title = str(file_info.get('title', ''))
+                    description = str(file_info.get('description', ''))
+                    tags = str(file_info.get('tags', ''))
                     filepath = str(file_info.get('filepath', ''))
                     
                     # Truncate long filenames and filepaths for display
                     MAX_FILENAME_LENGTH = 25
                     MAX_FILEPATH_LENGTH = 30
+                    MAX_DESCRIPTION_LENGTH = 40
                     
                     # Truncate filename if needed
                     if len(filename) > MAX_FILENAME_LENGTH:
-                        # Truncate and add ellipsis
                         truncated_filename = f"{filename[:MAX_FILENAME_LENGTH-3]}..."
                     else:
                         truncated_filename = filename
                         
                     # Truncate filepath if needed
                     if len(filepath) > MAX_FILEPATH_LENGTH:
-                        # Keep the first part and the last part with an ellipsis in between
                         truncated_filepath = f"{filepath[:15]}...{filepath[-15:]}"
                     else:
                         truncated_filepath = filepath
-                      # Create table items
+                    
+                    # Truncate description if needed
+                    if len(description) > MAX_DESCRIPTION_LENGTH:
+                        truncated_description = f"{description[:MAX_DESCRIPTION_LENGTH-3]}..."
+                    else:
+                        truncated_description = description
+                    
+                    # Create table items
                     filename_item = QtWidgets.QTableWidgetItem(truncated_filename)
                     extension_item = QtWidgets.QTableWidgetItem(extension)
+                    id_item = QtWidgets.QTableWidgetItem(str(file_id)) if file_id is not None else QtWidgets.QTableWidgetItem("")
                     item_id_item = QtWidgets.QTableWidgetItem(item_id)
                     status_item = QtWidgets.QTableWidgetItem(status)
+                    title_item = QtWidgets.QTableWidgetItem(title)
+                    description_item = QtWidgets.QTableWidgetItem(truncated_description)
+                    tags_item = QtWidgets.QTableWidgetItem(tags)
                     filepath_item = QtWidgets.QTableWidgetItem(truncated_filepath)
                     
-                    # Set tooltip to show full filename and filepath when hovering
+                    # Set tooltip to show full content when hovering
                     filename_item.setToolTip(filename)
                     filepath_item.setToolTip(filepath)
+                    description_item.setToolTip(description)
+                    tags_item.setToolTip(tags)
                     
                     # Store the full file_info in the user data of the filename item
                     # This allows us to retrieve it later when an item is clicked
@@ -94,11 +112,15 @@ class TableManager:
                     # Set items in the table
                     table_widget.setItem(row_idx, 0, filename_item)
                     table_widget.setItem(row_idx, 1, extension_item)
-                    table_widget.setItem(row_idx, 2, item_id_item)
-                    table_widget.setItem(row_idx, 3, status_item)
-                    table_widget.setItem(row_idx, 4, filepath_item)
-                
-            else:                # No data found - add a single row with a message
+                    table_widget.setItem(row_idx, 2, id_item)
+                    table_widget.setItem(row_idx, 3, item_id_item)
+                    table_widget.setItem(row_idx, 4, status_item)
+                    table_widget.setItem(row_idx, 5, title_item)
+                    table_widget.setItem(row_idx, 6, description_item)
+                    table_widget.setItem(row_idx, 7, tags_item)
+                    table_widget.setItem(row_idx, 8, filepath_item)
+            else:
+                # No data found - add a single row with a message
                 table_widget.setRowCount(1)
                 no_data_item = QtWidgets.QTableWidgetItem("No files found")
                 table_widget.setItem(0, 0, no_data_item)
@@ -106,6 +128,10 @@ class TableManager:
                 table_widget.setItem(0, 2, QtWidgets.QTableWidgetItem(""))
                 table_widget.setItem(0, 3, QtWidgets.QTableWidgetItem(""))
                 table_widget.setItem(0, 4, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 5, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 6, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 7, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 8, QtWidgets.QTableWidgetItem(""))
             
             # Resize columns to content
             table_widget.resizeColumnsToContents()
@@ -174,9 +200,13 @@ class TableManager:
                         'row': row,
                         'filename': table_widget.item(row, 0).text() if table_widget.item(row, 0) else '',
                         'extension': table_widget.item(row, 1).text() if table_widget.item(row, 1) else '',
-                        'item_id': table_widget.item(row, 2).text() if table_widget.item(row, 2) else '',
-                        'status': table_widget.item(row, 3).text() if table_widget.item(row, 3) else '',
-                        'filepath': table_widget.item(row, 4).text() if table_widget.item(row, 4) else '',
+                        'id': table_widget.item(row, 2).text() if table_widget.item(row, 2) else '',
+                        'item_id': table_widget.item(row, 3).text() if table_widget.item(row, 3) else '',
+                        'status': table_widget.item(row, 4).text() if table_widget.item(row, 4) else '',
+                        'title': table_widget.item(row, 5).text() if table_widget.item(row, 5) else '',
+                        'description': table_widget.item(row, 6).text() if table_widget.item(row, 6) else '',
+                        'tags': table_widget.item(row, 7).text() if table_widget.item(row, 7) else '',
+                        'filepath': table_widget.item(row, 8).text() if table_widget.item(row, 8) else '',
                     }
                 
                 # Call the callback function with the row, column, and data
