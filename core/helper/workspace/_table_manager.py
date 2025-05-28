@@ -87,6 +87,12 @@ class TableManager:
                         truncated_description = f"{description[:MAX_DESCRIPTION_LENGTH-3]}..."
                     else:
                         truncated_description = description
+                      # Calculate metadata values
+                    title_length = len(title)
+                    description_length = len(description)
+                    # Count tags by splitting the tag string and counting non-empty items
+                    tags_list = [tag.strip() for tag in tags.split(',') if tag.strip()]
+                    tags_count = len(tags_list)
                     
                     # Create table items
                     filename_item = QtWidgets.QTableWidgetItem(truncated_filename)
@@ -97,6 +103,9 @@ class TableManager:
                     title_item = QtWidgets.QTableWidgetItem(title)
                     description_item = QtWidgets.QTableWidgetItem(truncated_description)
                     tags_item = QtWidgets.QTableWidgetItem(tags)
+                    title_length_item = QtWidgets.QTableWidgetItem(str(title_length))
+                    description_length_item = QtWidgets.QTableWidgetItem(str(description_length))
+                    tags_count_item = QtWidgets.QTableWidgetItem(str(tags_count))
                     filepath_item = QtWidgets.QTableWidgetItem(truncated_filepath)
                     
                     # Set tooltip to show full content when hovering
@@ -108,8 +117,7 @@ class TableManager:
                     # Store the full file_info in the user data of the filename item
                     # This allows us to retrieve it later when an item is clicked
                     filename_item.setData(QtCore.Qt.UserRole, file_info)
-                    
-                    # Set items in the table
+                      # Set items in the table
                     table_widget.setItem(row_idx, 0, filename_item)
                     table_widget.setItem(row_idx, 1, extension_item)
                     table_widget.setItem(row_idx, 2, id_item)
@@ -118,9 +126,11 @@ class TableManager:
                     table_widget.setItem(row_idx, 5, title_item)
                     table_widget.setItem(row_idx, 6, description_item)
                     table_widget.setItem(row_idx, 7, tags_item)
-                    table_widget.setItem(row_idx, 8, filepath_item)
-            else:
-                # No data found - add a single row with a message
+                    table_widget.setItem(row_idx, 8, title_length_item)
+                    table_widget.setItem(row_idx, 9, description_length_item)
+                    table_widget.setItem(row_idx, 10, tags_count_item)
+                    table_widget.setItem(row_idx, 11, filepath_item)
+            else:                # No data found - add a single row with a message
                 table_widget.setRowCount(1)
                 no_data_item = QtWidgets.QTableWidgetItem("No files found")
                 table_widget.setItem(0, 0, no_data_item)
@@ -132,6 +142,9 @@ class TableManager:
                 table_widget.setItem(0, 6, QtWidgets.QTableWidgetItem(""))
                 table_widget.setItem(0, 7, QtWidgets.QTableWidgetItem(""))
                 table_widget.setItem(0, 8, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 9, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 10, QtWidgets.QTableWidgetItem(""))
+                table_widget.setItem(0, 11, QtWidgets.QTableWidgetItem(""))
             
             # Resize columns to content
             table_widget.resizeColumnsToContents()
@@ -196,8 +209,7 @@ class TableManager:
                 data = id_item.data(QtCore.Qt.UserRole)
                 if not data:
                     # If no specific data stored, create a dictionary with the visible data                    
-                    data = {
-                        'row': row,
+                    data = {                        'row': row,
                         'filename': table_widget.item(row, 0).text() if table_widget.item(row, 0) else '',
                         'extension': table_widget.item(row, 1).text() if table_widget.item(row, 1) else '',
                         'id': table_widget.item(row, 2).text() if table_widget.item(row, 2) else '',
@@ -206,7 +218,10 @@ class TableManager:
                         'title': table_widget.item(row, 5).text() if table_widget.item(row, 5) else '',
                         'description': table_widget.item(row, 6).text() if table_widget.item(row, 6) else '',
                         'tags': table_widget.item(row, 7).text() if table_widget.item(row, 7) else '',
-                        'filepath': table_widget.item(row, 8).text() if table_widget.item(row, 8) else '',
+                        'title_length': table_widget.item(row, 8).text() if table_widget.item(row, 8) else '',
+                        'description_length': table_widget.item(row, 9).text() if table_widget.item(row, 9) else '',
+                        'tags_count': table_widget.item(row, 10).text() if table_widget.item(row, 10) else '',
+                        'filepath': table_widget.item(row, 11).text() if table_widget.item(row, 11) else '',
                     }
                 
                 # Call the callback function with the row, column, and data
