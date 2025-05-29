@@ -93,12 +93,12 @@ class FlowLayout(QtWidgets.QLayout):
 
 class GridManager:
     """Helper class for managing grid view display of images with names."""
-    
     def __init__(self):
         """Initialize the grid manager."""
         self.image_items = []  # Keep track of created items to manage memory
         self.image_size = 150  # Default image size in the grid
         self.grid_spacing = 10  # Default spacing between grid items
+        self.active_image = None  # Track the currently active image widget
         
     def update_grid_data(self, grid_widget, item_id):
         """
@@ -369,14 +369,65 @@ class GridManager:
                     QtCore.Qt.SmoothTransformation
                 )
                 label.setPixmap(pixmap)
-            else:
-                # Use a placeholder for failed loads
+            else:                # Use a placeholder for failed loads
                 label.setText("Cannot load\nimage")
                 warning(f"Failed to load image: {image_path}")
                 
         except Exception as e:
             label.setText("Error")
             exception(e, f"Error loading image: {image_path}")
+            
+    def _update_active_image(self, new_active_widget):
+        """
+        Update the styling to highlight the active image and reset previous selection.
+        
+        Args:
+            new_active_widget: The widget to set as active
+        """
+        try:
+            # Reset the previous active image if exists
+            if self.active_image:
+                # Find the image label in the container
+                for child in self.active_image.children():
+                    if isinstance(child, QtWidgets.QLabel) and child.objectName() != "filename_label":
+                        # Reset to normal style
+                        child.setStyleSheet("""
+                            QLabel {
+                                border: 2px solid rgba(0, 0, 0, 0.1);
+                                border-radius: 4px;
+                                padding: 2px;
+                            }
+                            QLabel:hover {
+                                border: 2px solid rgba(88, 165, 0, 0.3);
+                                background-color: rgba(88, 165, 0, 0.05);
+                            }
+                        """)
+                        break
+            
+            # Update the active image
+            self.active_image = new_active_widget
+            
+            # Apply active style to the new active image
+            if self.active_image:
+                for child in self.active_image.children():
+                    if isinstance(child, QtWidgets.QLabel) and child.objectName() != "filename_label":
+                        # Set active style with green border at 20% opacity
+                        child.setStyleSheet("""
+                            QLabel {
+                                border: 2px solid rgba(88, 165, 0, 0.3);
+                                border-radius: 4px;
+                                padding: 2px;
+                                background-color: rgba(88, 165, 0, 0.20);
+                            }
+                            QLabel:hover {
+                                border: 2px solid rgba(88, 165, 0, 0.5);
+                                background-color: rgba(88, 165, 0, 0.25);
+                            }
+                        """)
+                        break
+        except Exception as e:
+            exception(e, "Error updating active image styling")
+            
     def _handle_image_click(self, widget, event):
         """
         Handle click events on grid images to show in preview pane.
@@ -392,6 +443,9 @@ class GridManager:
                 return
                 
             debug(f"Grid image clicked: {file_info.get('filename')} ({file_info.get('filepath')})")
+            
+            # Update active image border styling
+            self._update_active_image(widget)
             
             # Get the filepath and file id
             filepath = file_info.get('filepath')
