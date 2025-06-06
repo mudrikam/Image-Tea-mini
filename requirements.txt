@@ -4,3 +4,4 @@ QtAwesome
 requests
 packaging
 Pillow
+pyexiv2

@@ -522,7 +522,7 @@ class ProjectFilesModel:
                     # Only process files with supported extensions
                     if ext in supported_extensions:
                         try:
-                            # Reuse the get_file_details function with our operation ID
+                            # Use get_file_details which now extracts metadata from files
                             file_details = get_file_details(file_path, operation_id)
                             if file_details:
                                 # Add colors to the file details
@@ -534,6 +534,7 @@ class ProjectFilesModel:
                                 file_id = self.add_file(file_details, publish_event=False)
                                 if file_id:
                                     processed_count += 1
+                                    log(f"Added file with extracted metadata: {file_details.get('title', 'Unknown')} from {file_path}")
                         except Exception as e:
                             warning(f"Error processing file {file_path}: {str(e)}")
             
