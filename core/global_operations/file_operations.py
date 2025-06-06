@@ -27,6 +27,93 @@ def get_new_operation_id():
         _current_operation_id = "0001"  # Default to "0001" if no previous ID exists
         return _current_operation_id
 
+def get_image_dimensions(filepath):
+    """
+    Get image dimensions from file.
+    
+    Args:
+        filepath (str): Path to the image file
+        
+    Returns:
+        tuple: (width, height, dimensions_string) or (None, None, None) if not an image
+    """
+    try:
+        from PIL import Image
+        if filepath and os.path.exists(filepath):
+            with Image.open(filepath) as img:
+                width, height = img.size
+                dimensions_str = f"{width} x {height}"
+                return width, height, dimensions_str
+    except Exception as e:
+        debug(f"Could not get image dimensions for {filepath}: {str(e)}")
+    return None, None, None
+
+def get_file_type_category(extension):
+    """
+    Determine file type category based on extension.
+    
+    Args:
+        extension (str): File extension without dot
+        
+    Returns:
+        tuple: (file_type, category, sub_category)
+    """
+    extension = extension.lower()
+    
+    # Image files
+    image_extensions = {
+        'jpg': 'JPEG Image',
+        'jpeg': 'JPEG Image', 
+        'png': 'PNG Image',
+        'gif': 'GIF Image',
+        'bmp': 'Bitmap Image',
+        'tiff': 'TIFF Image',
+        'tif': 'TIFF Image',
+        'webp': 'WebP Image',
+        'svg': 'SVG Image',
+        'ico': 'Icon File',
+        'raw': 'RAW Image',
+        'cr2': 'Canon RAW',
+        'nef': 'Nikon RAW',
+        'arw': 'Sony RAW'
+    }    # Video files
+    video_extensions = {
+        'mp4': 'MP4 Video',
+        'avi': 'AVI Video',
+        'mov': 'QuickTime Video',
+        'mkv': 'Matroska Video',
+        'wmv': 'Windows Media Video',
+        'flv': 'Flash Video',
+        'webm': 'WebM Video',
+        'm4v': 'M4V Video',
+        '3gp': '3GP Video',
+        'mpg': 'MPEG Video',
+        'mpeg': 'MPEG Video',
+        'ts': 'Transport Stream',
+        'mts': 'AVCHD Video'
+    }
+    
+    if extension in image_extensions:
+        return image_extensions[extension], 'Image', 'Photo'
+    elif extension in video_extensions:
+        return video_extensions[extension], 'Video', 'Movie'
+    else:
+        return extension.upper() + ' File', 'Other', 'Unknown'
+
+def calculate_title_length(title):
+    """Calculate the length of title text."""
+    if not title or title == '-':
+        return 0
+    return len(str(title))
+
+def calculate_tags_count(tags):
+    """Calculate the number of tags."""
+    if not tags or tags == '-':
+        return 0
+    # Count tags by splitting on common separators
+    tags_list = [tag.strip() for tag in str(tags).replace(',', ' ').split() if tag.strip()]
+    return len(tags_list)
+
 def get_current_operation_id():
     """
     Get the current operation ID or generate a new sequential one if none exists.
@@ -39,20 +126,26 @@ def get_current_operation_id():
         return get_new_operation_id()
     return _current_operation_id
 
-def get_file_details(filepath, operation_id=None):
+def get_file_details(filepath, operation_id=None, title=None, description=None, tags=None, category=None, sub_category=None):
     """
-    Extract file details from a given filepath.
+    Extract file details from a given filepath with comprehensive metadata extraction.
     
     Args:
         filepath (str): Path to the file
         operation_id (str, optional): Operation ID to use, or None to use current
+        title (str, optional): Custom title for the file
+        description (str, optional): Custom description for the file
+        tags (str, optional): Custom tags for the file
+        category (str, optional): Custom category override
+        sub_category (str, optional): Custom sub-category override
         
     Returns:
-        dict: Dictionary containing file details
+        dict: Dictionary containing comprehensive file details
     """
     try:
-        filename = os.path.basename(filepath)
-        extension = os.path.splitext(filename)[1].lower().lstrip('.')
+        filename_with_ext = os.path.basename(filepath)
+        filename = os.path.splitext(filename_with_ext)[0]
+        extension = os.path.splitext(filename_with_ext)[1].lower().lstrip('.')
         
         stat_info = os.stat(filepath)
         filesize = stat_info.st_size
@@ -68,16 +161,44 @@ def get_file_details(filepath, operation_id=None):
         # Use the provided operation ID or get the current one
         item_id = operation_id or get_current_operation_id()
         
+        # Get file type and category information
+        file_type, auto_category, auto_sub_category = get_file_type_category(extension)
+        
+        # Use provided category/sub_category or auto-detected ones
+        final_category = category or auto_category
+        final_sub_category = sub_category or auto_sub_category
+        
+        # Get image dimensions if it's an image file
+        image_width, image_height, dimensions = get_image_dimensions(filepath)
+        
+        # Use provided title or default to filename
+        final_title = title or filename
+        
+        # Calculate title length and tags count
+        title_length = calculate_title_length(final_title)
+        tags_count = calculate_tags_count(tags)
+        
         return {
             "year": year,
             "month": month,
             "day": day,
             "item_id": item_id,
             "status": "draft",  # Default status
+            "title": final_title,
+            "description": description,
+            "tags": tags,
             "filename": filename,
             "extension": extension,
             "filepath": filepath,
             "filesize": filesize,
+            "file_type": file_type,
+            "image_width": image_width,
+            "image_height": image_height,
+            "dimensions": dimensions,
+            "category": final_category,
+            "sub_category": final_sub_category,
+            "title_length": title_length,
+            "tags_count": tags_count,
             "created_at": created_time,
             "updated_at": modified_time,
             "deleted_at": None

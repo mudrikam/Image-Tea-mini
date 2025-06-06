@@ -308,12 +308,12 @@ class ProjectFilesModel:
         try:
             conn = connect_to_database()
             cursor = conn.cursor()
-            
-            # Query for files with the specified item_id
+              # Query for files with the specified item_id
             query = """
-                SELECT id, year, month, day, item_id, status, 
-                       filename, extension, filepath, filesize,
-                       created_at, updated_at
+                SELECT id, year, month, day, item_id, status, year_color, month_color, day_color,
+                       title, description, tags, filename, extension, filepath, filesize,
+                       file_type, image_width, image_height, dimensions, category, sub_category,
+                       title_length, tags_count, created_at, updated_at
                 FROM project_data 
                 WHERE item_id = ? AND deleted_at IS NULL
                 ORDER BY filename
@@ -351,12 +351,12 @@ class ProjectFilesModel:
         try:
             conn = connect_to_database()
             cursor = conn.cursor()
-            
-            # Query for the file with the specified id
+              # Query for the file with the specified id
             query = """
-                SELECT id, year, month, day, item_id, status, 
-                       filename, extension, filepath, filesize,
-                       created_at, updated_at
+                SELECT id, year, month, day, item_id, status, year_color, month_color, day_color,
+                       title, description, tags, filename, extension, filepath, filesize,
+                       file_type, image_width, image_height, dimensions, category, sub_category,
+                       title_length, tags_count, created_at, updated_at
                 FROM project_data 
                 WHERE id = ? AND deleted_at IS NULL
             """
