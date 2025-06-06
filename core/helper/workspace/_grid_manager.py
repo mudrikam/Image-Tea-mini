@@ -427,13 +427,9 @@ class GridManager:
                         break
         except Exception as e:
             exception(e, "Error updating active image styling")
-            
     def _handle_image_click(self, widget, event):
         """
-        Handle click events on grid images to show in preview pane.
-        
-        This is a completely rewritten handler that tries multiple approaches
-        to ensure the image appears in the preview.
+        Handle click events on grid images to update both image preview and file properties.
         """
         try:
             # Get file info from the widget
@@ -447,24 +443,22 @@ class GridManager:
             # Update active image border styling
             self._update_active_image(widget)
             
-            # Get the filepath and file id
-            filepath = file_info.get('filepath')
-            file_id = file_info.get('id')
+            # Get the parent grid widget to access the callback function
+            parent_widget = widget.parent()
+            while parent_widget and not hasattr(parent_widget, '_callback_function'):
+                parent_widget = parent_widget.parent()
             
-            if not filepath:
-                debug("No filepath in file_info")
-                return
-            main_window = QtWidgets.QApplication.activeWindow()
-            if main_window:
-                # Look for the ImagePreview dock widget by name
-                image_preview_dock = main_window.findChild(QtWidgets.QDockWidget, "ImagePreview")
-                if image_preview_dock and hasattr(image_preview_dock, 'widget'):
-                    dock_widget = image_preview_dock.widget()
-                    preview_label = dock_widget.findChild(QtWidgets.QLabel, "previewLabel")
-                    if preview_label and hasattr(preview_label, 'setImagePath'):
-                        debug(f"Setting image directly on preview label: {filepath}")
-                        preview_label.setImagePath(filepath)
-                        return            
+            # Call the same callback function that the table uses
+            if parent_widget and hasattr(parent_widget, '_callback_function'):
+                callback_function = parent_widget._callback_function
+                if callback_function:
+                    # Call with same parameters as table click handler
+                    callback_function(0, 0, file_info)
+                else:
+                    debug("No callback function found in grid widget")
+            else:
+                debug("No callback function available for grid click")
+                        
         except Exception as e:
             exception(e, "Error handling grid image click")
     

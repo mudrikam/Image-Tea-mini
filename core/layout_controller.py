@@ -181,10 +181,14 @@ class LayoutController:
         self.workspace_controller.load_workspace()
         self.load_explorer_widget()
         self.load_image_preview_widget()
-        self.load_file_properties_widget()  # Add file properties loading
-          # Connect the image preview widget to the workspace controller
+        self.load_file_properties_widget()  # Add file properties loading       
+        # Connect the image preview widget to the workspace controller
         if self.image_preview:
             self.workspace_controller.connect_to_image_preview(self.image_preview)
+            
+        # Connect the file properties widget to the workspace controller
+        if self.file_properties:
+            self.workspace_controller.connect_to_file_properties(self.file_properties)
             
         # Assign the workspace controller to the parent window for global access
         self.parent.workspace_controller = self.workspace_controller

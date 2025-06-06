@@ -147,15 +147,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="filenameValue">
+          <item>           
+          <widget class="QLabel" name="filenameValue">
             <property name="text">
              <string>-</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -174,15 +180,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="titleValue">
+          <item>           
+          <widget class="QLabel" name="titleValue">
             <property name="text">
              <string>-</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -201,15 +213,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="tagsValue">
+          <item>           
+          <widget class="QLabel" name="tagsValue">
             <property name="text">
              <string>-</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -228,15 +246,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="filepathValue">
+          <item>           
+          <widget class="QLabel" name="filepathValue">
             <property name="text">
              <string>-</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -255,15 +279,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="categoryValue">
+          <item>           
+          <widget class="QLabel" name="categoryValue">
             <property name="text">
              <string>-</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -282,15 +312,21 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="subCategoryValue">
+          <item>           
+          <widget class="QLabel" name="subCategoryValue">
             <property name="text">
              <string>-</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -319,12 +355,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="titleLengthValue">
+          <item>           
+          <widget class="QLabel" name="titleLengthValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -343,12 +385,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="tagsCountValue">
+          <item>           
+          <widget class="QLabel" name="tagsCountValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -367,12 +415,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="statusValue">
+          <item>           
+          <widget class="QLabel" name="statusValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -391,12 +445,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="idValue">
+          <item>           
+          <widget class="QLabel" name="idValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -425,12 +485,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="typeValue">
+          <item>           
+          <widget class="QLabel" name="typeValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -449,12 +515,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="sizeValue">
+          <item>           
+          <widget class="QLabel" name="sizeValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>
@@ -473,12 +545,18 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
               <height>0</height>
              </size>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
+            </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="dimensionsValue">
+          <item>           
+          <widget class="QLabel" name="dimensionsValue">
             <property name="text">
              <string>-</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignTop</set>
             </property>
            </widget>
           </item>

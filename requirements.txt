@@ -3,3 +3,4 @@ google-genai
 QtAwesome
 requests
 packaging
+Pillow
