@@ -144,7 +144,8 @@ class TreeLoader:
         
         # Set colors
         year_item.setBackground(0, QBrush(year_color_bg))
-        year_item.setForeground(0, QBrush(year_color_fg))        # Set pointing hand cursor data
+        year_item.setForeground(0, QBrush(year_color_fg))        
+        # Set pointing hand cursor data
         year_item.setData(0, Qt.UserRole, "pointing_hand_cursor")
         
         # Store references
