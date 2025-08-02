@@ -5,3 +5,4 @@ requests
 packaging
 Pillow
 pyexiv2
+exif

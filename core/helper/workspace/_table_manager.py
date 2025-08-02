@@ -41,6 +41,14 @@ class TableManager:
             # Make sure vertical header (row numbers) is visible
             table_widget.verticalHeader().setVisible(True)
             
+            # Configure table selection behavior for full row selection
+            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+            table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+            
+            # Enable clicking on row headers to select entire rows
+            table_widget.verticalHeader().setSectionsClickable(True)
+            table_widget.verticalHeader().setHighlightSections(True)
+            
             # Clear existing table data
             table_widget.setRowCount(0)
             
