@@ -149,15 +149,12 @@
             }
         },
         "api_keys": {
-            "gemini": [
-                "AIzaSyCtyNK_TNVBExW2o_k2HSzx3t8gVUFPRcI"
-            ],
+            "gemini": [],
             "openai": []
         },
         "api_key_status": {
-            "gemini": {
-                "AIzaSyCtyNK_TNVBExW2o_k2HSzx3t8gVUFPRcI": "invalid"
-            }
+            "gemini": {},
+            "openai": {}
         },
         "settings": {
             "title_min_length": 100,

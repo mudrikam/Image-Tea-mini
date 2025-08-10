@@ -12,7 +12,7 @@ from .ai_config_manager import config_manager
 import qtawesome as qta
 
 try:
-    import google.generativeai as genai
+    from google import genai
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
@@ -49,7 +49,7 @@ class ApiTestThread(QThread):
     def test_gemini_key(self):
         """Test Gemini API key"""
         if not GENAI_AVAILABLE:
-            return False, "Library Google GenAI belum diinstall.\n\nSilakan install dulu pakai:\npip install google-generativeai"
+            return False, "Library Google GenAI belum diinstall.\n\nSilakan install dulu pakai:\npip install google-genai"
         
         try:
             # Get available models from config
@@ -57,9 +57,11 @@ class ApiTestThread(QThread):
             models = platform_config.get('models', ['gemini-1.5-flash'])
             test_model = models[0]  # Use first available model for testing
             
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(test_model)
-            response = model.generate_content("Test connection")
+            client = genai.Client(api_key=self.api_key)
+            response = client.models.generate_content(
+                model=test_model,
+                contents=["Test connection"]
+            )
             return True, "✅ Gemini API Key valid dan aktif!\n\nKoneksi berhasil, siap digunakan untuk analisis AI."
         except Exception as e:
             return False, self._parse_gemini_error(str(e))
@@ -543,7 +545,7 @@ class APIKeysManager(QDialog):
     def open_whatsapp_group(self):
         """Open WhatsApp group link"""
         try:
-            url = QUrl("https://chat.whatsapp.com/your-group-link")
+            url = QUrl("https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3")
             QDesktopServices.openUrl(url)
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Gagal membuka link WhatsApp: {str(e)}")

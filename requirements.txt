@@ -6,3 +6,4 @@ packaging
 Pillow
 pyexiv2
 exif
+openai
