@@ -1,8 +1,8 @@
-# filepath: z:\Build\Image-Tea-mini\core\widgets\actions_widget.py
-from PySide6 import QtWidgets, QtUiTools, QtCore
 import os
+from PySide6 import QtWidgets, QtUiTools, QtCore
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
+from core.utils.logger import log, debug, warning, error, exception
 
 # Import QtAwesome for icons
 try:
@@ -20,6 +20,20 @@ except ImportError:
     show_donation_dialog = None
     open_url = None
 
+# Import Gemini AI System
+try:
+    from core.utils.gemini_ai_system import GeminiAISystem
+except ImportError:
+    print("Gemini AI System not found")
+    GeminiAISystem = None
+try:
+    from core.helper.dialogs._donation_dialog import show_donation_dialog
+    from core.helper._url_handler import open_url
+except ImportError:
+    print("Donation dialog module or URL handler not found")
+    show_donation_dialog = None
+    open_url = None
+
 class ActionsWidget:
     def __init__(self, base_dir):
         """Initialize the Actions widget."""
@@ -27,6 +41,16 @@ class ActionsWidget:
         self.widget = None
         self.config = {}  # Store config when it's passed to us
         self.main_window = None  # Store reference to main window
+        
+        # Initialize Gemini AI System
+        self.gemini_ai_system = None
+        
+        # UI References
+        self.generate_button = None
+        self.stop_button = None
+        
+        # Workspace controller reference (will be set by controller)
+        self.workspace_controller = None
         
     def load_ui(self):
         """Load the UI from the .ui file and return the dock widget."""
@@ -65,16 +89,16 @@ class ActionsWidget:
                 button.setCursor(QCursor(Qt.PointingHandCursor))
             
             # Apply Font Awesome play icon to the generate button
-            generate_button = self.widget.findChild(QtWidgets.QPushButton, "generateButton")
-            if generate_button:
+            self.generate_button = self.widget.findChild(QtWidgets.QPushButton, "generateButton")
+            if self.generate_button:
                 # Create a play icon from Font Awesome 6
                 play_icon = qta.icon('fa5s.play', color='white')
-                generate_button.setIcon(play_icon)
-                generate_button.setText("Generate")  # Keep the "Generate" text
-                generate_button.setToolTip("Run")  # Add tooltip
+                self.generate_button.setIcon(play_icon)
+                self.generate_button.setText("Generate")  # Keep the "Generate" text
+                self.generate_button.setToolTip("Run")  # Add tooltip
                 
                 # Optional: Style the button to look more like a play button
-                generate_button.setStyleSheet("""
+                self.generate_button.setStyleSheet("""
                     QPushButton {
                         background-color: #4CAF50;
                         border-radius: 12px;
@@ -90,22 +114,29 @@ class ActionsWidget:
                     QPushButton:pressed {
                         background-color: #3d8b40;
                     }
+                    QPushButton:disabled {
+                        background-color: rgba(115, 119, 123, 0.18);
+                        color: rgba(115, 119, 123, 0.48);
+                    }
                 """)
                 
                 # Make the icon bigger
-                generate_button.setIconSize(QtCore.QSize(16, 16))
+                self.generate_button.setIconSize(QtCore.QSize(16, 16))
+                
+                # Connect to processing function
+                self.generate_button.clicked.connect(self._on_generate_clicked)
             
             # Configure the stop button
-            stop_button = self.widget.findChild(QtWidgets.QPushButton, "stopButton")
-            if stop_button:
+            self.stop_button = self.widget.findChild(QtWidgets.QPushButton, "stopButton")
+            if self.stop_button:
                 # Create a stop icon from Font Awesome
                 stop_icon = qta.icon('fa5s.stop', color="#ff4460")
-                stop_button.setIcon(stop_icon)
-                stop_button.setText("")  # Remove text
-                stop_button.setToolTip("Stop")  # Add tooltip
+                self.stop_button.setIcon(stop_icon)
+                self.stop_button.setText("")  # Remove text
+                self.stop_button.setToolTip("Stop")  # Add tooltip
                 
                 # Style the stop button using the requested red color
-                stop_button.setStyleSheet("""
+                self.stop_button.setStyleSheet("""
                     QPushButton {
                         background-color: rgba(233, 29, 73, 0.32);
                         border-radius: 12px;
@@ -126,10 +157,13 @@ class ActionsWidget:
                 """)
                 
                 # Make the icon bigger and consistent with generate button
-                stop_button.setIconSize(QtCore.QSize(16, 16))
+                self.stop_button.setIconSize(QtCore.QSize(16, 16))
                 
                 # Initially disable the stop button
-                stop_button.setEnabled(False)
+                self.stop_button.setEnabled(False)
+                
+                # Connect to stop function
+                self.stop_button.clicked.connect(self._on_stop_clicked)
                 
             # Check if donate button exists in UI
             donate_button = self.widget.findChild(QtWidgets.QPushButton, "donateButton")
@@ -242,6 +276,129 @@ class ActionsWidget:
         """Set both the main window and configuration for use in dialogs."""
         self.main_window = main_window
         self.config = config
+        
+        # Initialize Gemini AI System with config
+        if GeminiAISystem and config:
+            self.gemini_ai_system = GeminiAISystem(config)
+            debug("Gemini AI System initialized")
+    
+    def set_workspace_controller(self, workspace_controller):
+        """Set the workspace controller reference."""
+        self.workspace_controller = workspace_controller
+        debug("Workspace controller reference set")
+        
+        # Subscribe to database change events for table refresh
+        try:
+            from core.utils.event_system import EventSystem
+            EventSystem.subscribe('project_data_changed', self._on_database_changed, weak=True)
+            debug("Subscribed to project_data_changed events")
+        except Exception as e:
+            warning(f"Failed to subscribe to database events: {e}")
+    
+    def _on_database_changed(self):
+        """Handle database change events to refresh table colors."""
+        try:
+            if self.gemini_ai_system and hasattr(self.gemini_ai_system, 'refresh_table_colors'):
+                self.gemini_ai_system.refresh_table_colors()
+                debug("Refreshed table colors due to database change")
+        except Exception as e:
+            warning(f"Error handling database change event: {e}")
+    
+    def _on_generate_clicked(self):
+        """Handle generate button click."""
+        debug("Generate button clicked")
+        
+        if not self.gemini_ai_system:
+            warning("Gemini AI System not initialized")
+            return
+        
+        if not self.workspace_controller:
+            warning("Workspace controller not available")
+            return
+        
+        # Get current tab data from workspace controller
+        current_item_id = self._get_current_tab_item_id()
+        debug(f"Current item_id from tab manager: {current_item_id}")
+        
+        if not current_item_id:
+            warning("No active tab with data to process")
+            return
+        
+        # Get files data for current tab
+        files_data = self._get_current_tab_files_data(current_item_id)
+        debug(f"Files data result: {len(files_data) if files_data else 'None'}")
+        
+        if not files_data:
+            warning("No files data found for current tab")
+            return
+        
+        # Get current table widget for highlighting
+        current_table_widget = self._get_current_table_widget()
+        debug(f"Current table widget: {current_table_widget}")
+        
+        # Setup AI system with UI components
+        self.gemini_ai_system.set_ui_components(
+            self.generate_button,
+            self.stop_button, 
+            current_table_widget
+        )
+        
+        # Start processing
+        self.gemini_ai_system.start_processing(current_item_id, files_data)
+        log(f"Started Gemini AI processing for item_id: {current_item_id}")
+    
+    def _on_stop_clicked(self):
+        """Handle stop button click."""
+        debug("Stop button clicked")
+        
+        if self.gemini_ai_system:
+            self.gemini_ai_system.stop_processing()
+            log("Stopped Gemini AI processing")
+    
+    def _get_current_tab_item_id(self):
+        """Get the item ID of the currently active tab."""
+        try:
+            if hasattr(self.workspace_controller, 'tab_manager'):
+                return self.workspace_controller.tab_manager.get_current_item_id()
+        except Exception as e:
+            exception(e, "Error getting current tab item ID")
+        return None
+    
+    def _get_current_tab_files_data(self, item_id):
+        """Get files data for the current tab."""
+        try:
+            # Extract actual ID from item_id 
+            # Format is: YYYY-MM-DD_ID_STATUS (like 2025-08-02_0007_draft)
+            parts = item_id.split('_')
+            debug(f"Item ID parts for files data: {parts}")
+            
+            if len(parts) >= 2:
+                # For format YYYY-MM-DD_ID_STATUS, the actual ID is parts[1]
+                actual_id = parts[1]
+                debug(f"Using actual_id: {actual_id} for database lookup")
+                
+                # Use ProjectFilesModel directly like in table_manager and grid_manager
+                from database.db_project_files import ProjectFilesModel
+                files_data = ProjectFilesModel().get_files_by_item_id(actual_id)
+                debug(f"Found {len(files_data) if files_data else 0} files for actual_id: {actual_id}")
+                
+                return files_data
+            else:
+                warning(f"Invalid item_id format: {item_id}")
+        except Exception as e:
+            exception(e, "Error getting files data for current tab")
+        return None
+    
+    def _get_current_table_widget(self):
+        """Get the table widget of the currently active tab."""
+        try:
+            if hasattr(self.workspace_controller, 'tab_manager'):
+                current_item_id = self.workspace_controller.tab_manager.get_current_item_id()
+                if current_item_id and current_item_id in self.workspace_controller.tab_manager.table_widgets:
+                    return self.workspace_controller.tab_manager.table_widgets[current_item_id]
+        except Exception as e:
+            exception(e, "Error getting current table widget")
+        return None
     
     # Remove the _on_donate_button_clicked method since it's no longer used
     # We're using _show_donation_dialog directly like status_bar_actions.py does

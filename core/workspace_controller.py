@@ -36,6 +36,7 @@ class WorkspaceController:
         from core.utils.event_system import EventSystem
         EventSystem.subscribe('explorer_item_selected', self.on_explorer_item_selected, weak=True)
         EventSystem.subscribe('explorer_item_deselected', self.on_explorer_item_deselected, weak=True)
+        EventSystem.subscribe('project_data_changed', self.on_project_data_changed, weak=True)
         
         # Set thread timeout to minimize thread issues
         QtCore.QThreadPool.globalInstance().setExpiryTimeout(1000)  # 1 second thread expiry
@@ -181,6 +182,31 @@ class WorkspaceController:
         # No longer switching to drag-drop UI on deselection
         # We only switch when all tabs are closed
         return self.workspace_widget
+    def on_project_data_changed(self):
+        """
+        Handle project data changed event.
+        This refreshes the current workspace table without affecting tabs or causing closures.
+        """
+        debug("WorkspaceController received project_data_changed event")
+        try:
+            # Only refresh if we have an active workspace and current item
+            if self.current_item_id and self.tab_widget and self.tab_widget.count() > 0:
+                debug(f"Refreshing table data for current item: {self.current_item_id}")
+                
+                # Get the current table widget
+                table_widget = self.tab_manager.table_widgets.get(self.current_item_id)
+                if table_widget:
+                    # Use table manager's refresh method to update colors based on new database status
+                    self.table_manager.refresh_table_colors(table_widget, self.current_item_id)
+                    debug(f"Successfully refreshed table colors for {self.current_item_id}")
+                else:
+                    debug(f"No table widget found for current item: {self.current_item_id}")
+            else:
+                debug("No active workspace or current item to refresh")
+                
+        except Exception as e:
+            exception(e, "Error handling project_data_changed event")
+    
     def refresh_current_workspace(self):
         """Refresh the data in the current tab."""
         if self.current_item_id:
@@ -318,6 +344,7 @@ class WorkspaceController:
             from core.utils.event_system import EventSystem
             EventSystem.unsubscribe('explorer_item_selected', self.on_explorer_item_selected)
             EventSystem.unsubscribe('explorer_item_deselected', self.on_explorer_item_deselected)
+            EventSystem.unsubscribe('project_data_changed', self.on_project_data_changed)
             
             # Clean up the tab manager
             if hasattr(self, 'tab_manager'):
