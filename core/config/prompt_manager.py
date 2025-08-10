@@ -63,7 +63,7 @@ class PromptManager(QDialog):
     def create_ui(self):
         """Create UI elements programmatically"""
         # Set window title and icon
-        self.setWindowTitle("Kelola Prompt")
+        self.setWindowTitle("Manage AI Prompts")  # translated from Kelola Prompt
         self.setWindowIcon(qta.icon('fa6s.message'))
         
         # Main layout
@@ -88,7 +88,7 @@ class PromptManager(QDialog):
         header_layout.setContentsMargins(0, 0, 0, 0)
         
         # Title label
-        self.titleLabel = QLabel("🤖 Kelola Prompt AI")
+        self.titleLabel = QLabel("🤖 Manage AI Prompts")  # translated from Kelola Prompt AI
         title_font = QFont()
         title_font.setPointSize(14)
         title_font.setBold(True)
@@ -96,7 +96,7 @@ class PromptManager(QDialog):
         header_layout.addWidget(self.titleLabel)
         
         # Description label
-        self.descLabel = QLabel("Atur prompt AI untuk analisis gambar yang lebih akurat dan personal")
+        self.descLabel = QLabel("Configure AI prompts for more accurate and personalized image analysis")  # translated
         desc_font = QFont()
         desc_font.setPointSize(10)
         desc_font.setItalic(True)
@@ -126,7 +126,7 @@ class PromptManager(QDialog):
         preset_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
         self.resetButton = QPushButton("Reset")
-        self.resetButton.setToolTip("Reset semua prompt ke default")
+        self.resetButton.setToolTip("Reset all prompts to default")  # translated
         preset_layout.addWidget(self.resetButton)
         
         main_layout.addLayout(preset_layout)
@@ -148,7 +148,7 @@ class PromptManager(QDialog):
         settings_layout.setContentsMargins(0, 0, 0, 0)
         
         # Settings label
-        self.settingsLabel = QLabel("⚙️ Pengaturan Prompt")
+        self.settingsLabel = QLabel("⚙️ Prompt Settings")  # translated from Pengaturan Prompt
         settings_font = QFont()
         settings_font.setBold(True)
         self.settingsLabel.setFont(settings_font)
@@ -520,7 +520,7 @@ class PromptManager(QDialog):
         """)
         self.mandatoryPromptEdit.setFrameShape(QFrame.NoFrame)
         self.mandatoryPromptEdit.setReadOnly(True)
-        self.mandatoryPromptEdit.setToolTip("Prompt wajib yang diperlukan agar aplikasi dapat memproses respons AI dengan benar. Tidak dapat diedit secara manual.")
+        self.mandatoryPromptEdit.setToolTip("Mandatory prompt required for the application to process AI responses correctly. Cannot be edited manually.")  # translated
         mandatory_prompt_layout.addWidget(self.mandatoryPromptEdit)
         
         self.mandatoryPromptFrame.setLayout(mandatory_prompt_layout)
@@ -535,7 +535,7 @@ class PromptManager(QDialog):
         button_layout = QHBoxLayout()
         
         self.previewButton = QPushButton("Preview")
-        self.previewButton.setToolTip("Preview prompt final")
+        self.previewButton.setToolTip("Preview final prompt")
         self.previewButton.setStyleSheet("""
             QPushButton {
                 padding: 8px 16px;
@@ -556,8 +556,8 @@ class PromptManager(QDialog):
         
         button_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
-        self.saveButton = QPushButton("Simpan")
-        self.saveButton.setToolTip("Simpan semua perubahan")
+        self.saveButton = QPushButton("Save")  # translated
+        self.saveButton.setToolTip("Save all changes")  # translated
         save_font = QFont()
         save_font.setBold(True)
         self.saveButton.setFont(save_font)
@@ -580,8 +580,8 @@ class PromptManager(QDialog):
         """)
         button_layout.addWidget(self.saveButton)
         
-        self.cancelButton = QPushButton("Batal")
-        self.cancelButton.setToolTip("Batal tanpa menyimpan")
+        self.cancelButton = QPushButton("Cancel")  # translated
+        self.cancelButton.setToolTip("Cancel without saving")  # translated
         self.cancelButton.setStyleSheet("""
             QPushButton {
                 padding: 8px 16px;
@@ -1131,7 +1131,7 @@ class PromptManager(QDialog):
         reply = QMessageBox.question(
             self,
             "Clear Preset",
-            f"Yakin mau hapus semua prompt dan reset settings di {self.presets.get(self.current_preset, {}).get('name', 'preset ini')}?\n\nSemua prompt akan dikosongkan dan settings direset ke 0 (kecuali mandatory prompt).",
+            f"Are you sure you want to clear all prompts and reset settings in {self.presets.get(self.current_preset, {}).get('name', 'this preset')}?\n\nAll prompts will be cleared and settings reset to 0 (except mandatory prompt).",
             QMessageBox.Yes | QMessageBox.No
         )
         
@@ -1324,7 +1324,7 @@ class PromptPreviewWindow(QDialog):
     def create_ui(self):
         """Create UI elements programmatically"""
         # Set window title and icon
-        self.setWindowTitle("Preview Prompt")
+        self.setWindowTitle("Prompt Preview")  # translated to English
         self.setWindowIcon(qta.icon('fa6s.file-lines'))
         self.setStyleSheet("QDialog { border-radius: 8px; }")
         
@@ -1347,7 +1347,7 @@ class PromptPreviewWindow(QDialog):
         title_layout.addWidget(self.titleIconLabel)
         
         # Title label
-        self.titleLabel = QLabel("Preview Prompt Final")
+        self.titleLabel = QLabel("Prompt Preview")  # translated to English
         title_font = QFont()
         title_font.setPointSize(14)
         title_font.setBold(True)
@@ -1457,7 +1457,7 @@ class PromptPreviewWindow(QDialog):
         
         button_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
-        self.closeButton = QPushButton("Tutup")
+        self.closeButton = QPushButton("Close")  # translated from Tutup
         self.closeButton.setIcon(qta.icon('fa6s.xmark', color='#666'))
         self.closeButton.setStyleSheet("""
             QPushButton {

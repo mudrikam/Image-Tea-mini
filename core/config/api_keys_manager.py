@@ -1,6 +1,6 @@
 """
-API Keys Manager - Kelola API Key untuk berbagai platform AI
-Mendukung platform: OpenAI, Gemini
+API Keys Manager - Manage API Keys for various AI platforms
+Supports platforms: OpenAI, Gemini
 """
 
 from PySide6.QtWidgets import (QDialog, QMessageBox, QListWidgetItem, QVBoxLayout, QHBoxLayout, 
@@ -49,7 +49,7 @@ class ApiTestThread(QThread):
     def test_gemini_key(self):
         """Test Gemini API key"""
         if not GENAI_AVAILABLE:
-            return False, "Library Google GenAI belum diinstall.\n\nSilakan install dulu pakai:\npip install google-genai"
+            return False, "Google GenAI library is not installed.\n\nPlease install it using:\npip install google-genai"
         
         try:
             # Get available models from config
@@ -62,14 +62,14 @@ class ApiTestThread(QThread):
                 model=test_model,
                 contents=["Test connection"]
             )
-            return True, "✅ Gemini API Key valid dan aktif!\n\nKoneksi berhasil, siap digunakan untuk analisis AI."
+            return True, "✅ Gemini API Key is valid and active!\n\nConnection successful, ready for AI analysis."
         except Exception as e:
             return False, self._parse_gemini_error(str(e))
     
     def test_openai_key(self):
         """Test OpenAI API key"""
         if not OPENAI_AVAILABLE:
-            return False, "Library OpenAI belum diinstall.\n\nSilakan install dulu pakai:\npip install openai"
+            return False, "OpenAI library is not installed.\n\nPlease install it using:\npip install openai"
         
         try:
             # Get available models from config
@@ -86,7 +86,7 @@ class ApiTestThread(QThread):
                 ],
                 max_tokens=5
             )
-            return True, "✅ OpenAI API Key valid dan aktif!\n\nKoneksi berhasil, siap digunakan untuk analisis AI."
+            return True, "✅ OpenAI API Key is valid and active!\n\nConnection successful, ready for AI analysis."
         except Exception as e:
             return False, self._parse_openai_error(str(e))
     
@@ -95,40 +95,40 @@ class ApiTestThread(QThread):
         error_lower = error_msg.lower()
         
         if "invalid api key" in error_lower or "api_key_invalid" in error_lower:
-            return "❌ API Key Tidak Valid\n\nAPI Key yang kamu masukkan salah.\nCoba cek lagi dan ulangi."
+            return "❌ Invalid API Key\n\nThe API Key you entered is incorrect.\nPlease check and try again."
         elif "quota" in error_lower or "resource_exhausted" in error_lower:
-            return "❌ Quota Habis\n\nQuota API kamu sudah habis.\nCoba cek billing atau tunggu reset quota."
+            return "❌ Quota Exceeded\n\nYour API quota has been exhausted.\nPlease check billing or wait for quota reset."
         elif "permission" in error_lower or "forbidden" in error_lower:
-            return "❌ Permission Denied\n\nAPI Key tidak punya akses ke model ini.\nCoba cek permission di Google AI Studio."
+            return "❌ Permission Denied\n\nAPI Key does not have access to this model.\nPlease check permissions in Google AI Studio."
         elif "not found" in error_lower or "model_not_found" in error_lower:
-            return "❌ Model Tidak Ditemukan\n\nModel yang diminta tidak tersedia.\nCoba gunakan model lain yang support."
+            return "❌ Model Not Found\n\nThe requested model is not available.\nPlease use another supported model."
         elif "timeout" in error_lower or "deadline" in error_lower:
-            return "❌ Timeout\n\nKoneksi ke server timeout.\nCoba lagi dalam beberapa menit."
+            return "❌ Timeout\n\nConnection to the server timed out.\nPlease try again in a few minutes."
         elif "network" in error_lower or "connection" in error_lower:
-            return "❌ Network Error\n\nMasalah koneksi internet.\nCek koneksi dan coba lagi."
+            return "❌ Network Error\n\nInternet connection issue.\nPlease check your connection and try again."
         else:
-            return f"❌ Error Tidak Dikenal\n\n{error_msg}\n\nSilakan cek dokumentasi atau hubungi support."
+            return f"❌ Unknown Error\n\n{error_msg}\n\nPlease check the documentation or contact support."
     
     def _parse_openai_error(self, error_msg):
         """Parse OpenAI error message into user-friendly format"""
         error_lower = error_msg.lower()
         
         if "invalid api key" in error_lower or "unauthorized" in error_lower:
-            return "❌ API Key Tidak Valid\n\nAPI Key yang kamu masukkan salah.\nCoba cek lagi di OpenAI Dashboard."
+            return "❌ Invalid API Key\n\nThe API Key you entered is incorrect.\nPlease check again in the OpenAI Dashboard."
         elif "quota" in error_lower or "insufficient_quota" in error_lower:
-            return "❌ Quota Habis\n\nQuota API kamu sudah habis.\nCoba top up credit di OpenAI Dashboard."
+            return "❌ Quota Exceeded\n\nYour API quota has been exhausted.\nPlease top up credits in the OpenAI Dashboard."
         elif "permission" in error_lower or "forbidden" in error_lower:
-            return "❌ Permission Denied\n\nAPI Key tidak punya akses ke model ini.\nCoba upgrade plan atau gunakan model lain."
+            return "❌ Permission Denied\n\nAPI Key does not have access to this model.\nPlease upgrade your plan or use another model."
         elif "rate limit" in error_lower:
-            return "❌ Rate Limit\n\nTerlalu banyak request dalam waktu singkat.\nTunggu sebentar dan coba lagi."
+            return "❌ Rate Limit\n\nToo many requests in a short time.\nPlease wait a moment and try again."
         elif "model" in error_lower and "not found" in error_lower:
-            return "❌ Model Tidak Ditemukan\n\nModel yang diminta tidak tersedia.\nCoba gunakan model lain yang support."
+            return "❌ Model Not Found\n\nThe requested model is not available.\nPlease use another supported model."
         elif "timeout" in error_lower:
-            return "❌ Timeout\n\nKoneksi ke server timeout.\nCoba lagi dalam beberapa menit."
+            return "❌ Timeout\n\nConnection to the server timed out.\nPlease try again in a few minutes."
         elif "network" in error_lower or "connection" in error_lower:
-            return "❌ Network Error\n\nMasalah koneksi internet.\nCek koneksi dan coba lagi."
+            return "❌ Network Error\n\nInternet connection issue.\nPlease check your connection and try again."
         else:
-            return f"❌ Error Tidak Dikenal\n\n{error_msg}\n\nSilakan cek dokumentasi OpenAI atau hubungi support."
+            return f"❌ Unknown Error\n\n{error_msg}\n\nPlease check the OpenAI documentation or contact support."
 
 
 class APIKeysManager(QDialog):
@@ -142,15 +142,15 @@ class APIKeysManager(QDialog):
         self.setup_connections()
         self.load_platforms()
         
-        # Set window properties - ukuran optimal untuk laptop
+        # Set window properties - optimal size for laptops
         self.setModal(True)
-        self.resize(750, 650)  # Lebih besar untuk accommodate content
-        self.setMinimumSize(700, 600)  # Minimum size untuk laptop kecil
+        self.resize(750, 650)  # Larger to accommodate content
+        self.setMinimumSize(700, 600)  # Minimum size for small laptops
     
     def create_ui(self):
         """Create UI elements programmatically"""
         # Set window title and icon
-        self.setWindowTitle("Kelola API Key")
+        self.setWindowTitle("Manage API Keys")
         self.setWindowIcon(qta.icon('fa6s.key'))
         
         # Main layout
@@ -159,7 +159,7 @@ class APIKeysManager(QDialog):
         main_layout.setSpacing(8)
         
         # Title label
-        self.titleLabel = QLabel("🔑 Kelola API Key")
+        self.titleLabel = QLabel("🔑 Manage API Keys")
         title_font = QFont()
         title_font.setPointSize(14)
         title_font.setBold(True)
@@ -167,7 +167,7 @@ class APIKeysManager(QDialog):
         main_layout.addWidget(self.titleLabel)
         
         # Subtitle label
-        self.subtitleLabel = QLabel("Atur API Key untuk analisis AI yang lebih powerful dan akurat ✨")
+        self.subtitleLabel = QLabel("Set up API Keys for more powerful and accurate AI analysis ✨")
         subtitle_font = QFont()
         subtitle_font.setPointSize(10)
         subtitle_font.setItalic(True)
@@ -184,7 +184,7 @@ class APIKeysManager(QDialog):
         # Help section
         help_layout = QHBoxLayout()
         
-        self.helpLabel = QLabel("💡 Butuh API Key gratis? Join grup kami untuk dapetin API Key gratis dan tutorial lengkap! Udah 500+ orang yang terbantu.")
+        self.helpLabel = QLabel("💡 Need a free API Key? Join our group to get free API Keys and tutorials!")
         help_font = QFont()
         help_font.setPointSize(9)
         self.helpLabel.setFont(help_font)
@@ -199,7 +199,7 @@ class APIKeysManager(QDialog):
         """)
         help_layout.addWidget(self.helpLabel)
         
-        self.waButton = QPushButton("Join Grup")
+        self.waButton = QPushButton("Join Group")
         self.waButton.setMinimumSize(120, 40)
         self.waButton.setMaximumSize(120, 40)
         wa_font = QFont()
@@ -297,7 +297,7 @@ class APIKeysManager(QDialog):
         key_actions_layout = QHBoxLayout()
         
         self.keyLineEdit = QLineEdit()
-        self.keyLineEdit.setPlaceholderText("Paste API Key kamu di sini...")
+        self.keyLineEdit.setPlaceholderText("Paste your API Key here...")
         self.keyLineEdit.setEchoMode(QLineEdit.Password)
         self.keyLineEdit.setStyleSheet("""
             QLineEdit {
@@ -318,8 +318,8 @@ class APIKeysManager(QDialog):
         """)
         key_actions_layout.addWidget(self.keyLineEdit)
         
-        self.addKeyButton = QPushButton("Tambah")
-        self.addKeyButton.setToolTip("Tambahin API Key baru (otomatis deteksi platform)")
+        self.addKeyButton = QPushButton("Add")
+        self.addKeyButton.setToolTip("Add a new API Key (auto-detect platform)")
         self.addKeyButton.setStyleSheet("""
             QPushButton {
                 padding: 8px 16px;
@@ -339,8 +339,8 @@ class APIKeysManager(QDialog):
         """)
         key_actions_layout.addWidget(self.addKeyButton)
         
-        self.testKeyButton = QPushButton("Tes")
-        self.testKeyButton.setToolTip("Tes koneksi API Key yang dipilih")
+        self.testKeyButton = QPushButton("Test")
+        self.testKeyButton.setToolTip("Test selected API Key connection")
         self.testKeyButton.setStyleSheet("""
             QPushButton {
                 padding: 8px 16px;
@@ -360,8 +360,8 @@ class APIKeysManager(QDialog):
         """)
         key_actions_layout.addWidget(self.testKeyButton)
         
-        self.removeKeyButton = QPushButton("Hapus")
-        self.removeKeyButton.setToolTip("Hapus API Key yang dipilih")
+        self.removeKeyButton = QPushButton("Remove")
+        self.removeKeyButton.setToolTip("Remove selected API Key")
         self.removeKeyButton.setStyleSheet("""
             QPushButton {
                 padding: 8px 16px;
@@ -446,7 +446,7 @@ class APIKeysManager(QDialog):
         main_layout.addWidget(self.keysGroupBox)
         
         # Platform info label
-        self.platformInfoLabel = QLabel("Info platform bakal ditampilkan di sini...")
+        self.platformInfoLabel = QLabel("Platform info will be displayed here...")
         self.platformInfoLabel.setWordWrap(True)
         self.platformInfoLabel.setOpenExternalLinks(True)
         self.platformInfoLabel.setFrameShape(QFrame.NoFrame)
@@ -465,8 +465,8 @@ class APIKeysManager(QDialog):
         
         button_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
-        self.saveButton = QPushButton("Simpan")
-        self.saveButton.setToolTip("Simpan perubahan dan tutup")
+        self.saveButton = QPushButton("Save")
+        self.saveButton.setToolTip("Save changes and close")
         self.saveButton.setDefault(True)
         save_font = QFont()
         save_font.setBold(True)
@@ -490,8 +490,8 @@ class APIKeysManager(QDialog):
         """)
         button_layout.addWidget(self.saveButton)
         
-        self.cancelButton = QPushButton("Batal")
-        self.cancelButton.setToolTip("Batal tanpa menyimpan")
+        self.cancelButton = QPushButton("Cancel")
+        self.cancelButton.setToolTip("Cancel without saving")
         self.cancelButton.setStyleSheet("""
             QPushButton {
                 padding: 8px 16px;
@@ -517,7 +517,7 @@ class APIKeysManager(QDialog):
     
     def setup_icons(self):
         """Setup QtAwesome icons for buttons and UI elements"""
-        # Button icons dengan warna - consistent with PromptManager style
+        # Button icons with color - consistent with PromptManager style
         self.addKeyButton.setIcon(qta.icon('fa6s.plus', color='#4CAF50'))
         self.removeKeyButton.setIcon(qta.icon('fa6s.trash', color='#F44336'))
         self.testKeyButton.setIcon(qta.icon('fa6s.flask', color='#9C27B0'))
@@ -548,12 +548,12 @@ class APIKeysManager(QDialog):
             url = QUrl("https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3")
             QDesktopServices.openUrl(url)
         except Exception as e:
-            QMessageBox.warning(self, "Error", f"Gagal membuka link WhatsApp: {str(e)}")
+            QMessageBox.warning(self, "Error", f"Failed to open WhatsApp link: {str(e)}")
     
     def update_platform_info(self):
         """Update platform information display"""
         if not self.current_platform:
-            self.platformInfoLabel.setText("Pilih platform untuk melihat info...")
+            self.platformInfoLabel.setText("Select a platform to view info...")
             return
         
         platform_config = self.config_manager.get_platform_config(self.current_platform)
@@ -569,20 +569,20 @@ class APIKeysManager(QDialog):
             info_text = f"""<b>🤖 {platform_name}</b><br/>
             <b>Models:</b> {', '.join(models[:3])}{'...' if len(models) > 3 else ''}<br/>
             <b>Default:</b> {default_model}<br/>
-            <b>API Keys:</b> {len(api_keys)} tersimpan<br/>
+            <b>API Keys:</b> {len(api_keys)} saved<br/>
             <b>Support:</b> Images, Videos<br/>
             <br/>
-            <i>💡 Gemini bagus untuk analisis gambar dan video dengan akurasi tinggi.</i>"""
+            <i>💡 Gemini is great for image and video analysis with high accuracy.</i>"""
         elif self.current_platform == "openai":
             info_text = f"""<b>🧠 {platform_name}</b><br/>
             <b>Models:</b> {', '.join(models[:3])}{'...' if len(models) > 3 else ''}<br/>
             <b>Default:</b> {default_model}<br/>
-            <b>API Keys:</b> {len(api_keys)} tersimpan<br/>
+            <b>API Keys:</b> {len(api_keys)} saved<br/>
             <b>Support:</b> Images, Text<br/>
             <br/>
-            <i>💡 OpenAI excellent untuk analisis detail dan reasoning yang complex.</i>"""
+            <i>💡 OpenAI is excellent for detailed analysis and complex reasoning.</i>"""
         else:
-            info_text = f"<b>{platform_name}</b><br/>Platform info tidak tersedia."
+            info_text = f"<b>{platform_name}</b><br/>Platform info not available."
         
         self.platformInfoLabel.setText(info_text)
     
@@ -624,7 +624,7 @@ class APIKeysManager(QDialog):
             self.keysListWidget.addItem(item)
     
     def get_status_icon(self, status):
-        """Get QtAwesome icon for API key status dengan warna"""
+        """Get QtAwesome icon for API key status with color"""
         icons = {
             "active": qta.icon('fa6s.circle-check', color='#4CAF50'),
             "busy": qta.icon('fa6s.clock', color='#FF9800'),
@@ -674,12 +674,12 @@ class APIKeysManager(QDialog):
         """Test selected API key"""
         # Prevent multiple simultaneous tests
         if self.test_thread and self.test_thread.isRunning():
-            QMessageBox.information(self, "Info", "Test API sedang berjalan...\nTunggu sampai selesai dulu.")
+            QMessageBox.information(self, "Info", "API test is already running...\nPlease wait until it finishes.")
             return
             
         current_item = self.keysListWidget.currentItem()
         if not current_item:
-            QMessageBox.warning(self, "Warning", "Pilih API Key yang mau di-test dulu!")
+            QMessageBox.warning(self, "Warning", "Please select an API Key to test!")
             return
         
         full_key = current_item.data(Qt.UserRole)
@@ -704,7 +704,7 @@ class APIKeysManager(QDialog):
         
         # Re-enable test button
         self.testKeyButton.setEnabled(True)
-        self.testKeyButton.setText("Tes")
+        self.testKeyButton.setText("Test")
         self.testKeyButton.setIcon(qta.icon('fa6s.flask', color='#9C27B0'))
         
         # Update API key status
@@ -719,37 +719,37 @@ class APIKeysManager(QDialog):
         
         # Show result message
         if success:
-            QMessageBox.information(self, "Test Berhasil! ✅", message)
+            QMessageBox.information(self, "Test Successful! ✅", message)
         else:
-            QMessageBox.warning(self, "Test Gagal ❌", message)
+            QMessageBox.warning(self, "Test Failed ❌", message)
     
     def save_changes(self):
         """Save all changes and close dialog"""
         try:
             self.config_manager.save_config()
-            QMessageBox.information(self, "Success", "Semua perubahan berhasil disimpan! ✅")
+            QMessageBox.information(self, "Success", "All changes have been saved! ✅")
             self.accept()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal menyimpan config:\n{str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to save config:\n{str(e)}")
     
     def add_api_key(self):
         """Add new API key"""
         new_key = self.keyLineEdit.text().strip()
         if not new_key:
-            QMessageBox.warning(self, "Warning", "Mohon masukkan API Key terlebih dahulu!")
+            QMessageBox.warning(self, "Warning", "Please enter an API Key first!")
             return
         
         # Auto-detect platform based on API key format
         detected_platform = self.detect_platform_from_key(new_key)
         
         if not detected_platform:
-            QMessageBox.warning(self, "Warning", "Format API Key tidak dikenali!\n\nPastikan API Key yang dimasukkan valid untuk OpenAI atau Gemini.")
+            QMessageBox.warning(self, "Warning", "API Key format not recognized!\n\nMake sure the API Key is valid for OpenAI or Gemini.")
             return
         
         # Check if key already exists in detected platform
         existing_keys = self.config_manager.get_api_keys(detected_platform)
         if new_key in existing_keys:
-            QMessageBox.warning(self, "Warning", f"API Key sudah ada di platform {detected_platform}!")
+            QMessageBox.warning(self, "Warning", f"API Key already exists in platform {detected_platform}!")
             return
         
         # Add key to detected platform
@@ -764,7 +764,7 @@ class APIKeysManager(QDialog):
         # Clear input
         self.keyLineEdit.clear()
         
-        QMessageBox.information(self, "Success", f"API Key berhasil ditambahkan ke platform {detected_platform}! ✅\n(Auto-detected)")
+        QMessageBox.information(self, "Success", f"API Key successfully added to platform {detected_platform}! ✅\n(Auto-detected)")
 
     def detect_platform_from_key(self, api_key):
         """Detect platform based on API key format using config"""
@@ -790,15 +790,15 @@ class APIKeysManager(QDialog):
         """Remove selected API key"""
         current_item = self.keysListWidget.currentItem()
         if not current_item:
-            QMessageBox.warning(self, "Warning", "Pilih API Key yang mau dihapus dulu!")
+            QMessageBox.warning(self, "Warning", "Please select an API Key to remove!")
             return
         
         full_key = current_item.data(Qt.UserRole)
         
         reply = QMessageBox.question(
             self, 
-            "Konfirmasi Hapus", 
-            "Yakin mau hapus API Key ini?",
+            "Confirm Removal", 
+            "Are you sure you want to remove this API Key?",  # translated
             QMessageBox.Yes | QMessageBox.No
         )
         
@@ -806,4 +806,4 @@ class APIKeysManager(QDialog):
             self.config_manager.remove_api_key(self.current_platform, full_key)
             self.load_api_keys()
             self.update_platform_info()
-            QMessageBox.information(self, "Success", "API Key berhasil dihapus! ✅")
+            QMessageBox.information(self, "Success", "API Key successfully removed! ✅")  # translated
