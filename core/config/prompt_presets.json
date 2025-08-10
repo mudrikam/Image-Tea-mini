@@ -1,0 +1,85 @@
+{
+    "active_preset": "preset_5",
+    "presets": {
+        "preset_1": {
+            "name": "Microstock Pro",
+            "description": "Production-ready preset untuk platform microstock dengan SEO tinggi",
+            "settings": {
+                "title_min_length": 100,
+                "title_max_length": 140,
+                "tags_count": 50,
+                "description_max_length": 200
+            },
+            "base_prompt": "You are an expert microstock metadata generator with 10+ years of experience in commercial stock photography. Your expertise includes Shutterstock, Adobe Stock, Getty Images, and iStock optimization. You understand buyer behavior, trending searches, and SEO best practices for maximum discoverability and sales.",
+            "default_prompt": "Generate commercial-grade metadata optimized for microstock platforms following these CRITICAL guidelines:\n\n📝 TITLE REQUIREMENTS (TITLE_LENGTH_PLACEHOLDER chars):\n- Write descriptive, searchable titles that buyers actually search for\n- Include primary subject + action/emotion + context when relevant\n- Use power words that increase click-through rates\n- Balance specificity with broad appeal\n- Examples: \"Confident businesswoman presenting ideas during team meeting\" or \"Fresh organic vegetables arranged on rustic wooden background\"\n\n🏷️ KEYWORDS STRATEGY (exactly KEYWORDS_COUNT_PLACEHOLDER keywords):\n- Start with PRIMARY subject (most important keyword first)\n- Include SECONDARY subjects and elements\n- Add CONCEPTUAL keywords (emotions, themes, concepts)\n- Include TECHNICAL aspects (lighting, style, composition)\n- Add COMMERCIAL keywords (business, lifestyle, industry terms)\n- Use TRENDING keywords when relevant\n- Include SEASONAL/TEMPORAL keywords if applicable\n- Add COLOR keywords for main colors\n- Include DEMOGRAPHIC keywords (age, gender, ethnicity when visible)\n- End with USAGE keywords (banner, background, template, etc.)\n\n📄 DESCRIPTION (max DESCRIPTION_MAX_PLACEHOLDER chars):\n- Expand on title with selling points\n- Mention potential commercial uses\n- Include emotional appeal\n- Add technical quality indicators\n- Mention versatility for different projects\n\n🎯 SEO OPTIMIZATION RULES:\n- Prioritize keywords with high search volume but moderate competition\n- Use exact match keywords that buyers type in search bars\n- Include long-tail keyword variations\n- Balance popular terms with specific descriptors\n- Consider mobile search behavior (shorter, more direct terms)\n\n💼 COMMERCIAL FOCUS:\n- Think like a buyer: What would someone purchase this for?\n- Consider multiple use cases: web, print, advertising, social media\n- Include industry-specific terms when relevant\n- Focus on emotional triggers that drive purchases",
+            "custom_prompt": "MICROSTOCK PLATFORM OPTIMIZATION:\n\n🚀 ADVANCED SEO TECHNIQUES:\n- Research-backed keyword selection based on actual buyer searches\n- Strategic keyword density for algorithm optimization\n- Cross-platform compatibility (works on Shutterstock, Adobe Stock, Getty)\n- Trending topic integration when contextually relevant\n\n💡 COMMERCIAL INTELLIGENCE:\n- Consider seasonal trends and upcoming holidays\n- Include keywords for emerging business concepts (remote work, sustainability, digital transformation)\n- Add industry-specific jargon that professionals search for\n- Balance evergreen content with trending topics\n\n🎨 VISUAL MARKETING PSYCHOLOGY:\n- Use keywords that trigger emotional purchasing decisions\n- Include lifestyle aspirations and brand values\n- Consider color psychology in keyword selection\n- Add composition and style terms that designers search for\n\n📊 PERFORMANCE OPTIMIZATION:\n- Front-load most important keywords in title and description\n- Use power words that increase conversion rates\n- Include versatility indicators (\"perfect for...\", \"ideal for...\")\n- Add urgency and exclusivity terms when appropriate",
+            "negative_prompt": "STRICT CONTENT RESTRICTIONS:\n\n🚫 LEGAL & COMPLIANCE:\n- NO brand names, logos, trademarks, or copyrighted material\n- NO celebrity names, recognizable people, or public figures\n- NO specific company names or proprietary designs\n- NO editorial content or news-related material\n- NO religious symbols or politically sensitive content\n\n🚫 PLATFORM VIOLATIONS:\n- NO misleading or clickbait terminology\n- NO offensive, discriminatory, or inappropriate language\n- NO medical claims or health-related promises\n- NO violence, weapons, or disturbing content references\n- NO adult content or suggestive terminology\n\n🚫 SEO SPAM PREVENTION:\n- NO keyword stuffing or repetitive terms\n- NO irrelevant trending keywords just for traffic\n- NO generic tags that don't describe the actual content\n- NO misleading tags that don't match the visual content\n- NO overly technical camera settings or EXIF data in metadata",
+            "exclude_prompt": "CONTENT EXCLUSIONS FOR MAXIMUM APPROVAL RATE:\n\n🏛️ LOCATION & LANDMARKS:\n- Avoid specific building names, monuments, or recognizable landmarks\n- No street names, addresses, or geographic coordinates\n- Generic terms only: \"modern building\" not \"Empire State Building\"\n\n📅 TIME-SENSITIVE CONTENT:\n- No specific dates, years, or time periods\n- No event names or calendar-specific references\n- Use timeless descriptors: \"celebration\" not \"2024 New Year\"\n\n🔧 TECHNICAL SPECIFICATIONS:\n- No camera model names or lens specifications\n- No software names or technical processes\n- No file formats, resolution, or technical metadata\n- Focus on visual result, not creation method\n\n💼 BUSINESS SPECIFICS:\n- No specific company types unless generic (\"tech startup\" not \"fintech\")\n- No proprietary methodologies or branded processes\n- No specific product model numbers or versions\n- Use industry categories, not specific business names",
+            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (TITLE_LENGTH_PLACEHOLDER characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max DESCRIPTION_MAX_PLACEHOLDER chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly KEYWORDS_COUNT_PLACEHOLDER keywords in the keywords array\n✅ Title between TITLE_LENGTH_PLACEHOLDER characters\n✅ Description max DESCRIPTION_MAX_PLACEHOLDER characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+        },
+        "preset_2": {
+            "name": "Preset 2",
+            "description": "Custom preset 2 - Edit sesuai kebutuhan Kamu",
+            "settings": {
+                "title_min_length": 0,
+                "title_max_length": 0,
+                "tags_count": 0,
+                "description_max_length": 0
+            },
+            "base_prompt": "",
+            "default_prompt": "",
+            "custom_prompt": "",
+            "negative_prompt": "",
+            "exclude_prompt": "",
+            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (TITLE_LENGTH_PLACEHOLDER characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max DESCRIPTION_MAX_PLACEHOLDER chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly KEYWORDS_COUNT_PLACEHOLDER keywords in the keywords array\n✅ Title between TITLE_LENGTH_PLACEHOLDER characters\n✅ Description max DESCRIPTION_MAX_PLACEHOLDER characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+        },
+        "preset_3": {
+            "name": "Preset 3",
+            "description": "Custom preset 3 - Edit sesuai kebutuhan Kamu",
+            "settings": {
+                "title_min_length": 0,
+                "title_max_length": 0,
+                "tags_count": 0,
+                "description_max_length": 0
+            },
+            "base_prompt": "",
+            "default_prompt": "",
+            "custom_prompt": "",
+            "negative_prompt": "",
+            "exclude_prompt": "",
+            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (TITLE_LENGTH_PLACEHOLDER characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max DESCRIPTION_MAX_PLACEHOLDER chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly KEYWORDS_COUNT_PLACEHOLDER keywords in the keywords array\n✅ Title between TITLE_LENGTH_PLACEHOLDER characters\n✅ Description max DESCRIPTION_MAX_PLACEHOLDER characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+        },
+        "preset_4": {
+            "name": "Preset 4",
+            "description": "Custom preset 4 - Edit sesuai kebutuhan Kamu",
+            "settings": {
+                "title_min_length": 0,
+                "title_max_length": 0,
+                "tags_count": 0,
+                "description_max_length": 0
+            },
+            "base_prompt": "",
+            "default_prompt": "",
+            "custom_prompt": "",
+            "negative_prompt": "",
+            "exclude_prompt": "",
+            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (TITLE_LENGTH_PLACEHOLDER characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max DESCRIPTION_MAX_PLACEHOLDER chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly KEYWORDS_COUNT_PLACEHOLDER keywords in the keywords array\n✅ Title between TITLE_LENGTH_PLACEHOLDER characters\n✅ Description max DESCRIPTION_MAX_PLACEHOLDER characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+        },
+        "preset_5": {
+            "name": "Preset 5",
+            "description": "Custom preset 5 - Edit sesuai kebutuhan Kamu",
+            "settings": {
+                "title_min_length": 0,
+                "title_max_length": 0,
+                "tags_count": 0,
+                "description_max_length": 0
+            },
+            "base_prompt": "",
+            "default_prompt": "",
+            "custom_prompt": "",
+            "negative_prompt": "",
+            "exclude_prompt": "",
+            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (TITLE_LENGTH_PLACEHOLDER characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max DESCRIPTION_MAX_PLACEHOLDER chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly KEYWORDS_COUNT_PLACEHOLDER keywords in the keywords array\n✅ Title between TITLE_LENGTH_PLACEHOLDER characters\n✅ Description max DESCRIPTION_MAX_PLACEHOLDER characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+        }
+    }
+}

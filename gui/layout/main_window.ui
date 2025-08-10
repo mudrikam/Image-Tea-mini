@@ -141,12 +141,7 @@
     <property name="title">
      <string>Prompt</string>
     </property>
-    <addaction name="actionDefault_Prompt"/>
-    <addaction name="actionCustom_Prompt"/>
-    <addaction name="actionNegative_Prompt"/>
-    <addaction name="actionMetadata_Prompt_2"/>
-    <addaction name="separator"/>
-    <addaction name="actionPrompt_Preferences"/>
+    <addaction name="actionPrompt_Manager"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -516,29 +511,9 @@
     <string>Donate</string>
    </property>
   </action>
-  <action name="actionDefault_Prompt">
+  <action name="actionPrompt_Manager">
    <property name="text">
-    <string>Default Prompt</string>
-   </property>
-  </action>
-  <action name="actionCustom_Prompt">
-   <property name="text">
-    <string>Custom Prompt</string>
-   </property>
-  </action>
-  <action name="actionNegative_Prompt">
-   <property name="text">
-    <string>Negative Prompt</string>
-   </property>
-  </action>
-  <action name="actionMetadata_Prompt_2">
-   <property name="text">
-    <string>Metadata Prompt</string>
-   </property>
-  </action>
-  <action name="actionPrompt_Preferences">
-   <property name="text">
-    <string>Prompt Preferences</string>
+    <string>Prompt Manager</string>
    </property>
   </action>
   <action name="actionFull_Screen">

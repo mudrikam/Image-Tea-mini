@@ -74,7 +74,6 @@ coverage.xml
 database/database.db
 *_ui.py
 test/
-config/
 *expired_year.txt
 *.db-shm
 *.db-wal
