@@ -1,174 +1,127 @@
 {
-    "app_name": "Image Tea Mini",
-    "app_icon": "image_tea.ico",
-    "app_description": "Image Tea Mini is a lightweight image and video metadata generator using Artifical Intelligence.",
-    "app_author": "Mudrikul Hikam",
-    "app_author_email": "kyutkitten@gmail.com",
-    "app_license": "MIT",
-    "app_repository": "https://github.com/mudrikam/Image-Tea-mini",
-    "app_report_issue": "https://github.com/mudrikam/Image-Tea-mini/issues",
-    "app_copyright": "2025 Desainia Studio",
-    "app_commit_hash": "b3542c0fa03751fa40e94aeb1280296c9b6342f6",
-    "app_commit_date": "2025-01-01",
-    "app_version": "1.0.0",
-    "app_version_hash": "b3542c0fa03751fa40e94aeb1280296c9b6342f6",
-    "app_version_date": "2025-01-01",
-    "app_remote_commit_hash": "cb470ed57662d992d9b20485d6dfa307adf64fa6",
-    "app_remote_version": "1.0.8",
-    "app_remote_version_date": "2025-05-19",
-    "app_last_update_check": "2025-08-02T19:29:55Z",
-    "app_automatic_update": false,
-    "app_update_url": "https://github.com/mudrikam/Image-Tea-mini/releases",
-    "app_update_message": "New version available! Please update to the latest version for new features and bug fixes.",
-    "app_update_message_no_internet": "No internet connection. Please check your connection and try again.",
-    "app_update_message_no_update": "You are using the latest version of Image Tea Mini.",
-    "app_update_message_error": "Error checking for updates. Please try again later.",
-    "app_whatsapp": "https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3",
-    "donation_dialog": {
-        "title": "Support Image Tea Mini",
-        "message": "If you like this app, please consider supporting its development. \nYour contribution helps us continue improving and adding new features.",
-        "ewallet": [
-            {
-                "name": "DANA",
-                "number": "085172230405",
-                "account_name": "Muhamad Mudrikul Hikam",
-                "color": "#2F80ED",
-                "image": "res/dana.png",
-                "max_width": 30
-            },
-            {
-                "name": "OVO",
-                "number": "085172230405",
-                "account_name": "Muhamad Mudrikul Hikam",
-                "color": "#4F3AA0",
-                "image": "res/ovo.png",
-                "max_width": 30
-            },
-            {
-                "name": "Gopay",
-                "number": "085172230405",
-                "account_name": "Muhamad Mudrikul Hikam",
-                "color": "#00AEEF",
-                "image": "res/gopay.png",
-                "max_width": 30
-            }
-        ],
-        "bank": [
-            {
-                "name": "Bank BCA",
-                "number": "0131953347",
-                "account_name": "Muhamad Mudrikul Hikam",
-                "color": "#1868B0",
-                "image": "res/bca.png",
-                "max_width": 30
-            },
-            {
-                "name": "Bank BRI",
-                "number": "008101073232509",
-                "account_name": "Muhamad Mudrikul Hikam",
-                "color": "#00529C",
-                "image": "res/bri.png",
-                "max_width": 30
-            },
-            {
-                "name": "Bank Jago",
-                "number": "108279976960",
-                "account_name": "Muhamad Mudrikul Hikam",
-                "color": "#FF6F44",
-                "image": "res/jago.png",
-                "max_width": 30
-            }
-        ],
-        "QRIS": [
-            {
-                "name": "QRIS",
-                "image": "res/qris.jpeg",
-                "max_width": 400,
-                "description": "Scan this QR code with any Indonesian e-wallet app"
-            }
-        ]
-    },
     "application": {
-        "name": "Image Tea Mini",
-        "version": "1.0.0"
+        "name": "Image-Tea-lite",
+        "display_name": "Image-Tea-lite",
+        "version": "1.0",
+        "app_id": "ImageTeaLite.1.0",
+        "organization": "Desainia",
+        "author": "Desainia",
+        "description": "A lightweight image metadata generator and viewer.",
+        "license": "MIT",
+        "repository": "https://github.com/mudrikam/Image-Tea-lite",
+        "contact": {
+            "whatsapp": "https://chat.whatsapp.com/CMQvDxpCfP647kBBA6dRn3",
+            "lynk": "https://lynk.id/desainiajob",
+            "donation": "https://github.com/mudrikam/Image-Tea-mini/blob/main/res/qris.jpeg"
+        }
     },
     "window": {
-        "width": 1200,
-        "height": 800,
-        "maximized": false
+        "title": "Image-Tea-lite",
+        "width": 800,
+        "height": 600,
+        "x": 100,
+        "y": 100
     },
     "resources": {
-        "icon_path": "res/image_tea.ico"
+        "icon_path": "App/res/image_tea.ico"
     },
     "prompting": {
         "platform": "gemini",
-        "current_model": "gemini-1.5-flash",
         "platforms": {
             "gemini": {
                 "name": "Google Gemini",
                 "models": [
+                    "gemini-2.0-flash",
                     "gemini-1.5-flash",
-                    "gemini-1.5-pro"
+                    "gemini-1.5-pro",
+                    "gemini-1.0-pro"
                 ],
-                "default_model": "gemini-1.5-flash",
+                "default_model": "gemini-2.0-flash",
+                "test_model": "gemini-2.0-flash",
+                "api_key_pattern": {
+                    "prefix": "AIza",
+                    "min_length": 35
+                },
                 "supported_formats": {
                     "images": [
+                        "png",
                         "jpg",
                         "jpeg",
-                        "png",
-                        "gif",
-                        "bmp",
-                        "webp"
+                        "webp",
+                        "heic",
+                        "heif"
                     ],
                     "videos": [
                         "mp4",
+                        "mpeg",
+                        "mpg",
                         "mov",
-                        "avi"
+                        "avi",
+                        "flv",
+                        "webm",
+                        "wmv",
+                        "3gp"
                     ]
                 }
             },
             "openai": {
-                "name": "OpenAI GPT",
+                "name": "OpenAI GPT Vision",
                 "models": [
-                    "gpt-4o-mini",
                     "gpt-4o",
-                    "gpt-4-turbo"
+                    "gpt-4o-mini",
+                    "gpt-4-turbo",
+                    "gpt-4-vision-preview"
                 ],
-                "default_model": "gpt-4o-mini",
+                "default_model": "gpt-4o",
+                "test_model": "gpt-4o-mini",
+                "api_key_pattern": {
+                    "prefix": "sk-",
+                    "min_length": 40
+                },
                 "supported_formats": {
                     "images": [
+                        "png",
                         "jpg",
                         "jpeg",
-                        "png",
-                        "gif",
-                        "bmp",
-                        "webp"
+                        "webp",
+                        "gif"
                     ],
                     "videos": []
                 }
             }
         },
         "api_keys": {
-            "gemini": [],
+            "gemini": [
+                "AIzaSyBzT-DJlo4RAbv9V4Y_NMTvZvgyZJndATk",
+                "AIzaSyD-gEfyv8kH2EMhAbaKz3mLg5HjrGr8njw"
+            ],
             "openai": []
         },
         "api_key_status": {
-            "gemini": {},
+            "gemini": {
+                "AIzaSyBzT-DJlo4RAbv9V4Y_NMTvZvgyZJndATk": "unknown",
+                "AIzaSyD-gEfyv8kH2EMhAbaKz3mLg5HjrGr8njw": "active"
+            },
             "openai": {}
         },
-        "settings": {
-            "title_min_length": 100,
-            "title_max_length": 140,
-            "tags_count": 50,
-            "description_max_length": 200
-        },
+        "current_model": "gemini-2.0-flash",
         "prompts": {
             "base_prompt": "You are an expert microstock metadata generator with 10+ years of experience in commercial stock photography. Your expertise includes Shutterstock, Adobe Stock, Getty Images, and iStock optimization. You understand buyer behavior, trending searches, and SEO best practices for maximum discoverability and sales.",
             "default_prompt": "Generate commercial-grade metadata optimized for microstock platforms following these CRITICAL guidelines:\n\n📝 TITLE REQUIREMENTS (100-140 chars):\n- Write descriptive, searchable titles that buyers actually search for\n- Include primary subject + action/emotion + context when relevant\n- Use power words that increase click-through rates\n- Balance specificity with broad appeal\n- Examples: \"Confident businesswoman presenting ideas during team meeting\" or \"Fresh organic vegetables arranged on rustic wooden background\"\n\n🏷️ KEYWORDS STRATEGY (exactly 50 keywords):\n- Start with PRIMARY subject (most important keyword first)\n- Include SECONDARY subjects and elements\n- Add CONCEPTUAL keywords (emotions, themes, concepts)\n- Include TECHNICAL aspects (lighting, style, composition)\n- Add COMMERCIAL keywords (business, lifestyle, industry terms)\n- Use TRENDING keywords when relevant\n- Include SEASONAL/TEMPORAL keywords if applicable\n- Add COLOR keywords for main colors\n- Include DEMOGRAPHIC keywords (age, gender, ethnicity when visible)\n- End with USAGE keywords (banner, background, template, etc.)\n\n📄 DESCRIPTION (max 200 chars):\n- Expand on title with selling points\n- Mention potential commercial uses\n- Include emotional appeal\n- Add technical quality indicators\n- Mention versatility for different projects\n\n🎯 SEO OPTIMIZATION RULES:\n- Prioritize keywords with high search volume but moderate competition\n- Use exact match keywords that buyers type in search bars\n- Include long-tail keyword variations\n- Balance popular terms with specific descriptors\n- Consider mobile search behavior (shorter, more direct terms)\n\n💼 COMMERCIAL FOCUS:\n- Think like a buyer: What would someone purchase this for?\n- Consider multiple use cases: web, print, advertising, social media\n- Include industry-specific terms when relevant\n- Focus on emotional triggers that drive purchases",
             "custom_prompt": "MICROSTOCK PLATFORM OPTIMIZATION:\n\n🚀 ADVANCED SEO TECHNIQUES:\n- Research-backed keyword selection based on actual buyer searches\n- Strategic keyword density for algorithm optimization\n- Cross-platform compatibility (works on Shutterstock, Adobe Stock, Getty)\n- Trending topic integration when contextually relevant\n\n💡 COMMERCIAL INTELLIGENCE:\n- Consider seasonal trends and upcoming holidays\n- Include keywords for emerging business concepts (remote work, sustainability, digital transformation)\n- Add industry-specific jargon that professionals search for\n- Balance evergreen content with trending topics\n\n🎨 VISUAL MARKETING PSYCHOLOGY:\n- Use keywords that trigger emotional purchasing decisions\n- Include lifestyle aspirations and brand values\n- Consider color psychology in keyword selection\n- Add composition and style terms that designers search for\n\n📊 PERFORMANCE OPTIMIZATION:\n- Front-load most important keywords in title and description\n- Use power words that increase conversion rates\n- Include versatility indicators (\"perfect for...\", \"ideal for...\")\n- Add urgency and exclusivity terms when appropriate",
             "negative_prompt": "STRICT CONTENT RESTRICTIONS:\n\n🚫 LEGAL & COMPLIANCE:\n- NO brand names, logos, trademarks, or copyrighted material\n- NO celebrity names, recognizable people, or public figures\n- NO specific company names or proprietary designs\n- NO editorial content or news-related material\n- NO religious symbols or politically sensitive content\n\n🚫 PLATFORM VIOLATIONS:\n- NO misleading or clickbait terminology\n- NO offensive, discriminatory, or inappropriate language\n- NO medical claims or health-related promises\n- NO violence, weapons, or disturbing content references\n- NO adult content or suggestive terminology\n\n🚫 SEO SPAM PREVENTION:\n- NO keyword stuffing or repetitive terms\n- NO irrelevant trending keywords just for traffic\n- NO generic tags that don't describe the actual content\n- NO misleading tags that don't match the visual content\n- NO overly technical camera settings or EXIF data in metadata",
             "exclude_prompt": "CONTENT EXCLUSIONS FOR MAXIMUM APPROVAL RATE:\n\n🏛️ LOCATION & LANDMARKS:\n- Avoid specific building names, monuments, or recognizable landmarks\n- No street names, addresses, or geographic coordinates\n- Generic terms only: \"modern building\" not \"Empire State Building\"\n\n📅 TIME-SENSITIVE CONTENT:\n- No specific dates, years, or time periods\n- No event names or calendar-specific references\n- Use timeless descriptors: \"celebration\" not \"2024 New Year\"\n\n🔧 TECHNICAL SPECIFICATIONS:\n- No camera model names or lens specifications\n- No software names or technical processes\n- No file formats, resolution, or technical metadata\n- Focus on visual result, not creation method\n\n💼 BUSINESS SPECIFICS:\n- No specific company types unless generic (\"tech startup\" not \"fintech\")\n- No proprietary methodologies or branded processes\n- No specific product model numbers or versions\n- Use industry categories, not specific business names",
-            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (100-140 characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max 200 chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly 51 keywords in the keywords array\n✅ Title between 100-140 characters\n✅ Description max 200 characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+            "mandatory_prompt": "MANDATORY OUTPUT FORMAT - CRITICAL FOR THE APPLICATION TO WORK:\n\nYou MUST respond with ONLY valid JSON in this EXACT format:\n\n{\n  \"title\": \"Your optimized title here (100-140 characters)\",\n  \"keywords\": [\"keyword1\", \"keyword2\", \"keyword3\", \"...\"],\n  \"description\": \"Commercial description highlighting uses and appeal (max 200 chars)\",\n  \"category\": \"Primary category (business, lifestyle, technology, etc.)\",\n  \"mood\": \"Emotional tone (professional, cheerful, serene, dynamic, etc.)\",\n  \"style\": \"Visual style (modern, minimalist, vintage, dramatic, etc.)\",\n  \"colors\": [\"primary\", \"secondary\", \"accent\"],\n  \"composition\": \"Layout description (centered, rule-of-thirds, symmetrical, etc.)\"\n}\n\nIMPORTANT:\n✅ Exactly 50 keywords in the keywords array\n✅ Title between 100-140 characters\n✅ Description max 200 characters\n✅ NO text before or after the JSON\n✅ Use double quotes for all strings\n✅ Keywords separated by commas within the array\n\nDO NOT include any text before or after the JSON. Only return valid JSON."
+        },
+        "settings": {
+            "max_tokens": 1000,
+            "temperature": 0.7,
+            "include_confidence": true,
+            "output_format": "json",
+            "title_min_length": 100,
+            "title_max_length": 140,
+            "tags_count": 50,
+            "description_max_length": 200
         }
     }
 }

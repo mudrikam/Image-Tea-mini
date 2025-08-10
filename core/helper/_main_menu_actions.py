@@ -128,17 +128,11 @@ class MenuActionHandler(QObject):
     
     def connect_prompt_menu_actions(self):
         """Connect Prompt menu actions to their handlers."""
-        # These are application-specific and might require custom handlers
-        if hasattr(self.window, 'actionDefault_Prompt'):
-            self.window.actionDefault_Prompt.triggered.connect(self.handle_default_prompt)
-        if hasattr(self.window, 'actionCustom_Prompt'):
-            self.window.actionCustom_Prompt.triggered.connect(self.handle_custom_prompt)
-        if hasattr(self.window, 'actionNegative_Prompt'):
-            self.window.actionNegative_Prompt.triggered.connect(self.handle_negative_prompt)
-        if hasattr(self.window, 'actionMetadata_Prompt_2'):
-            self.window.actionMetadata_Prompt_2.triggered.connect(self.handle_metadata_prompt)
-        if hasattr(self.window, 'actionPrompt_Preferences'):
-            self.window.actionPrompt_Preferences.triggered.connect(self.handle_prompt_preferences)
+        # Only connect to Prompt Manager and API Keys Manager
+        if hasattr(self.window, 'actionPrompt_Manager'):
+            self.window.actionPrompt_Manager.triggered.connect(self.handle_prompt_manager)
+        if hasattr(self.window, 'actionAPI_Keys_Manager'):
+            self.window.actionAPI_Keys_Manager.triggered.connect(self.handle_api_keys_manager)
     
     def connect_help_menu_actions(self):
         """Connect Help menu actions to their handlers."""
@@ -552,30 +546,43 @@ class MenuActionHandler(QObject):
         # Implement OpenAI settings dialog
 
     # Prompt menu handlers
-    def handle_default_prompt(self):
-        """Handle Default Prompt action."""
-        log("Using default prompt")
-        self.show_status_message("Using default prompt")
+    def handle_prompt_manager(self):
+        """Handle Prompt Manager action - open prompt management window."""
+        log("Opening Prompt Manager")
+        self.show_status_message("Opening Prompt Manager...")
+        
+        try:
+            # Import here to avoid circular imports
+            from core.config.prompt_manager import PromptManager
+            
+            # Create and show prompt manager dialog
+            prompt_manager_dialog = PromptManager(self.window)
+            prompt_manager_dialog.exec()
+            
+            self.show_status_message("Prompt Manager closed", 2000)
+            
+        except Exception as e:
+            error(f"Failed to open Prompt Manager: {e}")
+            self.show_status_message("Failed to open Prompt Manager", 3000)
     
-    def handle_custom_prompt(self):
-        """Handle Custom Prompt action."""
-        log("Using custom prompt")
-        self.show_status_message("Using custom prompt")
-    
-    def handle_negative_prompt(self):
-        """Handle Negative Prompt action."""
-        log("Using negative prompt")
-        self.show_status_message("Using negative prompt")
-    
-    def handle_metadata_prompt(self):
-        """Handle Metadata Prompt action."""
-        log("Using metadata prompt")
-        self.show_status_message("Using metadata prompt")
-    
-    def handle_prompt_preferences(self):
-        """Handle Prompt Preferences action."""
-        log("Opening prompt preferences")
-        self.show_status_message("Opening prompt preferences...")
+    def handle_api_keys_manager(self):
+        """Handle API Keys Manager action - open API keys management window."""
+        log("Opening API Keys Manager")
+        self.show_status_message("Opening API Keys Manager...")
+        
+        try:
+            # Import here to avoid circular imports
+            from core.config.api_keys_manager import APIKeysManager
+            
+            # Create and show API keys manager dialog
+            api_keys_dialog = APIKeysManager(self.window)
+            api_keys_dialog.exec()
+            
+            self.show_status_message("API Keys Manager closed", 2000)
+            
+        except Exception as e:
+            error(f"Failed to open API Keys Manager: {e}")
+            self.show_status_message("Failed to open API Keys Manager", 3000)
 
     # Help menu handlers  
     def handle_about(self):

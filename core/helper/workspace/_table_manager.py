@@ -41,6 +41,14 @@ class TableManager:
             # Make sure vertical header (row numbers) is visible
             table_widget.verticalHeader().setVisible(True)
             
+            # Configure table selection behavior for full row selection
+            table_widget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+            table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+            
+            # Enable clicking on row headers to select entire rows
+            table_widget.verticalHeader().setSectionsClickable(True)
+            table_widget.verticalHeader().setHighlightSections(True)
+            
             # Clear existing table data
             table_widget.setRowCount(0)
             
@@ -53,8 +61,7 @@ class TableManager:
                 table_widget.setRowCount(len(files_data))
                 
                 # Add each row of data
-                for row_idx, file_info in enumerate(files_data):
-                    # Get data from file info
+                for row_idx, file_info in enumerate(files_data):                    # Get data from file info
                     filename = str(file_info.get('filename', ''))
                     extension = str(file_info.get('extension', ''))
                     file_id = file_info.get('id')
@@ -64,6 +71,10 @@ class TableManager:
                     description = str(file_info.get('description', ''))
                     tags = str(file_info.get('tags', ''))
                     filepath = str(file_info.get('filepath', ''))
+                    file_type = str(file_info.get('file_type', ''))
+                    category = str(file_info.get('category', ''))
+                    sub_category = str(file_info.get('sub_category', ''))
+                    dimensions = str(file_info.get('dimensions', ''))
                     
                     # Truncate long filenames and filepaths for display
                     MAX_FILENAME_LENGTH = 25
@@ -87,12 +98,11 @@ class TableManager:
                         truncated_description = f"{description[:MAX_DESCRIPTION_LENGTH-3]}..."
                     else:
                         truncated_description = description
-                      # Calculate metadata values
-                    title_length = len(title)
-                    description_length = len(description)
-                    # Count tags by splitting the tag string and counting non-empty items
-                    tags_list = [tag.strip() for tag in tags.split(',') if tag.strip()]
-                    tags_count = len(tags_list)
+                        # Get pre-calculated metadata values from database
+                    title_length = file_info.get('title_length', 0)
+                    tags_count = file_info.get('tags_count', 0)
+                    filesize = file_info.get('filesize', 0)
+                    description_length = len(description)  # Calculate description length here
                     
                     # Create table items
                     filename_item = QtWidgets.QTableWidgetItem(truncated_filename)

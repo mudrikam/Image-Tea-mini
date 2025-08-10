@@ -22,6 +22,64 @@ QDockWidget::title {
 }
 QDockWidget::contents {
     border: 1px solid rgba(114, 114, 114, 0.2);
+}
+
+QScrollArea {
+    background: transparent;
+    border: none;
+}
+
+/* Subtle scrollbar styling with lower opacity */
+QScrollBar:vertical {
+    border: none;
+    background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+    width: 8px;  /* Slightly narrower */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    border: none;
+    background-color: rgba(0, 0, 0, 5);  /* Very subtle background */
+    height: 8px;  /* Slightly narrower */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: rgba(128, 128, 128, 60);  /* Lower opacity */
+    min-width: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: rgba(128, 128, 128, 120);  /* More visible on hover but still subtle */
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
 }</string>
   </property>
   <property name="windowTitle">
@@ -30,6 +88,31 @@ QDockWidget::contents {
   <widget class="QWidget" name="dockWidgetContents">
    <property name="styleSheet">
     <string notr="true">QWidget {
+    background: transparent;
+}
+
+QTreeWidget {
+    background: transparent;
+    border: none;
+    outline: none;
+    show-decoration-selected: 1;
+}
+
+QTreeWidget::item {
+    height: 25px;
+    border: none;
+    color: white;
+}
+
+QTreeWidget::item:hover {
+    background-color: rgba(255, 255, 255, 20);
+}
+
+QTreeWidget::item:selected {
+    background-color: rgba(100, 149, 237, 100);
+}
+
+QTreeWidget::branch {
     background: transparent;
 }</string>
    </property>
@@ -47,18 +130,29 @@ QDockWidget::contents {
      <number>4</number>
     </property>
     <item>
-     <widget class="QLabel" name="propertiesLabel">
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
+     <widget class="QTreeWidget" name="propertiesTreeWidget">
+      <property name="headerHidden">
+       <bool>true</bool>
       </property>
-      <property name="text">
-       <string>File Properties</string>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+      <property name="alternatingRowColors">
+       <bool>false</bool>
       </property>
+      <property name="indentation">
+       <number>0</number>
+      </property>
+      <column>
+       <property name="text">
+        <string>Property</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Value</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

@@ -100,11 +100,12 @@ class WorkspaceController:
                     file_count = self.table_manager.update_table_data(table_widget, item_id)
                     self.tab_manager.update_tab_title(item_id, file_count)
                     self.current_item_id = item_id
-                    
-                    # Also update the grid view if available
+                      # Also update the grid view if available
                     grid_widget = self.tab_manager.grid_widgets.get(item_id)
                     if grid_widget:
                         self.grid_manager.update_grid_data(grid_widget, item_id)
+                        # Set up grid click handler to use same callback as table
+                        self.grid_manager.setup_grid_click_handler(grid_widget, self.on_table_item_clicked)
             
             # Show the appropriate UI based on whether there are tabs
             if self.tab_widget and self.tab_widget.count() > 0:
@@ -141,7 +142,7 @@ class WorkspaceController:
             table_widget = self.tab_manager.add_or_select_tab(item_id)
             if table_widget:
                 debug(f"Got table_widget, updating data for item_id: {item_id}")
-                # Update the table data
+                # Update the table data                
                 file_count = self.table_manager.update_table_data(table_widget, item_id)
                 self.tab_manager.update_tab_title(item_id, file_count)
                 self.current_item_id = item_id
@@ -151,6 +152,8 @@ class WorkspaceController:
                 if grid_widget:
                     debug(f"Updating grid view for item_id: {item_id}")
                     self.grid_manager.update_grid_data(grid_widget, item_id)
+                    # Set up grid click handler to use same callback as table
+                    self.grid_manager.setup_grid_click_handler(grid_widget, self.on_table_item_clicked)
                 
                 debug(f"Updated tab title with file count: {file_count}")
             else:
@@ -186,11 +189,12 @@ class WorkspaceController:
             if table_widget:
                 file_count = self.table_manager.update_table_data(table_widget, self.current_item_id)
                 self.tab_manager.update_tab_title(self.current_item_id, file_count)
-            
-            # Update the grid view if available
+              # Update the grid view if available
             grid_widget = self.tab_manager.grid_widgets.get(self.current_item_id)
             if grid_widget:
                 self.grid_manager.update_grid_data(grid_widget, self.current_item_id)
+                # Set up grid click handler to use same callback as table
+                self.grid_manager.setup_grid_click_handler(grid_widget, self.on_table_item_clicked)
                 
         return self.workspace_widget
     def on_last_tab_closed(self):
@@ -255,7 +259,6 @@ class WorkspaceController:
         except Exception as e:
             exception(e, "Error switching to drag-and-drop UI")
             return None
-    
     def connect_to_image_preview(self, image_preview):
         """
         Connect the workspace to the image preview widget so selected items can be previewed.
@@ -264,21 +267,27 @@ class WorkspaceController:
             image_preview: An instance of ImagePreviewWidget
         """
         self.image_preview = image_preview
+    
+    def connect_to_file_properties(self, file_properties):
+        """
+        Connect the workspace to the file properties widget so selected items can show properties.
         
+        Args:
+            file_properties: An instance of FilePropertiesWidget
+        """
+        self.file_properties = file_properties
+    
     def on_table_item_clicked(self, row, column, data):
         """
         Handle when an item in a table is clicked.
-        Update the image preview if available.
+        Update the image preview and file properties if available.
         
         Args:
             row: The row index
             column: The column index
             data: The data associated with the item (dict from table data)
         """
-        if not hasattr(self, 'image_preview') or not self.image_preview:
-            debug("No image preview widget available")
-            return
-            
+        debug(f"Table item clicked - Row: {row}, Column: {column}")
         
         try:
             if isinstance(data, dict):
@@ -286,11 +295,21 @@ class WorkspaceController:
                 file_id = data.get('id')
                 
                 if file_id:
-                    self.image_preview.update_preview_from_database(id=file_id)
+                    # Update image preview if available
+                    if hasattr(self, 'image_preview') and self.image_preview:
+                        self.image_preview.update_preview_from_database(id=file_id)
+                    else:
+                        debug("No image preview widget available")
+                    
+                    # Update file properties if available
+                    if hasattr(self, 'file_properties') and self.file_properties:
+                        self.file_properties.update_properties_from_database(id=file_id)
+                    else:
+                        debug("No file properties widget available")
                 else:
                     debug("No file ID found in table item data")
         except Exception as e:
-            exception(e, "Error updating image preview from table selection")
+            exception(e, "Error updating image preview and file properties from table selection")
     
     def __del__(self):
         """Clean up resources when the controller is deleted."""

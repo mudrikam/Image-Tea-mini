@@ -83,11 +83,8 @@ def _apply_settings_menu_icons(window):
 
 def _apply_prompt_menu_icons(window):
     """Apply icons to Prompt menu actions."""
-    window.actionDefault_Prompt.setIcon(qta.icon('fa6s.sliders'))
-    window.actionCustom_Prompt.setIcon(qta.icon('fa6s.pen-fancy'))
-    window.actionNegative_Prompt.setIcon(qta.icon('fa6s.ban'))
-    window.actionMetadata_Prompt_2.setIcon(qta.icon('fa6s.tags'))
-    window.actionPrompt_Preferences.setIcon(qta.icon('fa6s.puzzle-piece'))
+    window.actionPrompt_Manager.setIcon(qta.icon('fa6s.sliders'))
+    window.actionAPI_Keys_Manager.setIcon(qta.icon('fa6s.key'))
 
 def _apply_help_menu_icons(window):
     """Apply icons to Help menu actions."""

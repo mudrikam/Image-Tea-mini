@@ -77,7 +77,7 @@ class MainController:
         config_path = os.path.join(self.BASE_DIR, "config.json")
         
         try:
-            with open(config_path, 'r') as config_file:
+            with open(config_path, 'r', encoding='utf-8') as config_file:
                 config = json.load(config_file)
                 log(f"{config.get('app_name')} {config.get('app_version')}")
                 return config
@@ -86,6 +86,9 @@ class MainController:
             return self.get_default_config()
         except json.JSONDecodeError as e:
             error(f"Invalid configuration file: {e}")
+            return self.get_default_config()
+        except UnicodeDecodeError as e:
+            error(f"Unicode error in configuration file: {e}")
             return self.get_default_config()
     
     def get_default_config(self):
