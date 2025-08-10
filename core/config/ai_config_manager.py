@@ -1,4 +1,5 @@
 import json
+import json
 from pathlib import Path
 from typing import Dict, Any
 
@@ -146,17 +147,6 @@ class ConfigManager:
         self._config['prompting']['api_key_status'][platform][api_key] = status
         self.save_config()
     
-    def remove_api_key(self, platform: str, key: str):
-        """Remove API key"""
-        api_keys = self.get_api_keys(platform)
-        if key in api_keys:
-            api_keys.remove(key)
-            
-            # Also remove status
-            if 'api_key_status' in self._config['prompting']:
-                if platform in self._config['prompting']['api_key_status']:
-                    if key in self._config['prompting']['api_key_status'][platform]:
-                        del self._config['prompting']['api_key_status'][platform][key]
     def remove_api_key(self, platform: str, key: str):
         """Remove API key"""
         api_keys = self.get_api_keys(platform)

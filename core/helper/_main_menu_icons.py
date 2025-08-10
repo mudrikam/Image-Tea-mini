@@ -84,6 +84,7 @@ def _apply_settings_menu_icons(window):
 def _apply_prompt_menu_icons(window):
     """Apply icons to Prompt menu actions."""
     window.actionPrompt_Manager.setIcon(qta.icon('fa6s.sliders'))
+    window.actionAPI_Keys_Manager.setIcon(qta.icon('fa6s.key'))
 
 def _apply_help_menu_icons(window):
     """Apply icons to Help menu actions."""

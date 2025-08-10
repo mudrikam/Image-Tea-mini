@@ -142,6 +142,8 @@
      <string>Prompt</string>
     </property>
     <addaction name="actionPrompt_Manager"/>
+    <addaction name="separator"/>
+    <addaction name="actionAPI_Keys_Manager"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -514,6 +516,11 @@
   <action name="actionPrompt_Manager">
    <property name="text">
     <string>Prompt Manager</string>
+   </property>
+  </action>
+  <action name="actionAPI_Keys_Manager">
+   <property name="text">
+    <string>API Keys Manager</string>
    </property>
   </action>
   <action name="actionFull_Screen">

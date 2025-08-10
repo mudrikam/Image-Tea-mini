@@ -128,9 +128,11 @@ class MenuActionHandler(QObject):
     
     def connect_prompt_menu_actions(self):
         """Connect Prompt menu actions to their handlers."""
-        # Only connect to Prompt Manager - single menu item
+        # Only connect to Prompt Manager and API Keys Manager
         if hasattr(self.window, 'actionPrompt_Manager'):
             self.window.actionPrompt_Manager.triggered.connect(self.handle_prompt_manager)
+        if hasattr(self.window, 'actionAPI_Keys_Manager'):
+            self.window.actionAPI_Keys_Manager.triggered.connect(self.handle_api_keys_manager)
     
     def connect_help_menu_actions(self):
         """Connect Help menu actions to their handlers."""
@@ -562,6 +564,25 @@ class MenuActionHandler(QObject):
         except Exception as e:
             error(f"Failed to open Prompt Manager: {e}")
             self.show_status_message("Failed to open Prompt Manager", 3000)
+    
+    def handle_api_keys_manager(self):
+        """Handle API Keys Manager action - open API keys management window."""
+        log("Opening API Keys Manager")
+        self.show_status_message("Opening API Keys Manager...")
+        
+        try:
+            # Import here to avoid circular imports
+            from core.config.api_keys_manager import APIKeysManager
+            
+            # Create and show API keys manager dialog
+            api_keys_dialog = APIKeysManager(self.window)
+            api_keys_dialog.exec()
+            
+            self.show_status_message("API Keys Manager closed", 2000)
+            
+        except Exception as e:
+            error(f"Failed to open API Keys Manager: {e}")
+            self.show_status_message("Failed to open API Keys Manager", 3000)
 
     # Help menu handlers  
     def handle_about(self):

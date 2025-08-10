@@ -1,14 +1,18 @@
+"""
+API Keys Manager - Kelola API Key untuk berbagai platform AI
+Mendukung platform: OpenAI, Gemini
+"""
+
 from PySide6.QtWidgets import (QDialog, QMessageBox, QListWidgetItem, QVBoxLayout, QHBoxLayout, 
                              QPushButton, QLabel, QComboBox, QLineEdit, QListWidget, QGroupBox, 
                              QFrame, QSizePolicy, QSpacerItem)
 from PySide6.QtCore import Qt, QThread, Signal, QUrl, QSize
 from PySide6.QtGui import QColor, QDesktopServices, QFont
-from App.config.config_manager import config_manager
-from App.utils.window_utils import center_dialog
+from .ai_config_manager import config_manager
 import qtawesome as qta
 
 try:
-    from google import genai
+    import google.generativeai as genai
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
@@ -45,7 +49,7 @@ class ApiTestThread(QThread):
     def test_gemini_key(self):
         """Test Gemini API key"""
         if not GENAI_AVAILABLE:
-            return False, "Library Google GenAI belum diinstall.\n\nSilakan install dulu pakai:\npip install google-genai"
+            return False, "Library Google GenAI belum diinstall.\n\nSilakan install dulu pakai:\npip install google-generativeai"
         
         try:
             # Get available models from config
@@ -53,12 +57,10 @@ class ApiTestThread(QThread):
             models = platform_config.get('models', ['gemini-1.5-flash'])
             test_model = models[0]  # Use first available model for testing
             
-            client = genai.Client(api_key=self.api_key)
-            response = client.models.generate_content(
-                model=test_model,
-                contents=["Test connection"]
-            )
-            return True, f"API Key kamu berfungsi dengan baik!\n\nTes koneksi berhasil menggunakan model: {test_model}"
+            genai.configure(api_key=self.api_key)
+            model = genai.GenerativeModel(test_model)
+            response = model.generate_content("Test connection")
+            return True, "✅ Gemini API Key valid dan aktif!\n\nKoneksi berhasil, siap digunakan untuk analisis AI."
         except Exception as e:
             return False, self._parse_gemini_error(str(e))
     
@@ -79,9 +81,10 @@ class ApiTestThread(QThread):
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": "Test connection"}
-                ]
+                ],
+                max_tokens=5
             )
-            return True, f"API Key kamu berfungsi dengan baik!\n\nTes koneksi berhasil menggunakan model: {test_model}"
+            return True, "✅ OpenAI API Key valid dan aktif!\n\nKoneksi berhasil, siap digunakan untuk analisis AI."
         except Exception as e:
             return False, self._parse_openai_error(str(e))
     
@@ -90,42 +93,43 @@ class ApiTestThread(QThread):
         error_lower = error_msg.lower()
         
         if "invalid api key" in error_lower or "api_key_invalid" in error_lower:
-            return "API Key Tidak Valid\n\nAPI Key yang kamu masukkan salah.\nCoba cek lagi dan ulangi."
+            return "❌ API Key Tidak Valid\n\nAPI Key yang kamu masukkan salah.\nCoba cek lagi dan ulangi."
         elif "quota" in error_lower or "resource_exhausted" in error_lower:
-            return "Quota Habis\n\nQuota API kamu sudah habis.\nCoba cek billing atau tunggu reset quota."
+            return "❌ Quota Habis\n\nQuota API kamu sudah habis.\nCoba cek billing atau tunggu reset quota."
         elif "permission" in error_lower or "forbidden" in error_lower:
-            return "Akses Ditolak\n\nAPI Key kamu gak punya akses ke layanan ini.\nCoba cek permission API Key kamu."
+            return "❌ Permission Denied\n\nAPI Key tidak punya akses ke model ini.\nCoba cek permission di Google AI Studio."
         elif "not found" in error_lower or "model_not_found" in error_lower:
-            return "Model Tidak Ditemukan\n\nModel yang diminta gak tersedia.\nCoba lagi nanti."
+            return "❌ Model Tidak Ditemukan\n\nModel yang diminta tidak tersedia.\nCoba gunakan model lain yang support."
         elif "timeout" in error_lower or "deadline" in error_lower:
-            return "Koneksi Timeout\n\nPermintaan kamu kelamaan.\nCoba cek koneksi internet dan ulangi."
+            return "❌ Timeout\n\nKoneksi ke server timeout.\nCoba lagi dalam beberapa menit."
         elif "network" in error_lower or "connection" in error_lower:
-            return "Error Jaringan\n\nGak bisa konek ke API Gemini.\nCoba cek koneksi internet kamu."
+            return "❌ Network Error\n\nMasalah koneksi internet.\nCek koneksi dan coba lagi."
         else:
-            return f"Tes API Gagal\n\nDetail error:\n{error_msg}"
+            return f"❌ Error Tidak Dikenal\n\n{error_msg}\n\nSilakan cek dokumentasi atau hubungi support."
     
     def _parse_openai_error(self, error_msg):
         """Parse OpenAI error message into user-friendly format"""
         error_lower = error_msg.lower()
         
         if "invalid api key" in error_lower or "unauthorized" in error_lower:
-            return "API Key Tidak Valid\n\nAPI Key yang kamu masukkan salah.\nCoba cek lagi dan ulangi."
+            return "❌ API Key Tidak Valid\n\nAPI Key yang kamu masukkan salah.\nCoba cek lagi di OpenAI Dashboard."
         elif "quota" in error_lower or "insufficient_quota" in error_lower:
-            return "Quota Habis\n\nQuota API kamu sudah habis.\nCoba cek billing atau tambahin kredit ke akun kamu."
+            return "❌ Quota Habis\n\nQuota API kamu sudah habis.\nCoba top up credit di OpenAI Dashboard."
         elif "permission" in error_lower or "forbidden" in error_lower:
-            return "Akses Ditolak\n\nAPI Key kamu gak punya akses ke layanan ini.\nCoba cek permission API Key kamu."
+            return "❌ Permission Denied\n\nAPI Key tidak punya akses ke model ini.\nCoba upgrade plan atau gunakan model lain."
         elif "rate limit" in error_lower:
-            return "Rate Limit Kelebihan\n\nTerlalu banyak request. Tunggu sebentar dulu terus coba lagi."
+            return "❌ Rate Limit\n\nTerlalu banyak request dalam waktu singkat.\nTunggu sebentar dan coba lagi."
         elif "model" in error_lower and "not found" in error_lower:
-            return "Model Gak Tersedia\n\nModel yang diminta gak tersedia.\nCoba lagi nanti."
+            return "❌ Model Tidak Ditemukan\n\nModel yang diminta tidak tersedia.\nCoba gunakan model lain yang support."
         elif "timeout" in error_lower:
-            return "Koneksi Timeout\n\nPermintaan kamu kelamaan.\nCoba cek koneksi internet dan ulangi."
+            return "❌ Timeout\n\nKoneksi ke server timeout.\nCoba lagi dalam beberapa menit."
         elif "network" in error_lower or "connection" in error_lower:
-            return "Error Jaringan\n\nGak bisa konek ke API OpenAI.\nCoba cek koneksi internet kamu."
+            return "❌ Network Error\n\nMasalah koneksi internet.\nCek koneksi dan coba lagi."
         else:
-            return f"Tes API Gagal\n\nDetail error:\n{error_msg}"
+            return f"❌ Error Tidak Dikenal\n\n{error_msg}\n\nSilakan cek dokumentasi OpenAI atau hubungi support."
 
-class ApiKeysManager(QDialog):
+
+class APIKeysManager(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.config_manager = config_manager
@@ -140,9 +144,6 @@ class ApiKeysManager(QDialog):
         self.setModal(True)
         self.resize(750, 650)  # Lebih besar untuk accommodate content
         self.setMinimumSize(700, 600)  # Minimum size untuk laptop kecil
-        
-        # Center window di layar AFTER all setup is complete
-        center_dialog(self)
     
     def create_ui(self):
         """Create UI elements programmatically"""
@@ -520,7 +521,7 @@ class ApiKeysManager(QDialog):
         self.testKeyButton.setIcon(qta.icon('fa6s.flask', color='#9C27B0'))
         self.saveButton.setIcon(qta.icon('fa6s.check', color='#4CAF50'))
         self.cancelButton.setIcon(qta.icon('fa6s.xmark', color='#F44336'))
-        self.waButton.setIcon(qta.icon('fa6b.whatsapp', color="#FFFFFF"))
+        self.waButton.setIcon(qta.icon('fa6b.whatsapp', color="#25D366"))
         
         # Set window icon - consistent with PromptManager
         self.setWindowIcon(qta.icon('fa6s.key', color='#FF9800'))
@@ -542,25 +543,15 @@ class ApiKeysManager(QDialog):
     def open_whatsapp_group(self):
         """Open WhatsApp group link"""
         try:
-            wa_link = self.config_manager.app_config.get('contact', {}).get('whatsapp', '')
-            if wa_link:
-                QDesktopServices.openUrl(QUrl(wa_link))
-            else:
-                QMessageBox.information(
-                    self, 
-                    "Grup WhatsApp", 
-                    "Link grup WhatsApp gak tersedia di konfigurasi."
-                )
+            url = QUrl("https://chat.whatsapp.com/your-group-link")
+            QDesktopServices.openUrl(url)
         except Exception as e:
-            QMessageBox.warning(
-                self, 
-                "Error", 
-                f"Gagal buka grup WhatsApp:\n{str(e)}"
-            )
+            QMessageBox.warning(self, "Error", f"Gagal membuka link WhatsApp: {str(e)}")
     
     def update_platform_info(self):
         """Update platform information display"""
         if not self.current_platform:
+            self.platformInfoLabel.setText("Pilih platform untuk melihat info...")
             return
         
         platform_config = self.config_manager.get_platform_config(self.current_platform)
@@ -573,71 +564,41 @@ class ApiKeysManager(QDialog):
         supported_formats = platform_config.get('supported_formats', {})
         
         if self.current_platform == "gemini":
-            # Build supported formats string
-            image_formats = ', '.join(supported_formats.get('images', []))
-            video_formats = ', '.join(supported_formats.get('videos', []))
-            
-            info_text = f"""
-            <div style="padding: 4px;">
-            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #1976D2;">🤖 {platform_name}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>💎 Model Unggulan:</b> {default_model}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎯 Models Tersedia:</b> {', '.join(models)}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎁 Tier Gratis:</b> 15 request/menit, 1.500 request/hari</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>📸 Format Gambar:</b> {image_formats}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎬 Format Video:</b> {video_formats}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🔑 API Key Aktif:</b> {len(api_keys)} API Key</p>
-            <p style="margin: 4px 0; font-size: 10px; color: #666;"><i>💡 Butuh API Key gratis? Grup kami sering share API Key dan tips!</i></p>
-            </div>
-            """
+            info_text = f"""<b>🤖 {platform_name}</b><br/>
+            <b>Models:</b> {', '.join(models[:3])}{'...' if len(models) > 3 else ''}<br/>
+            <b>Default:</b> {default_model}<br/>
+            <b>API Keys:</b> {len(api_keys)} tersimpan<br/>
+            <b>Support:</b> Images, Videos<br/>
+            <br/>
+            <i>💡 Gemini bagus untuk analisis gambar dan video dengan akurasi tinggi.</i>"""
         elif self.current_platform == "openai":
-            # Build supported formats string
-            image_formats = ', '.join(supported_formats.get('images', []))
-            video_support = "Tidak didukung" if not supported_formats.get('videos') else ', '.join(supported_formats.get('videos', []))
-            
-            info_text = f"""
-            <div style="padding: 4px;">
-            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #10A37F;">🧠 {platform_name}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>💎 Model Unggulan:</b> {default_model}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎯 Models Tersedia:</b> {', '.join(models)}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎁 Tier Gratis:</b> Kredit $5 untuk akun baru (3 bulan)</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>📸 Format Gambar:</b> {image_formats}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎬 Format Video:</b> {video_support}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🔑 API Key Aktif:</b> {len(api_keys)} API Key</p>
-            <p style="margin: 4px 0; font-size: 10px; color: #666;"><i>💡 Join grup untuk tips mengoptimalkan penggunaan kredit!</i></p>
-            </div>
-            """
+            info_text = f"""<b>🧠 {platform_name}</b><br/>
+            <b>Models:</b> {', '.join(models[:3])}{'...' if len(models) > 3 else ''}<br/>
+            <b>Default:</b> {default_model}<br/>
+            <b>API Keys:</b> {len(api_keys)} tersimpan<br/>
+            <b>Support:</b> Images, Text<br/>
+            <br/>
+            <i>💡 OpenAI excellent untuk analisis detail dan reasoning yang complex.</i>"""
         else:
-            # Generic platform info from config
-            image_formats = ', '.join(supported_formats.get('images', []))
-            video_formats = ', '.join(supported_formats.get('videos', [])) if supported_formats.get('videos') else "Tidak didukung"
-            
-            info_text = f"""
-            <div style="padding: 4px;">
-            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #7C4DFF;">⚡ {platform_name}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>💎 Model Default:</b> {default_model}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎯 Models Tersedia:</b> {', '.join(models)}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>📸 Format Gambar:</b> {image_formats}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🎬 Format Video:</b> {video_formats}</p>
-            <p style="margin: 4px 0; font-size: 11px;"><b>🔑 API Key Aktif:</b> {len(api_keys)} API Key</p>
-            </div>
-            """
+            info_text = f"<b>{platform_name}</b><br/>Platform info tidak tersedia."
         
         self.platformInfoLabel.setText(info_text)
     
     def get_status_color(self, status):
         """Get color for API key status"""
         colors = {
-            "active": QColor(0, 128, 0),        # Green text
-            "busy": QColor(255, 165, 0),        # Orange text
-            "quota_exceeded": QColor(128, 128, 128),  # Gray text
-            "invalid": QColor(255, 0, 0),       # Red text
-            "unknown": None                      # No color (use default theme)
+            "active": QColor(0, 128, 0),
+            "busy": QColor(255, 165, 0),
+            "quota_exceeded": QColor(128, 128, 128),
+            "invalid": QColor(255, 0, 0),
+            "unknown": None
         }
         return colors.get(status, None)
     
     def load_api_keys(self):
         """Load API keys for current platform"""
         if not self.current_platform:
+            self.keysListWidget.clear()
             return
             
         self.keysListWidget.clear()
@@ -645,19 +606,18 @@ class ApiKeysManager(QDialog):
         key_status = self.config_manager.get_api_key_status(self.current_platform)
         
         for i, key in enumerate(api_keys):
-            # Mask the key for display
             masked_key = self.mask_api_key(key)
-            
-            # Add status icon based on key status
             status = key_status.get(key, "unknown")
-            status_icon = self.get_status_icon(status)
             
             item = QListWidgetItem()
-            item.setText(masked_key)
-            item.setIcon(status_icon)
-            item.setData(Qt.UserRole, key)  # Store full key in user data
+            item.setText(f"{masked_key}")
+            item.setData(Qt.UserRole, key)  # Store full key
+            item.setIcon(self.get_status_icon(status))
             
-            # NO FOREGROUND COLOR SETTING - let PySide6 handle it vanilla
+            # Set color based on status
+            color = self.get_status_color(status)
+            if color:
+                item.setForeground(color)
             
             self.keysListWidget.addItem(item)
     
@@ -681,7 +641,7 @@ class ApiKeysManager(QDialog):
     def mask_api_key(self, key):
         """Mask API key for display"""
         if len(key) <= 12:
-            return "*" * len(key)
+            return key[:4] + "*" * (len(key) - 8) + key[-4:]
         return key[:8] + "*" * (len(key) - 12) + key[-4:]
     
     def load_platforms(self):
@@ -690,16 +650,14 @@ class ApiKeysManager(QDialog):
         self.platformComboBox.clear()
         
         for platform_key, platform_info in platforms.items():
-            self.platformComboBox.addItem(platform_info['name'], platform_key)
+            display_name = platform_info.get('name', platform_key)
+            self.platformComboBox.addItem(display_name, platform_key)
         
         # Set current platform and load initial data
         current_platform = self.config_manager.current_platform
         for i in range(self.platformComboBox.count()):
             if self.platformComboBox.itemData(i) == current_platform:
                 self.platformComboBox.setCurrentIndex(i)
-                self.current_platform = current_platform
-                self.load_api_keys()
-                self.update_platform_info()
                 break
     
     def on_platform_changed(self):
@@ -714,11 +672,12 @@ class ApiKeysManager(QDialog):
         """Test selected API key"""
         # Prevent multiple simultaneous tests
         if self.test_thread and self.test_thread.isRunning():
+            QMessageBox.information(self, "Info", "Test API sedang berjalan...\nTunggu sampai selesai dulu.")
             return
             
         current_item = self.keysListWidget.currentItem()
         if not current_item:
-            QMessageBox.warning(self, "Gak Ada Yang Dipilih", "Pilih dulu API Key yang mau dites.")
+            QMessageBox.warning(self, "Warning", "Pilih API Key yang mau di-test dulu!")
             return
         
         full_key = current_item.data(Qt.UserRole)
@@ -737,7 +696,8 @@ class ApiKeysManager(QDialog):
         """Handle API test completion"""
         # Clean up thread
         if self.test_thread:
-            self.test_thread.deleteLater()
+            self.test_thread.quit()
+            self.test_thread.wait()
             self.test_thread = None
         
         # Re-enable test button
@@ -749,81 +709,45 @@ class ApiKeysManager(QDialog):
         current_item = self.keysListWidget.currentItem()
         if current_item:
             full_key = current_item.data(Qt.UserRole)
-            if success:
-                status = "active"
-            else:
-                if "quota" in message.lower() or "kuota" in message.lower():
-                    status = "quota_exceeded"
-                elif "invalid" in message.lower() or "tidak valid" in message.lower() or "salah" in message.lower():
-                    status = "invalid"
-                else:
-                    status = "unknown"
-            
-            # Update status 
+            status = "active" if success else "invalid"
             self.config_manager.set_api_key_status(self.current_platform, full_key, status)
             
-            # Update the display with new status - ONLY ICON, NO COLOR
-            status_icon = self.get_status_icon(status)
-            current_item.setIcon(status_icon)
-            
-            # NEVER SET FOREGROUND COLOR - let PySide6 handle it vanilla
+            # Reload keys to update display
+            self.load_api_keys()
         
         # Show result message
         if success:
-            QMessageBox.information(self, "Tes Berhasil", message)
+            QMessageBox.information(self, "Test Berhasil! ✅", message)
         else:
-            QMessageBox.warning(self, "Tes Gagal", message)
+            QMessageBox.warning(self, "Test Gagal ❌", message)
     
     def save_changes(self):
         """Save all changes and close dialog"""
         try:
-            # Configuration is auto-saved, just close
+            self.config_manager.save_config()
+            QMessageBox.information(self, "Success", "Semua perubahan berhasil disimpan! ✅")
             self.accept()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Gagal simpan perubahan:\n{str(e)}")
+            QMessageBox.critical(self, "Error", f"Gagal menyimpan config:\n{str(e)}")
     
     def add_api_key(self):
         """Add new API key"""
         new_key = self.keyLineEdit.text().strip()
         if not new_key:
-            QMessageBox.warning(self, "Peringatan", "Masukin dulu API Key nya")
+            QMessageBox.warning(self, "Warning", "Mohon masukkan API Key terlebih dahulu!")
             return
         
         # Auto-detect platform based on API key format
         detected_platform = self.detect_platform_from_key(new_key)
         
         if not detected_platform:
-            msg = QMessageBox(self)
-            msg.setWindowTitle("Format API Key Tidak Dikenali")
-            msg.setIcon(QMessageBox.Warning)
-            msg.setText("Hmm, format API Key ini belum kami kenali 🤔")
-            msg.setDetailedText(
-                "Format yang kami dukung saat ini:\n\n"
-                "🟢 Gemini: AIzaXXXXXXXX (dimulai dengan 'AIza')\n"
-                "🔵 OpenAI: sk-XXXXXXXX (dimulai dengan 'sk-')\n\n"
-                "📚 Belum punya API Key atau butuh bantuan?\n"
-                "Grup WhatsApp kami siap membantu! Kamu bisa:\n"
-                "• Dapat API Key gratis dari member lain\n"
-                "• Belajar cara daftar yang benar\n"
-                "• Share pengalaman dengan sesama pengguna\n"
-                "• Dapat tips mengoptimalkan penggunaan API"
-            )
-            
-            # Add community button to message box
-            wa_button = msg.addButton("🚀 Join Grup", QMessageBox.ActionRole)
-            skip_button = msg.addButton("Lewati", QMessageBox.RejectRole)
-            
-            msg.setDefaultButton(wa_button)
-            
-            result = msg.exec()
-            if msg.clickedButton() == wa_button:
-                self.open_whatsapp_group()
+            QMessageBox.warning(self, "Warning", "Format API Key tidak dikenali!\n\nPastikan API Key yang dimasukkan valid untuk OpenAI atau Gemini.")
             return
         
         # Check if key already exists in detected platform
         existing_keys = self.config_manager.get_api_keys(detected_platform)
         if new_key in existing_keys:
-            QMessageBox.warning(self, "API Key Sudah Ada", f"API Key ini sudah terdaftar di platform {detected_platform.upper()} 🔄")
+            QMessageBox.warning(self, "Warning", f"API Key sudah ada di platform {detected_platform}!")
             return
         
         # Add key to detected platform
@@ -833,52 +757,38 @@ class ApiKeysManager(QDialog):
         if detected_platform != self.current_platform:
             self.switch_to_platform(detected_platform)
         else:
-            # Just reload if same platform
             self.load_api_keys()
-            self.update_platform_info()
         
         # Clear input
         self.keyLineEdit.clear()
+        
+        QMessageBox.information(self, "Success", f"API Key berhasil ditambahkan ke platform {detected_platform}! ✅\n(Auto-detected)")
 
     def detect_platform_from_key(self, api_key):
         """Detect platform based on API key format using config"""
         if not api_key:
             return None
         
-        # Get all available platforms from config
-        platforms = self.config_manager.get_available_platforms()
-        
-        for platform_key, platform_config in platforms.items():
-            # Check known patterns for each platform
-            if platform_key == "gemini":
-                # Gemini API keys typically start with 'AIza' and are ~39 characters
-                if api_key.startswith("AIza") and len(api_key) >= 35:
-                    return platform_key
-            elif platform_key == "openai":
-                # OpenAI API keys typically start with 'sk-' and are longer
-                if api_key.startswith("sk-") and len(api_key) >= 40:
-                    return platform_key
-            # Add more platform detection patterns here as needed
+        # Simple detection rules for OpenAI and Gemini
+        if api_key.startswith('sk-'):
+            return "openai"
+        elif api_key.startswith('AIza'):
+            return "gemini"
         
         return None
     
     def switch_to_platform(self, platform):
         """Switch to specified platform"""
-        platforms = self.config_manager.get_available_platforms()
-        
         for i in range(self.platformComboBox.count()):
             if self.platformComboBox.itemData(i) == platform:
                 self.platformComboBox.setCurrentIndex(i)
-                self.current_platform = platform
-                self.load_api_keys()
-                self.update_platform_info()
                 break
     
     def remove_api_key(self):
         """Remove selected API key"""
         current_item = self.keysListWidget.currentItem()
         if not current_item:
-            QMessageBox.warning(self, "Peringatan", "Pilih dulu API Key yang mau dihapus")
+            QMessageBox.warning(self, "Warning", "Pilih API Key yang mau dihapus dulu!")
             return
         
         full_key = current_item.data(Qt.UserRole)
@@ -894,3 +804,4 @@ class ApiKeysManager(QDialog):
             self.config_manager.remove_api_key(self.current_platform, full_key)
             self.load_api_keys()
             self.update_platform_info()
+            QMessageBox.information(self, "Success", "API Key berhasil dihapus! ✅")
