@@ -674,23 +674,23 @@ def write_metadata_to_file(filepath, metadata):
                 iptc_data = {}
                 exif_data = {}
                 
-                # Handle title with error handling
+                # Handle title with error handling (write as plain string, not dict)
                 if 'title' in metadata and metadata['title']:
                     try:
                         title = str(metadata['title']).strip()
                         if title and len(title) < 250:  # Reasonable length limit
-                            xmp_data['Xmp.dc.title'] = {'x-default': title}
+                            xmp_data['Xmp.dc.title'] = title
                             iptc_data['Iptc.Application2.ObjectName'] = title
                             exif_data['Exif.Image.DocumentName'] = title
                     except Exception as e:
                         warning(f"Error processing title metadata: {e}")
                 
-                # Handle description with error handling
+                # Handle description with error handling (write as plain string, not dict)
                 if 'description' in metadata and metadata['description']:
                     try:
                         description = str(metadata['description']).strip()
                         if description and len(description) < 2000:  # Reasonable length limit
-                            xmp_data['Xmp.dc.description'] = {'x-default': description}
+                            xmp_data['Xmp.dc.description'] = description
                             iptc_data['Iptc.Application2.Caption'] = description
                             exif_data['Exif.Image.ImageDescription'] = description
                     except Exception as e:
