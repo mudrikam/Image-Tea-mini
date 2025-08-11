@@ -176,6 +176,8 @@ class LayoutController:
         # Check if the parent has config that might not have been available initially
         if self.actions_widget and hasattr(self.parent, 'config'):
             self.actions_widget.set_main_window_and_config(self.parent, self.parent.config)
+            # Connect actions widget to workspace controller
+            self.actions_widget.set_workspace_controller(self.workspace_controller)
         
         # Load the main workspace using the workspace controller
         self.workspace_controller.load_workspace()

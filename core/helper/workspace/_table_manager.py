@@ -1,4 +1,5 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
+from PySide6.QtCore import QTimer
 from core.utils.logger import log, debug, warning, error, exception
 
 class TableManager:
@@ -32,11 +33,14 @@ class TableManager:
             try:
                 from database.db_project_files import ProjectFilesModel
                 debug(f"Fetching files from database for item_id: {actual_id}")
-                files_data = ProjectFilesModel().get_files_by_item_id(actual_id)
+                model = ProjectFilesModel()
+                files_data = model.get_files_by_item_id(actual_id)
                 debug(f"Found {len(files_data) if files_data else 0} files from database")
             except Exception as e:
                 exception(e, "Error getting data from database")
                 files_data = []
+                # Return early to prevent further issues
+                return 0
             
             # Make sure vertical header (row numbers) is visible
             table_widget.verticalHeader().setVisible(True)
@@ -140,6 +144,13 @@ class TableManager:
                     table_widget.setItem(row_idx, 9, description_length_item)
                     table_widget.setItem(row_idx, 10, tags_count_item)
                     table_widget.setItem(row_idx, 11, filepath_item)
+                    
+                    # Apply row color based on status - this ensures initial colors are set
+                    try:
+                        self.apply_status_color_to_row(table_widget, row_idx, status)
+                        debug(f"Applied initial {status} color to row {row_idx}")
+                    except Exception as color_error:
+                        warning(f"Failed to apply color to row {row_idx}: {color_error}")
             else:                # No data found - add a single row with a message
                 table_widget.setRowCount(1)
                 no_data_item = QtWidgets.QTableWidgetItem("No files found")
@@ -158,6 +169,18 @@ class TableManager:
             
             # Resize columns to content
             table_widget.resizeColumnsToContents()
+            
+            # Final color refresh to ensure all status colors are properly applied
+            if files_data and len(files_data) > 0:
+                debug("Performing final color refresh after table population")
+                try:
+                    for row_idx, file_info in enumerate(files_data):
+                        status = file_info.get('status', 'draft')
+                        self.apply_status_color_to_row(table_widget, row_idx, status)
+                    table_widget.viewport().update()
+                    debug("Final color refresh completed successfully")
+                except Exception as final_color_error:
+                    warning(f"Error in final color refresh: {final_color_error}")
             
             return file_count
             
@@ -238,3 +261,139 @@ class TableManager:
                 callback_function(row, column, data)
         except Exception as e:
             exception(e, "Error handling table item click")
+    
+    def apply_status_color_to_row(self, table_widget, row_index, status):
+        """
+        Apply color to a table row based on file status.
+        
+        Args:
+            table_widget: The table widget to modify
+            row_index: The row index to color
+            status: The status to determine color ('draft', 'generating', 'finished', 'failed')
+        """
+        try:
+            # Validate inputs to prevent crashes
+            if not table_widget:
+                warning("Table widget is None, cannot apply color")
+                return
+            
+            if row_index < 0 or row_index >= table_widget.rowCount():
+                warning(f"Row index {row_index} out of bounds (table has {table_widget.rowCount()} rows)")
+                return
+            
+            if not status:
+                debug(f"Empty status for row {row_index}, using default")
+                status = 'draft'
+            
+            # Define status colors
+            status_colors = {
+                'draft': QtGui.QColor(240, 240, 240, 100),      # Light gray
+                'generating': QtGui.QColor(255, 255, 0, 150),   # Yellow
+                'finished': QtGui.QColor(144, 238, 144, 150),   # Light green
+                'failed': QtGui.QColor(255, 182, 193, 150),     # Light red
+            }
+            
+            # Get color for status (default to transparent if status not found)
+            color = status_colors.get(status.lower(), QtGui.QColor(255, 255, 255, 0))
+            
+            # Apply color to all columns in the row with error handling
+            columns_updated = 0
+            for column in range(table_widget.columnCount()):
+                try:
+                    item = table_widget.item(row_index, column)
+                    if item:
+                        brush = QtGui.QBrush(color)
+                        item.setBackground(brush)
+                        
+                        # Set text color for contrast
+                        if status.lower() == 'failed':
+                            item.setForeground(QtGui.QBrush(QtGui.QColor(139, 0, 0)))  # Dark red text
+                        elif status.lower() == 'finished':
+                            item.setForeground(QtGui.QBrush(QtGui.QColor(0, 100, 0)))  # Dark green text
+                        elif status.lower() == 'generating':
+                            item.setForeground(QtGui.QBrush(QtGui.QColor(255, 215, 0)))  # Gold/yellow text for yellow background
+                        else:
+                            item.setForeground(QtGui.QBrush())  # Default color for draft
+                        
+                        columns_updated += 1
+                except Exception as item_error:
+                    warning(f"Error setting color for row {row_index}, column {column}: {item_error}")
+                    continue
+            
+            debug(f"Applied {status} color to row {row_index} ({columns_updated} columns updated)")
+            
+        except Exception as e:
+            warning(f"Error applying status color to row {row_index}: {e}")
+            exception(e, f"Full error in apply_status_color_to_row")
+    
+    def refresh_table_colors(self, table_widget, item_id):
+        """
+        Refresh all row colors in the table based on current database status.
+        
+        Args:
+            table_widget: The table widget to refresh
+            item_id: The item_id to get fresh data from database
+        """
+        try:
+            debug(f"Starting refresh_table_colors for item_id: {item_id}")
+            
+            # Validate inputs
+            if not table_widget:
+                warning("Table widget is None, cannot refresh colors")
+                return
+            
+            if not item_id:
+                warning("Item ID is None, cannot refresh colors")
+                return
+            
+            # Get fresh data from database with error handling
+            parts = item_id.split('_')
+            if len(parts) < 2:
+                warning(f"Invalid item_id format for refresh: {item_id}")
+                return
+            
+            actual_id = parts[1]
+            debug(f"Refreshing colors for actual_id: {actual_id}")
+            
+            # Get fresh database data with better error handling
+            try:
+                from database.db_project_files import ProjectFilesModel
+                model = ProjectFilesModel()
+                files_data = model.get_files_by_item_id(actual_id)
+                debug(f"Retrieved {len(files_data) if files_data else 0} files for color refresh")
+            except Exception as db_error:
+                warning(f"Database error during color refresh: {db_error}")
+                return
+            
+            if not files_data:
+                debug("No files data retrieved, skipping color refresh")
+                return
+            
+            # Update colors for each row with bounds checking
+            current_row_count = table_widget.rowCount()
+            debug(f"Table has {current_row_count} rows, data has {len(files_data)} items")
+            
+            for row_idx, file_info in enumerate(files_data):
+                # Check bounds to prevent index errors
+                if row_idx >= current_row_count:
+                    warning(f"Row index {row_idx} exceeds table row count {current_row_count}")
+                    break
+                
+                try:
+                    status = file_info.get('status', 'draft')
+                    debug(f"Applying color refresh for row {row_idx} with status: {status}")
+                    self.apply_status_color_to_row(table_widget, row_idx, status)
+                except Exception as color_error:
+                    warning(f"Error applying color to row {row_idx}: {color_error}")
+                    continue
+            
+            # Force table refresh with error handling - avoid recursive repaint
+            try:
+                table_widget.viewport().update()
+                debug(f"Successfully refreshed table colors for item_id: {item_id}")
+            except Exception as refresh_error:
+                warning(f"Error during table viewport update: {refresh_error}")
+                
+        except Exception as e:
+            warning(f"Error refreshing table colors: {e}")
+            exception(e, f"Full error during refresh_table_colors for item_id: {item_id}")

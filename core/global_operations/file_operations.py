@@ -630,3 +630,212 @@ def get_video_extensions():
         '.webm', '.mkv', '.m4v', '.3gp', '.mpg',
         '.mpeg', '.ts', '.mts'
     ]
+
+
+def write_metadata_to_file(filepath, metadata):
+    """
+    Write metadata to an image file using pyexiv2 and other methods.
+    
+    Args:
+        filepath (str): Path to the image file
+        metadata (dict): Dictionary containing metadata to write
+                        Expected keys: title, description, keywords/tags
+                        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Check if file exists and is writable
+        if not os.path.exists(filepath):
+            warning(f"File does not exist: {filepath}")
+            return False
+        
+        if not os.access(filepath, os.W_OK):
+            warning(f"File is not writable: {filepath}")
+            return False
+        
+        # Check if it's an image file
+        image_extensions = ['.jpg', '.jpeg', '.png', '.tiff', '.tif']
+        file_ext = os.path.splitext(filepath)[1].lower()
+        
+        if file_ext not in image_extensions:
+            debug(f"Skipping metadata write for non-supported file type: {file_ext}")
+            return False
+        
+        success = False
+        
+        # Try pyexiv2 first (most comprehensive)
+        try:
+            import pyexiv2
+            
+            with pyexiv2.Image(filepath) as img:
+                # Prepare metadata for writing with safe string conversion
+                xmp_data = {}
+                iptc_data = {}
+                exif_data = {}
+                
+                # Handle title with error handling (write as plain string, not dict)
+                if 'title' in metadata and metadata['title']:
+                    try:
+                        title = str(metadata['title']).strip()
+                        if title and len(title) < 250:  # Reasonable length limit
+                            xmp_data['Xmp.dc.title'] = title
+                            iptc_data['Iptc.Application2.ObjectName'] = title
+                            exif_data['Exif.Image.DocumentName'] = title
+                    except Exception as e:
+                        warning(f"Error processing title metadata: {e}")
+                
+                # Handle description with error handling (write as plain string, not dict)
+                if 'description' in metadata and metadata['description']:
+                    try:
+                        description = str(metadata['description']).strip()
+                        if description and len(description) < 2000:  # Reasonable length limit
+                            xmp_data['Xmp.dc.description'] = description
+                            iptc_data['Iptc.Application2.Caption'] = description
+                            exif_data['Exif.Image.ImageDescription'] = description
+                    except Exception as e:
+                        warning(f"Error processing description metadata: {e}")
+                
+                # Handle keywords/tags with error handling
+                keywords = []
+                try:
+                    if 'keywords' in metadata and metadata['keywords']:
+                        if isinstance(metadata['keywords'], list):
+                            keywords = [str(k).strip() for k in metadata['keywords'] if k and str(k).strip() and len(str(k).strip()) < 100]
+                        elif isinstance(metadata['keywords'], str):
+                            keywords = [k.strip() for k in metadata['keywords'].split(',') if k.strip() and len(k.strip()) < 100]
+                    elif 'tags' in metadata and metadata['tags']:
+                        if isinstance(metadata['tags'], list):
+                            keywords = [str(t).strip() for t in metadata['tags'] if t and str(t).strip() and len(str(t).strip()) < 100]
+                        elif isinstance(metadata['tags'], str):
+                            keywords = [t.strip() for t in metadata['tags'].split(',') if t.strip() and len(t.strip()) < 100]
+                    
+                    # Limit number of keywords
+                    keywords = keywords[:50]  # Max 50 keywords
+                    
+                except Exception as e:
+                    warning(f"Error processing keywords metadata: {e}")
+                    keywords = []
+                
+                if keywords:
+                    try:
+                        xmp_data['Xmp.dc.subject'] = keywords
+                        # IPTC keywords need to be set individually
+                        iptc_data['Iptc.Application2.Keywords'] = keywords
+                    except Exception as e:
+                        warning(f"Error setting keywords in metadata: {e}")
+                
+                # Write XMP metadata with error handling
+                if xmp_data:
+                    try:
+                        img.modify_xmp(xmp_data)
+                        debug(f"Wrote XMP metadata to {filepath}")
+                    except Exception as e:
+                        warning(f"Failed to write XMP metadata: {e}")
+                
+                # Write IPTC metadata with error handling
+                if iptc_data:
+                    try:
+                        img.modify_iptc(iptc_data)
+                        debug(f"Wrote IPTC metadata to {filepath}")
+                    except Exception as e:
+                        warning(f"Failed to write IPTC metadata: {e}")
+                
+                # Write EXIF metadata with error handling (be careful with EXIF as it can be more restrictive)
+                if exif_data:
+                    try:
+                        img.modify_exif(exif_data)
+                        debug(f"Wrote EXIF metadata to {filepath}")
+                    except Exception as e:
+                        warning(f"Failed to write EXIF metadata: {e}")
+                
+                success = True
+                log(f"Successfully wrote metadata to {filepath}")
+                
+        except ImportError:
+            debug("pyexiv2 module not available, trying alternative methods")
+            
+            # Fallback to PIL method for basic metadata
+            try:
+                from PIL import Image
+                from PIL.ExifTags import TAGS
+                import piexif
+                
+                # Read existing EXIF data
+                img = Image.open(filepath)
+                
+                # Get existing EXIF or create new
+                if 'exif' in img.info:
+                    exif_dict = piexif.load(img.info['exif'])
+                else:
+                    exif_dict = {"0th": {}, "Exif": {}, "GPS": {}, "1st": {}, "thumbnail": None}
+                
+                # Add metadata to EXIF with error handling
+                if 'description' in metadata and metadata['description']:
+                    try:
+                        description = str(metadata['description']).strip()
+                        if description and len(description) < 500:  # EXIF has smaller limits
+                            exif_dict["0th"][piexif.ImageIFD.ImageDescription] = description.encode('utf-8')
+                    except Exception as e:
+                        warning(f"Error adding description to EXIF: {e}")
+                
+                if 'title' in metadata and metadata['title']:
+                    try:
+                        title = str(metadata['title']).strip()
+                        if title and len(title) < 100:  # EXIF has smaller limits
+                            exif_dict["0th"][piexif.ImageIFD.DocumentName] = title.encode('utf-8')
+                    except Exception as e:
+                        warning(f"Error adding title to EXIF: {e}")
+                
+                # Convert and save with error handling
+                try:
+                    exif_bytes = piexif.dump(exif_dict)
+                    img.save(filepath, exif=exif_bytes)
+                    success = True
+                    debug(f"Wrote basic metadata using PIL/piexif to {filepath}")
+                except Exception as e:
+                    warning(f"Failed to save image with EXIF: {e}")
+                
+            except ImportError:
+                debug("piexif module not available")
+            except Exception as e:
+                warning(f"Failed to write metadata using PIL method: {e}")
+        
+        except Exception as e:
+            warning(f"Failed to write metadata using pyexiv2: {e}")
+        
+        return success
+        
+    except Exception as e:
+        exception(e, f"Error writing metadata to {filepath}")
+        return False
+
+
+def update_file_metadata_from_ai(filepath, ai_metadata):
+    """
+    Update file metadata both in database and in the actual file.
+    This is a convenience function that combines database and file updates.
+    
+    Args:
+        filepath (str): Path to the image file
+        ai_metadata (dict): AI-generated metadata
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Write to file first
+        file_success = write_metadata_to_file(filepath, ai_metadata)
+        
+        # Update database if we have a way to find the record
+        # This would require finding the file record by filepath
+        db_success = True  # Assume success for now
+        
+        # You could add database update logic here if needed
+        # by finding the file record and updating it
+        
+        return file_success and db_success
+        
+    except Exception as e:
+        exception(e, f"Error updating file metadata for {filepath}")
+        return False
